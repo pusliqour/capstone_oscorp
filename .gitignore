@@ -17,8 +17,22 @@ ml_backend/ml_outputs/
 ml_backend/training/
 *.log
 
-# Secrets
+# Secrets and local service configuration
 sbkeys.txt
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.local
+ml_backend/.env
+supabase/.temp/
+**/supabase/.temp/
+
+# Operator-supplied or generated data
+data/incoming/*
+data/normalized/*
+!data/incoming/.gitkeep
+!data/normalized/.gitkeep
 
 # Node
 frontend/node_modules/

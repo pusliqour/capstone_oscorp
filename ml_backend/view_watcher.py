@@ -33,13 +33,8 @@ from supabase import create_client, Client
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-SUPABASE_URL = "https://nbrhlujwzbfupsouylkg.supabase.co"
-SUPABASE_SERVICE_KEY = (
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-    ".eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5icmhsdWp3emJmdXBzb3V5bGtnIiwi"
-    "cm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODcxNDQ0OSwiZXhwIjoyMDg0"
-    "MjkwNDQ5fQ.t0CppYILuuj78alkqUi63R03baTvoa95yD4v0xiCdtg"
-)
+SUPABASE_URL = os.getenv("SUPABASE_URL", "http://127.0.0.1:54321")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 
 POLL_INTERVAL    = int(os.getenv("POLL_INTERVAL", "60"))   # seconds between polls
 DOWNLOAD_DIR     = os.path.expanduser("~/Downloads")

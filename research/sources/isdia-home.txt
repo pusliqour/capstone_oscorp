@@ -1,0 +1,285 @@
+
+
+ISDIA
+
+
+
+
+
+
+
+
+
+11th International Conference on Information System Design and Intelligent Applications
+(Theme: Trustworthy AI - Governance, Risk and Responsible Innovation)
+Date: 9th - 10th, January 2027
+Venue: Sofitel Dubai Jumeirah Beach
+Submit Your Paper Program
+
+
+
+
+
+
+11th International Conference on Information System Design and Intelligent Applications
+(Theme: Trustworthy AI - Governance, Risk and Responsible Innovation)
+Date: 9th - 10th, January 2027
+Venue: Sofitel Dubai Jumeirah Beach
+Submit Your Paper Program
+
+
+
+
+
+
+11th International Conference on Information System Design and Intelligent Applications
+(Theme: Trustworthy AI - Governance, Risk and Responsible Innovation)
+Date: 9th - 10th, January 2027
+Venue: Sofitel Dubai Jumeirah Beach
+Submit Your Paper Program
+Springer proceedings (LNNS Series) book of ISDIA-2026 are expected to be published online by December 2026. Springer proceedings (LNNS Series) book of ISDIA-2026 are expected to be published online by December 2026.
+
+ORGANISED BY
+
+ISDIA-2027
+9th - 10th, January 2027
+Trustworthy AI - Governance, Risk and Responsible Innovation
+Important Dates
+Call for Papers
+Submit Paper
+
+In Association With
+
+IT
+PARTNER
+
+Protiviti
+AI
+PARTNER
+
+OpenRAG
+INT'L MANAGING
+PARTNER
+
+IRC
+PUBLICATION
+PARTNER
+
+Springer Nature
+KNOWLEDGE
+PARTNER
+
+CAI – ENAI
+DESTINATION
+PARTNER
+
+Dubai
+VENUE
+PARTNER
+
+Sofitel Dubai
+
+About ISDIA-2027
+
+The International Conference on Information System Design and Intelligent Applications (ISDIA), formerly known as INDIA, has a long-standing legacy of bringing together global researchers, academics, and industry professionals. Since its inception in 2012, ISDIA has grown into a prestigious platform recognized for fostering interdisciplinary dialogue and showcasing innovations in intelligent systems.
+Over the past decade, it has been hosted in India, Vietnam, Mauritius, and the UAE, attracting participation from dozens of countries and hundreds of delegates. With successful partnerships, including publication through Springer Nature, ISDIA continues to push the boundaries of academic excellence and applied research in intelligent systems.
+
+Conference Theme — Trustworthy AI - Governance, Risk and Responsible Innovation
+
+As Artificial Intelligence transitions from experimental technology to mission-critical enterprise infrastructure, the central question is no longer can AI do it — but should it, and can we trust it to? The 11th edition of ISDIA, in collaboration with UOWD Dubai and Protiviti, takes on this defining challenge of our era. Trustworthy AI encompasses the full spectrum of concerns that accompany intelligent systems at scale: algorithmic transparency, explainability, fairness, data privacy, regulatory compliance, and ethical accountability.
+ISDIA-2027 invites researchers, practitioners, policymakers, and industry leaders to explore how trust can be engineered into AI from the ground up — spanning model design, deployment pipelines, organizational governance, and societal impact.
+Why Attend ISDIA-2027?
+
+Global Exposure
+Engage with researchers and practitioners from academia and industry worldwide.
+
+Publication
+Papers published in Springer Nature's LNNS, indexed in Scopus, WoS & DBLP.
+
+Networking
+Build lasting connections with experts in future-driven technologies.
+
+Dubai Advantage
+Held at the prestigious UOWD campus in Dubai — a global innovation hub.
+
+Hybrid Access
+Join in person or virtually — full flexibility for global participants.
+11th International Conference on Information System Design and Intelligent Applications
+Submit Your Paper
+About University of Wollongong in Dubai (UOWD)
+
+ISDIA-2027 is proudly hosted by the University of Wollongong in Dubai (UOWD), a pioneer in international higher education in the UAE. Located in Dubai Knowledge Park, UOWD provides an ideal environment for global collaboration with strong regional and international networks.
+UOW is ranked among the top 200 universities globally with a 5+ star QS ranking. Established in 1993, UOWD is the first international Australian university in the UAE — home to 3,500+ students from 108 nationalities. All degrees are accredited by CAA and licensed by KHDA, recognised by AACSB, ACCA, ACS, Engineers Australia, and others.
+The School of Computer Science offers programmes in Computer Science, Cyber Security, Game & Mobile Development, AI and Big Data, IT Management, Digital Transformation, and PhD through UOW Australia.
+
+Our Partners
+
+
+IT PARTNER
+About Protiviti
+Protiviti is a global consulting firm delivering expertise in finance, technology, operations, data, digital, HR, risk, and internal audit through 90+ offices in 25+ countries. Named to the Fortune 100 Best Companies to Work For® list for the 10th consecutive year.
+Visit Website →
+
+AI PARTNER
+About OpenRAG
+OpenRAG is a trust infrastructure for AI that verifies whether AI-generated answers are supported by source context, highlights risky claims, and refuses to blindly endorse hallucinations — a model-agnostic verification layer for any LLM pipeline or application.
+Visit Website →
+
+INT'L MANAGING PARTNER
+About IRC
+Innovative Research Consultancy (IRC), based in India, advances research excellence and nurtures startup ecosystems. IRC partners with universities to organise international conferences, workshops, and mentorship programs for researchers and scholars globally.
+Visit Website →
+Conference Topics & Call for Papers
+
+ISDIA-2027 invites high-quality, original research submissions in Information System Design and Intelligent Applications. The conference runs in hybrid mode on 9th - 10th, January 2027 — Day 1 onsite in Dubai, Day 2 virtually via Webex.
+Accepted papers are published in Springer Nature's Lecture Notes in Networks and Systems, indexed in SCOPUS, DBLP and Web of Science.
+
+Dubai + Virtual
+
+9
+th
+- 10
+th
+, January 2027
+
+Springer LNNS
+
+OFFICIAL PUBLICATION PARTNER
+Topics of Interest (but not limited to)
+
+Trustworthy & Responsible AI
+	•	Explainable AI (XAI)
+	•	Interpretable ML for High-Stakes Decisions
+	•	Transparency in LLMs & Generative AI
+	•	Bias Detection & Fairness Metrics
+	•	Human-in-the-Loop Systems
+	•	AI Ethics & Workforce Transformation
+	•	Inclusive AI: Accessibility & Equity
+	•	AI and Sustainable Development Goals
+
+Privacy, Security & Governance
+	•	Privacy-Preserving ML (Federated Learning)
+	•	Data Sovereignty & GDPR Alignment
+	•	Blockchain for AI Traceability
+	•	Secure Data Sharing
+	•	Post-Quantum Cryptography
+	•	AI Risk, Compliance & Regulation
+	•	Agentic AI: Trust, Control & Oversight
+	•	Generative AI: Risks & Guardrails
+
+AI in Enterprise & Industry
+	•	Trustworthy AI in Banking & Finance
+	•	AI Governance in Healthcare
+	•	AI in Supply Chain & Logistics
+	•	Digital Twins & Process Automation
+	•	Robotics & Industry 4.0
+	•	Software Engineering & DevOps
+	•	Edge, Fog & Quantum Computing
+	•	Cybersecurity & Secure Cloud Systems
+
+AI for Society & Sustainability
+	•	AI for Climate Action
+	•	Smart Cities & IoT Infrastructure
+	•	Renewable Energy & Intelligent Optimization
+	•	Human–AI Collaboration for Social Good
+	•	AI for Education, Inclusion & Equity
+	•	Ethical AI & Green IT
+	•	NLP, Text Analytics & Sentiment Analysis
+	•	General Track
+
+Submitted papers must be original, unpublished, and not under consideration elsewhere. All manuscripts undergo rigorous peer review via
+Microsoft CMT
+. Accepted papers must be registered to appear in the final proceedings.
+Submit Your Paper →
+ISDIA Global Participation
+
+
+India
+
+Australia
+
+Bangladesh
+
+Cambodia
+
+China
+
+France
+
+Ireland
+
+Italy
+
+Kazakhstan
+
+South Korea
+
+Malaysia
+
+Morocco
+
+Moldova
+
+Nigeria
+
+Norway
+
+Russia
+
+Saudi Arabia
+
+Singapore
+
+Spain
+
+Taiwan
+
+USA
+
+Uzbekistan
+
+Vietnam
+
+Yemen
+
+Mauritius
+
+UK
+
+South Africa
+
+Thailand
+
+Czech Republic
+
+Sweden
+
+Switzerland
+
+UAE
+
+Netherlands
+Supporting the UN Sustainable Development Goals
+
+
+
+
+
+
+Tourist Attractions in Dubai
+
+ Burj Khalifa
+ Aquarium & Underwater Zoo
+ Miracle Garden
+ Red Dunes Desert Safari
+ Green Plannet
+ Atlantis Water Park
+ La Perl Show
+ Museum Of The Future
+ Marina Yatch Cruise
+ Dubai Frame
+ Dubai River Land
+ Global Village
+ Gold Souk
+© Copyright ISDIA-2027 | All Rights Reserved by ISDIA.ORG
+Design by: OdishaAIMS

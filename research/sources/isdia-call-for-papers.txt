@@ -1,0 +1,120 @@
+
+
+ISDIA
+
+
+
+11Th International Conference On Information System Design And Intelligent Applications
+(ISDIA-2027)
+	•	Home Call For Papers
+Call For Papers
+
+ISDIA-2027 invites high-quality, original research submissions from scholars, practitioners, and students in the areas of Information System Design and Intelligent Applications. The conference will be held in hybrid mode on 9th - 10th, January 2027, with Day 1 hosted onsite in Dubai and Day 2 conducted virtually via Webex. We welcome contributions across theoretical and applied dimensions of intelligent systems, with a focus on interdisciplinary innovation, real-world impact, and responsible AI.
+Building on the success of ISDIA 2025, which focused on “AI for Healthcare”, ISDIA-2027 expands the conversation toward Agentic AI and Sustainability. Accepted and registered papers will be published in Springer Nature's Lecture Notes in Networks and Systems, indexed in SCOPUS, DBLP, and Web of Science, subject to Springer’s editorial guidelines.
+Topics of Interest Include (but are not limited to):
+	▪	AI for climate modeling and forecasting
+	▪	Smart energy systems and green technology
+	▪	AI in agriculture and food sustainability
+	▪	Sustainable urban planning using intelligent systems
+	▪	AI for waste reduction and recycling
+	▪	Environmental monitoring and conservation using AI
+	▪	Ethical AI and responsible innovation
+	▪	Big Data Analytics and Data Science
+	▪	Information Security and Privacy
+	▪	Internet of Things (IoT) and Smart Applications
+	▪	Human-Centric Information Systems
+	▪	Information Retrieval and Search Engines
+	▪	Emerging Technologies and Trends
+	▪	Information System Design and Implementation
+	▪	AI for Healthcare
+	▪	Machine Learning and Deep Learning for Information Systems
+	▪	Natural Language Processing and Text Analytics
+	▪	Knowledge Representation and Reasoning
+	▪	Sentiment Analysis and Opinion Mining
+	▪	Intelligent Data Integration and Fusion
+	▪	AI-driven Decision Support Systems
+	▪	Cognitive Computing and Smart Systems
+	▪	Intelligent User Interfaces and Human-Computer Interaction
+	▪	Big Data Management and Processing
+	▪	Data Mining and Pattern Recognition
+	▪	Predictive Analytics and Data-driven Modeling
+	▪	Real-time Stream Processing and Analytics
+	▪	Scalable and Distributed Data Analytics
+	▪	Social Media Analytics
+	▪	Visualization Techniques for Big Data
+	▪	Ethical and Privacy Aspects of Big Data Analytics
+	▪	Cybersecurity and Threat Detection
+	▪	Privacy-preserving Data Mining and Analytics
+	▪	Secure Cloud Computing and Storage
+	▪	Blockchain Technology for Information Security
+	▪	Network Security and Intrusion Detection
+	▪	Biometric Authentication and Identity Management
+	▪	Digital Forensics and Incident Response
+	▪	Risk Assessment and Management in Information Systems
+	▪	IoT-enabled Information Systems and Applications
+	▪	Smart Cities and Urban Informatics
+	▪	Wearable Computing and Health Informatics
+	▪	IoT Data Analytics and Real-time Processing
+	▪	Smart Cities and Urban Informatics
+	▪	Wearable Computing and Health Informatics
+	▪	IoT Data Analytics and Real-time Processing
+	▪	Sensor Networks and Embedded Systems
+	▪	Energy-efficient IoT Communication Protocols
+	▪	Smart Agriculture and Environmental Monitoring
+	▪	IoT-based Supply Chain Management
+	▪	User-Centered Design and User Experience (UX)
+	▪	Personalization and Context-aware Systems
+	▪	Recommender Systems and Collaborative Filtering
+	▪	Social Computing and Online Communities
+	▪	Mobile and Pervasive Information Systems
+	▪	Accessibility and Assistive Technologies
+	▪	Gamification and Serious Games
+	▪	Usability Testing and User Interaction Studies
+	▪	Web Search and Information Retrieval
+	▪	Semantic Web and Linked Data
+	▪	Knowledge Graphs and Ontologies
+	▪	Information Filtering and Recommendation
+	▪	Meta-search and Federated Search
+	▪	Cross-lingual Information Retrieval
+	▪	Multimedia Information Retrieval
+	▪	User Profiling and Personalized Search
+	▪	Quantum Computing and Information Systems
+	▪	Edge Computing and Fog Computing
+	▪	Augmented Reality and Virtual Reality Applications
+	▪	AI in Autonomous Systems and Robotics
+	▪	Swarm Intelligence and Collective Decision Making
+	▪	Green IT and Sustainable Information Systems
+	▪	Cyber-Physical Systems and Industry 4.0
+	▪	Ethical AI and Responsible AI Practices
+	▪	Database Systems and Query Optimization
+	▪	Software Engineering for Information Systems
+	▪	Web Application Development and Frameworks
+	▪	Cloud-based Information Systems
+	▪	Distributed Systems and Middleware
+	▪	Software Testing and Verification
+	▪	Performance Evaluation and Optimization
+	▪	Agile Development and DevOps
+	▪	AI in Bioinformatics and Genomics
+	▪	AI in Drug Discovery
+	▪	AI in Clinical Trials
+	▪	AI in Medical Imaging and Sensing
+	▪	AI in Healthcare Operations
+	▪	AI in Supply Chain Management
+Submitted papers should neither be previously published nor under consideration for publication elsewhere. All papers will be refereed through a peer review process.
+Abstracted And Indexed In
+
+All accepted, registered and presented papers under this conference will be submitted to Springer, Lecture Notes in Networks and Systems Series.
+The books of this series are submitted to
+	•	 SCOPUS  SCImago  DBLP  EI Compendex  INSPEC  Japanese Science and Technology Agency (JST)  zbMATH  WTI AG
+
+
+
+
+
+
+
+
+
+
+© Copyright ISDIA-2027 | All Rights Reserved by ISDIA.ORG
+Design by: OdishaAIMS

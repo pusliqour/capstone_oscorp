@@ -71,7 +71,7 @@ export default function Landing() {
     }
   }, [location]);
 
-  
+
   return (
     <div className="landing-bg">
       {/* ===== NAVBAR ===== */}
@@ -159,7 +159,7 @@ export default function Landing() {
       <section className="section hero" ref={homeRef} id="home">
         <div className="container">
           <div className="hero-card">
-            <div className="badge">Now in Beta</div>
+            <div className="badge">Local recovery build</div>
 
             <h1 className="hero-title">
               Jiran
@@ -167,8 +167,8 @@ export default function Landing() {
             </h1>
 
             <p className="hero-sub">
-              A smart inventory layer for retailers that turns live POS data
-              into clearer decisions, healthier cash flow, and less dead stock.
+              A resource-allocation layer that consolidates operational data
+              and supports inventory decisions without hiding evidence gaps.
             </p>
 
             <div className="hero-actions">
@@ -190,18 +190,18 @@ export default function Landing() {
 
             <div className="hero-stats">
               <div className="stat">
-                <div className="stat-num">60%</div>
-                <div className="stat-label">Less dead stock</div>
+                <div className="stat-num">LOCAL</div>
+                <div className="stat-label">Self-hosted data plane</div>
               </div>
               <div className="stat">
-                <div className="stat-num">12x</div>
-                <div className="stat-label">Faster rebalancing</div>
+                <div className="stat-num">OPEN</div>
+                <div className="stat-label">Source-neutral imports</div>
               </div>
               <div className="stat">
-                <div className="stat-num">98%</div>
-                <div className="stat-label">Inventory accuracy</div>
+                <div className="stat-num">NULL</div>
+                <div className="stat-label">AI until validated</div>
               </div>
-              
+
             </div>
           </div>
         </div>
@@ -505,7 +505,7 @@ export default function Landing() {
               {[
                 "Hyperlocal optimization",
                 "Real-time data sync",
-                "AI-driven insights",
+                "Evidence-gated AI (validation pending)",
                 "Retailer-first design",
                 "Cross-store rebalancing",
                 "B2B inventory exchange",
@@ -523,8 +523,8 @@ export default function Landing() {
               <div className="compare-card primary">
                 <div className="cc-title">Jiran</div>
                 <div className="cc-sub">
-                  Built for modern retail operations with real-time
-                  intelligence.
+                  Designed for auditable resource decisions with optional,
+                  evidence-gated intelligence.
                 </div>
               </div>
               <div className="compare-card">

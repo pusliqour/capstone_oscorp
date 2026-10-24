@@ -1,6 +1,8 @@
 # Oscorp Capstone — Jiran Inventory Intelligence
 # Jiran — AI-Assisted Inventory Optimization & Retailer Marketplace
 
+> **Recovery status — 24 October 2026:** the original hosted Supabase hostname no longer resolves, so its historical rows could not be recovered. This repository now includes a local Supabase schema and a source-neutral ERP/CSV import path. AI data, evaluation metrics, and prediction claims remain explicitly `null` until a traceable dataset is supplied and evaluated. See [`data/data-status.json`](data/data-status.json), the [recovery decision](research/open-source-recovery-options.md), and the [ISDIA working draft](paper/ISDIA-paper-working-draft.md).
+
 Jiran is a centralized, web-based platform designed for small and mid-sized retailers to manage inventory more effectively, reduce stock imbalances, and make better operational decisions using analytics and AI-assisted forecasting. The platform brings together inventory tracking, demand insights, alerts, and a retailer-to-retailer marketplace in one system.
 
 Developed as a university capstone project by **Team OSCORP**, Jiran focuses on improving inventory visibility, enabling data-driven stock movement, and supporting retailers that often rely on disconnected tools such as spreadsheets, POS systems, and manual records.
@@ -67,6 +69,41 @@ Jiran is designed primarily for:
 
 ---
 
+## Recovered local development path
+
+The least-disruptive open-source recovery keeps the application's existing Supabase API contract:
+
+```bash
+# Docker Desktop must be running
+npx supabase start
+python3 scripts/configure_local_supabase.py
+
+# frontend
+cd frontend
+npm ci
+npm run dev
+```
+
+Local Supabase applies `supabase/migrations/202610240001_local_recovery.sql`. Generated credentials are written only to ignored owner-only local environment files. Do not commit them.
+
+For factual ERP inventory ingestion without Square:
+
+```bash
+python3 tools/resource_import.py --source erpnext --input export.csv --output data/normalized/inventory.csv
+# or: --source odoo
+```
+
+The adapter does not generate AI predictions. The Python ML service is a separate legacy component and should be treated as unverified until a traceable dataset and evaluation are restored.
+
+The recovery and paper dashboard is available by serving the repository root:
+
+```bash
+python3 -m http.server 4174
+# open http://127.0.0.1:4174/dashboard/
+```
+
+---
+
 ## Prerequisites
 
 Before running the project, ensure the following are installed:
@@ -107,16 +144,7 @@ Press `Ctrl+C` to stop both services.
 
 Jiran can be tested using either an existing account or a newly created account.
 
-### Option 1: Use the existing demo account
-
-You can log in using the following credentials:
-
-```text
-Username: joseg@gmail.com
-Password: Hello@1234
-```
-
-### Option 2: Create a new account
+Create a new local account after starting the self-hosted Supabase stack. Historical hosted demo credentials have been removed and must not be reused.
 
 Alternatively, users can create a new account through the application's sign-up flow and use it to test the platform features.
 

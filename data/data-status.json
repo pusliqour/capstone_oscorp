@@ -1,0 +1,12 @@
+{
+  "historical_hosted_database": "unreachable",
+  "historical_data_recovered": false,
+  "replacement_database": "local_self_hosted_supabase",
+  "source_inventory_rows": null,
+  "source_sales_rows": null,
+  "ai_training_dataset": null,
+  "ai_model_validation": null,
+  "ai_predictions": null,
+  "last_verified": "2026-10-24",
+  "notes": "The original Supabase hostname no longer resolves. No historic rows, model quality, or AI outcomes are claimed. Existing repository model artifacts are preserved as legacy, unverified artifacts only."
+}

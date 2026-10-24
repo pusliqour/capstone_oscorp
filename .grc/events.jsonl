@@ -1,0 +1,12 @@
+{"ts": "2026-10-24T13:37:41+04:00", "agent": "grc", "type": "init", "text": "GRC initialised for ISDIA"}
+{"ts": "2026-10-24T13:37:56+04:00", "agent": "hermes/gpt-5.6-sol", "type": "mcp", "text": "Added task T1: Priority Alpha — restore graduation project functionality"}
+{"ts": "2026-10-24T13:37:57+04:00", "agent": "hermes/gpt-5.6-sol", "type": "mcp", "text": "Added task T2: Research ISDIA venue and prior successful papers"}
+{"ts": "2026-10-24T13:37:58+04:00", "agent": "hermes/gpt-5.6-sol", "type": "mcp", "text": "Added task T3: Draft the ISDIA paper package"}
+{"ts": "2026-10-24T13:38:00+04:00", "agent": "hermes/gpt-5.6-sol", "type": "mcp", "text": "Added task T4: Build ISDIA project dashboard and architecture views"}
+{"ts": "2026-10-24T13:38:01+04:00", "agent": "hermes/gpt-5.6-sol", "type": "mcp", "text": "Updated the Resume-here card"}
+{"ts": "2026-10-24T20:25:40+04:00", "agent": "hermes/gpt-5.6-sol", "type": "mcp", "text": "Updated T1: status → done, ticked step 1, ticked step 2, ticked step 3, ticked step 4, ticked step 5, added a note"}
+{"ts": "2026-10-24T20:25:41+04:00", "agent": "hermes/gpt-5.6-sol", "type": "mcp", "text": "Updated T2: status → done, ticked step 1, ticked step 2, ticked step 3, ticked step 4, ticked step 5, added a note"}
+{"ts": "2026-10-24T20:25:42+04:00", "agent": "hermes/gpt-5.6-sol", "type": "mcp", "text": "Updated T3: status → done, ticked step 1, ticked step 2, ticked step 3, ticked step 4, ticked step 5, added a note"}
+{"ts": "2026-10-24T20:25:44+04:00", "agent": "hermes/gpt-5.6-sol", "type": "mcp", "text": "Updated T4: status → done, ticked step 1, ticked step 2, ticked step 3, ticked step 4, ticked step 5, added a note"}
+{"ts": "2026-10-24T20:31:41+04:00", "agent": "hermes/gpt-5.6-sol", "type": "mcp", "text": "Updated the Resume-here card"}
+{"ts": "2026-10-24T20:31:51+04:00", "agent": "hermes/gpt-5.6-sol", "type": "note", "text": "Priority Alpha local recovery and ISDIA paper package completed. Jiran now runs on local Supabase with a verified auth/profile/inventory round trip; frontend and FastAPI are live; missing/incompatible AI evidence produces explicit null/HTTP 503. Added tested ERPNext/Odoo CSV adapter, 10-page compiled Springer-style paper draft, official template archives, venue/source research, custom progress dashboard, high-level architecture, and verification report. Remaining gates: author/contact confirmation, organizer clarification, provenance-controlled dataset, and genuine AI evaluation.", "task": "T1,T2,T3,T4"}

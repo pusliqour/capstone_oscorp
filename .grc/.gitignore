@@ -1,0 +1,7 @@
+# made by GRC: rebuilt from the project, so not worth committing
+dashboard.html
+scan.json
+graph.json
+genie*.jsonl
+resolved-tasks.json
+checkpoints/

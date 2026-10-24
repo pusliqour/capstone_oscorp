@@ -1,0 +1,138 @@
+[
+  {
+    "id": "T1",
+    "title": "Priority Alpha — restore graduation project functionality",
+    "status": "done",
+    "last_agent": "hermes/gpt-5.6-sol",
+    "subtasks": [
+      {
+        "text": "Audit current startup failures and dependency contracts",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Replace hosted-only Supabase dependency with a local/open-source-compatible path",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Replace Square dependency with an appropriate self-hosted/open-source commerce path or adapter",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Create explicit null-state handling for missing AI data/models",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Verify the application starts and core non-AI workflow functions",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      }
+    ],
+    "notes": "Priority Alpha. Restore a reproducible local path without fabricating lost data or AI outputs. Local Supabase stack is running; migration applied; auth/profile/inventory round-trip passed; frontend and FastAPI start; invalid historical AI artifacts now produce explicit null/503; ERPNext/Odoo/neutral CSV adapter tested."
+  },
+  {
+    "id": "T2",
+    "title": "Research ISDIA venue and prior successful papers",
+    "status": "done",
+    "last_agent": "hermes/gpt-5.6-sol",
+    "subtasks": [
+      {
+        "text": "Identify the exact ISDIA venue and official organizer pages",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Download author template and submission requirements",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Collect accessible prior proceedings and award/winner evidence",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Build dated source matrix with confidence labels",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Create paper-readiness checklist",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      }
+    ],
+    "notes": "Collect official requirements and distinguish verified prior-paper evidence from unavailable award information. ISDIA-2027 official pages archived; dates/page limits/template/submission links verified; official Word and LaTeX packages downloaded; prior proceedings and representative chapters catalogued; no verifiable best-paper winner list found and this is stated explicitly."
+  },
+  {
+    "id": "T3",
+    "title": "Draft the ISDIA paper package",
+    "status": "done",
+    "last_agent": "hermes/gpt-5.6-sol",
+    "subtasks": [
+      {
+        "text": "Extract verified project claims from code and graduation artifacts",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Define problem, contributions, architecture, and limitations",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Fill available ISDIA paper sections from evidence",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Leave experimental metrics and missing AI results explicitly TBD/null",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Maintain a bibliography and claim-to-source ledger",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      }
+    ],
+    "notes": "Preserve graduation-project continuity while generalizing the framing to AI-assisted resource allocation. Evidence-bounded 10-page Springer-style LaTeX draft compiled to PDF. The AI evaluation is explicitly null/pending and no performance metrics are fabricated. Author order/contact and experimental results remain professor/team decisions."
+  },
+  {
+    "id": "T4",
+    "title": "Build ISDIA project dashboard and architecture views",
+    "status": "done",
+    "last_agent": "hermes/gpt-5.6-sol",
+    "subtasks": [
+      {
+        "text": "Inventory existing frontend theme and reusable tokens",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Build project status dashboard from GRC/project evidence",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Draw high-level current and target architecture",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Expose recovery progress and paper readiness",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      },
+      {
+        "text": "Run responsive browser QA",
+        "done": true,
+        "agent": "hermes/gpt-5.6-sol"
+      }
+    ],
+    "notes": "Same visual language as the project, but operationally honest about built, broken, recovered, and planned components. Standalone dark themed recovery dashboard and high-level architecture HTML created; desktop/mobile overflow and browser-console checks passed; GRC dashboard linked."
+  }
+]

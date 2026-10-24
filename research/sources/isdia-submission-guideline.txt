@@ -1,0 +1,22 @@
+
+
+ISDIA
+
+
+
+11Th International Conference On Information System Design And Intelligent Applications
+(ISDIA-2027)
+	•	Home Submission Guideline
+Submission Guidelines
+
+All accepted, presented and registered papers under this conference will be published in Springer Nature Lecture Notes in Networks and Systems (https://www.springer.com/series/15179)
+All submissions must comply with the Springer format: https://www.springer.com/gp/computer-science/lncs/conference-proceedings-guidelines
+Download The Template In Word Download The Template In LaTeX
+All submissions must comply with the Springer format: https://www.springer.com/gp/computer-science/lncs/conference-proceedings-guidelines
+Page limit for Camera Ready papers is 10-12 pages. Short papers (less than 10 pages) may not be considered.
+Before submission, Read the Springer publication ethics and guidelines
+
+Submit your paper in below given link
+Submit Your Paper
+© Copyright ISDIA-2027 | All Rights Reserved by ISDIA.ORG
+Design by: OdishaAIMS

@@ -67,42 +67,49 @@ def load_csv(name):
         raise RuntimeError(f"Missing artifact: {path}")
     return pd.read_csv(path)
 
-print("Loading ML models...")
-ensemble      = load_artifact("ensemble.pkl")
-scaler        = load_artifact("scaler.pkl")
-le_category   = load_artifact("label_encoder.pkl")
-FEATURE_COLS  = load_json("feature_cols.json")
-CATEGORY_CLASSES = load_json("category_classes.json")
+AI_AVAILABLE = False
+AI_UNAVAILABLE_REASON = "AI artifacts are not validated in this environment."
+ensemble = scaler = le_category = None
+FEATURE_COLS = []
+CATEGORY_CLASSES = []
+forecasts_df = pd.DataFrame()
+store_stats_df = pd.DataFrame()
+product_store_df = pd.DataFrame()
+feature_importance = pd.DataFrame()
 
-print("Loading supporting data...")
-forecasts_df       = load_csv("forecasts_aggregated.csv")
-store_stats_df     = load_csv("store_stats.csv")
-product_store_df   = load_csv("product_store_ranks.csv")
-feature_importance = load_csv("feature_importance.csv")
-
-# Index for fast lookups
-forecasts_df     = forecasts_df.set_index(["store_id", "product_id"])
-store_stats_df   = store_stats_df.set_index("store_id")
-product_store_df = product_store_df.set_index(["store_id", "product_id"])
-
-print("All models loaded — API ready.")
+try:
+    ensemble = load_artifact("ensemble.pkl")
+    scaler = load_artifact("scaler.pkl")
+    le_category = load_artifact("label_encoder.pkl")
+    FEATURE_COLS = load_json("feature_cols.json")
+    CATEGORY_CLASSES = load_json("category_classes.json")
+    forecasts_df = load_csv("forecasts_aggregated.csv").set_index(["store_id", "product_id"])
+    store_stats_df = load_csv("store_stats.csv").set_index("store_id")
+    product_store_df = load_csv("product_store_ranks.csv").set_index(["store_id", "product_id"])
+    feature_importance = load_csv("feature_importance.csv")
+    AI_AVAILABLE = True
+    AI_UNAVAILABLE_REASON = None
+except Exception as exc:
+    # The operational API must remain available even when legacy pickles are
+    # incompatible. This is an explicit null state, not a fabricated fallback.
+    AI_UNAVAILABLE_REASON = f"{type(exc).__name__}: {exc}"
+    logging.getLogger("app").warning("AI disabled: %s", AI_UNAVAILABLE_REASON)
 
 # ---------------------------------------------------------------------------
 # FastAPI app
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # ── Startup ──────────────────────────────────────────────────────────────
-    try:
-        from supabase_watcher import start_watcher_thread
-        _watcher_stop = start_watcher_thread()
-        logging.getLogger("app").info("Supabase watcher thread started.")
-    except ImportError:
-        _watcher_stop = None
-        logging.getLogger("app").warning(
-            "supabase package not installed — watcher disabled. "
-            "Run: pip install supabase"
-        )
+    # Watcher is opt-in during recovery so an unreachable legacy backend cannot
+    # block the API or repeatedly transmit stale credentials.
+    _watcher_stop = None
+    if os.getenv("ENABLE_SUPABASE_WATCHER", "false").lower() == "true":
+        try:
+            from supabase_watcher import start_watcher_thread
+            _watcher_stop = start_watcher_thread()
+            logging.getLogger("app").info("Supabase watcher thread started.")
+        except Exception as exc:
+            logging.getLogger("app").warning("Supabase watcher disabled: %s", exc)
     yield
     # ── Shutdown ─────────────────────────────────────────────────────────────
     if _watcher_stop:
@@ -483,14 +490,19 @@ def build_feature_row(p: ProductInput) -> dict:
 def health():
     return {
         "status": "ok",
-        "model": "Jiran ML v2222 (RF + GB + XGB ensemble)",
+        "ai_available": AI_AVAILABLE,
+        "ai_status": "ready" if AI_AVAILABLE else "null",
+        "ai_unavailable_reason": None if AI_AVAILABLE else AI_UNAVAILABLE_REASON,
+        "model": "Jiran ML v2222 (RF + GB + XGB ensemble)" if AI_AVAILABLE else None,
         "features": len(FEATURE_COLS),
-        "labels": ["Dead", "Excess", "Low", "Optimum", "Slow"],
+        "labels": ["Dead", "Excess", "Low", "Optimum", "Slow"] if AI_AVAILABLE else [],
     }
 
 
 @app.post("/predict-stock", response_model=PredictResponse)
 def predict_stock(req: PredictRequest):
+    if not AI_AVAILABLE:
+        raise HTTPException(status_code=503, detail="AI pipeline is intentionally null until artifacts and data are validated.")
     if not req.products:
         raise HTTPException(status_code=422, detail="products list is empty")
     try:
@@ -736,6 +748,8 @@ def recommend(req: PredictRequest):
     2. Computes transfer recommendations (multi-store, macro + micro).
     3. Computes restock recommendations for any remaining shortfalls.
     """
+    if not AI_AVAILABLE:
+        raise HTTPException(status_code=503, detail="AI pipeline is intentionally null until artifacts and data are validated.")
     if not req.products:
         raise HTTPException(status_code=422, detail="products list is empty")
 
@@ -778,5 +792,7 @@ def recommend(req: PredictRequest):
 
 @app.get("/feature-importance")
 def get_feature_importance(top_n: int = 20):
+    if not AI_AVAILABLE:
+        raise HTTPException(status_code=503, detail="AI pipeline is intentionally null until artifacts and data are validated.")
     rows = feature_importance.head(top_n).to_dict(orient="records")
     return {"top_n": top_n, "features": rows}

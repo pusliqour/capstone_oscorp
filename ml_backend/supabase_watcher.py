@@ -75,22 +75,12 @@ log = logging.getLogger("watcher")
 # ---------------------------------------------------------------------------
 # CONFIG
 # ---------------------------------------------------------------------------
-SUPABASE_URL  = os.getenv("SUPABASE_URL",  "https://nbrhlujwzbfupsouylkg.supabase.co")
-SUPABASE_ANON_KEY    = (
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-    ".eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5icmhsdWp3emJmdXBzb3V5bGtnIiwi"
-    "cm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MTQ0NDksImV4cCI6MjA4NDI5MDQ0OX0"
-    ".ZJTyJzuvSVVYA3Y7bd3kQdlKEdOch0XxKo3T95LFwz8"
-)
-SUPABASE_SERVICE_KEY = (
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
-    ".eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5icmhsdWp3emJmdXBzb3V5bGtnIiwi"
-    "cm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODcxNDQ0OSwiZXhwIjoyMDg0"
-    "MjkwNDQ5fQ.t0CppYILuuj78alkqUi63R03baTvoa95yD4v0xiCdtg"
-)
+SUPABASE_URL  = os.getenv("SUPABASE_URL", "http://127.0.0.1:54321")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 
 # Use service key so RLS doesn't block status updates; fall back to anon
-SUPABASE_KEY  = os.getenv("SUPABASE_KEY", SUPABASE_SERVICE_KEY)
+SUPABASE_KEY = os.getenv("SUPABASE_KEY") or SUPABASE_SERVICE_KEY or SUPABASE_ANON_KEY
 ML_API_URL    = os.getenv("ML_API_URL",   "http://localhost:8001")
 OUTPUT_DIR    = os.getenv("OUTPUT_DIR",   "./ml_outputs")
 POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", "10"))

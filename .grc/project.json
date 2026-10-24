@@ -1,0 +1,8 @@
+{
+  "name": "ISDIA",
+  "goal": "Describe in one sentence what this project is for.",
+  "status": "active",
+  "dashboard": ".grc/dashboard.html",
+  "flow": [],
+  "sections": []
+}
