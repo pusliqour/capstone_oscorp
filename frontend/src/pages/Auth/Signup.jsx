@@ -1,6 +1,6 @@
 // src/pages/auth/Signup.jsx
 import { useEffect, useState } from "react";
-import { supabase } from "../../supaBase/Client";
+import { publicDemo, supabase } from "../../supaBase/Client";
 import { Link, useNavigate } from "react-router-dom";
 import "/src/styles/Login.css";
 import logo from "/src/styles/Logo.png";
@@ -254,6 +254,11 @@ export default function Signup() {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+
+    if (publicDemo) {
+      setMessage("This GitHub Pages build is a public preview. Account creation runs only in the local recovered environment.");
+      return;
+    }
 
     const validationError = validateAll();
     if (validationError) {

@@ -1,7 +1,7 @@
 {
-  "now": "Priority Alpha recovered locally: self-hosted Supabase is running, auth/profile/inventory round trip passed, frontend and FastAPI are live, AI safely abstains. A 10-page Springer-style PDF draft, official template packages, sourced venue brief, GRC/dashboard, architecture, and tested ERPNext/Odoo import adapter are complete.",
-  "next": "Confirm author order/corresponding email with professor; obtain a provenance-controlled dataset; run temporal/location holdouts; clarify venue and svmult template with ISDIA; only then populate AI results and submit through CMT before 15 November 2026.",
-  "blocked": "Historical Supabase project is unreachable; no validated dataset exists; legacy ML artifacts are incompatible; public ISDIA best-paper winner list was not verifiable; official site has venue/template inconsistencies that require organizer confirmation.",
+  "now": "Jiran is publicly hosted and verified at https://pusliqour.github.io/jiran/. The public build makes no backend calls and labels auth as local-only; the full operational stack remains local.",
+  "next": "For a functional public application rather than a static architecture preview, provision a secure public backend, migrate the local schema, configure secrets through a deployment platform, and run end-to-end security tests.",
+  "blocked": "Historical Supabase and validated AI data remain unavailable. The authenticated GitHub account pusliqour has pull-only access to M4MD-M7SN/capstone_oscorp, so the Pages deployment lives in pusliqour/jiran.",
   "last_agent": "hermes/gpt-5.6-sol",
-  "updated": "2026-10-24T20:31:41+04:00"
+  "updated": "2026-10-24T20:48:07+04:00"
 }

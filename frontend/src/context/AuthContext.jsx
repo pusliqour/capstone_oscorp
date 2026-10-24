@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../supaBase/Client.js";
+import { publicDemo, supabase } from "../supaBase/Client.js";
 import { getMyProfile } from "../supaBase/Profiles.js";
 
 const AuthContext = createContext();
@@ -31,6 +31,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    if (publicDemo) {
+      setLoading(false);
+      return;
+    }
+
     const loadUser = async () => {
       setLoading(true);
 

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import "/src/styles/Landing.css";
-import { supabase } from "../supaBase/Client";
+import { publicDemo } from "../supaBase/Client";
 import { useAuth } from "../context/AuthContext";
 
 import logo from "/src/styles/Logo.png";
@@ -159,7 +159,9 @@ export default function Landing() {
       <section className="section hero" ref={homeRef} id="home">
         <div className="container">
           <div className="hero-card">
-            <div className="badge">Local recovery build</div>
+            <div className="badge">
+              {publicDemo ? "Public architecture preview" : "Local recovery build"}
+            </div>
 
             <h1 className="hero-title">
               Jiran

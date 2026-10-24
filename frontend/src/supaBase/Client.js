@@ -1,7 +1,9 @@
 // src/supabaseClient.js
 import { createClient } from "@supabase/supabase-js";
 
-export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+export const publicDemo = import.meta.env.VITE_PUBLIC_DEMO === "true";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://example.invalid";
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "public-demo-no-backend";
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "/src/styles/Login.css";
 import logo from "/src/styles/Logo.png";
-import { supabase } from "../../supaBase/Client";
+import { publicDemo, supabase } from "../../supaBase/Client";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,6 +13,11 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleAuth = async () => {
+    if (publicDemo) {
+      setMessage("This GitHub Pages build is a public preview. Authentication runs only in the local recovered environment.");
+      return;
+    }
+
     if (!email || !password) {
       setMessage("Please enter email and password.");
       return;

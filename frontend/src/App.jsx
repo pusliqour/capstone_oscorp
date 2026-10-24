@@ -18,7 +18,7 @@ import About from "./pages/About.jsx";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AuthProvider>
         <Routes>
           {/* Public routes */}

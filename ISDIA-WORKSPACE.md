@@ -4,6 +4,8 @@ This directory is both the recovered graduation-project repository and the worki
 
 ## Open first
 
+- **Public GitHub Pages preview:** https://pusliqour.github.io/jiran/
+- **Deployment repository:** https://github.com/pusliqour/jiran
 - **Project dashboard:** `dashboard/index.html` (served at `http://127.0.0.1:4174/dashboard/` while the local server is running)
 - **Paper PDF:** `paper/jiran_isdia_2027.pdf`
 - **Editable paper source:** `paper/jiran_isdia_2027.tex`
