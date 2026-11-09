@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../supaBase/Client";
@@ -9,7 +9,8 @@ const emptyLocation = { location_label: "", latitude: "", longitude: "", city: "
 const routes = [["Dashboard", "/retailer-dashboard"], ["Inventory", "/inventory"], ["Marketplace", "/exchange"], ["Analytics", "/analytics"], ["Settings", "/settings"]];
 const locationDraft = data => Object.fromEntries(Object.keys(emptyLocation).map(key => [key, data?.[key] == null ? "" : String(data[key])]));
 function Field({ label, help, ...props }) {
-  return <label className="management-field">{label}<input {...props} />{help && <small className="management-help">{help}</small>}</label>;
+  const id = useId();
+  return <div className="management-field"><label htmlFor={id}>{label}</label><input id={id} aria-describedby={help ? `${id}-help` : undefined} {...props} />{help && <small id={`${id}-help`} className="management-help">{help}</small>}</div>;
 }
 
 export default function Settings() {

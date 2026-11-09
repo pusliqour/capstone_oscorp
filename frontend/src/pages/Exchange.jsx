@@ -1,3 +1,4 @@
+import Icon from "../components/Icon";
 // src/pages/Exchange.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -203,7 +204,7 @@ function ContactModal({
             onClick={onClose}
             aria-label="Close"
           >
-            ✕
+            <Icon name="close" />
           </button>
         </div>
 
@@ -239,7 +240,7 @@ function ContactModal({
                       boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
                     }}
                   >
-                    View on Map 📍
+                    View on Map <Icon name="mapPin" />
                   </a>
                 )}
               </div>
@@ -247,7 +248,7 @@ function ContactModal({
               <div className="contact-help muted" style={{ marginTop: 6 }}>
                 {distanceKm && minutes ? (
                   <>
-                    📍 {distanceKm.toFixed(1)} km away · 🚗 ~{minutes} min
+                    <Icon name="mapPin" /> {distanceKm.toFixed(1)} km away · <Icon name="car" /> ~{minutes} min
                   </>
                 ) : (
                   <>Distance unavailable</>
@@ -768,7 +769,7 @@ function ListingModal({
             onClick={onClose}
             aria-label="Close"
           >
-            ✕
+            <Icon name="close" />
           </button>
         </div>
 
@@ -1017,7 +1018,7 @@ function BuyListingModal({
             onClick={onClose}
             aria-label="Close"
           >
-            ✕
+            <Icon name="close" />
           </button>
         </div>
 
@@ -1527,7 +1528,7 @@ export default function ExchangePage() {
         .gt("stock", 0)
         .order("created_at", { ascending: false });
 
-      // ✅ ONLY exclude own listings if retailerId is known
+      //  ONLY exclude own listings if retailerId is known
       if (retailerId) {
         query = query.neq("retailer_id", retailerId);
       }
@@ -2169,26 +2170,26 @@ export default function ExchangePage() {
         _buyerName: prettyRetailerName(r.from_retailer_id),
       }));
 
-    // ✅ Product filter
+    //  Product filter
     if (sellProductQuery) {
       rows = rows.filter((r) =>
         r.product_name?.toLowerCase().includes(sellProductQuery.toLowerCase()),
       );
     }
 
-    // ✅ Buyer filter
+    //  Buyer filter
     if (sellBuyerQuery) {
       rows = rows.filter((r) =>
         r._buyerName?.toLowerCase().includes(sellBuyerQuery.toLowerCase()),
       );
     }
 
-    // ✅ Status filter
+    //  Status filter
     if (sellStatus && sellStatus !== "All") {
       rows = rows.filter((r) => r._status === sellStatus);
     }
 
-    // ✅ Date range filter
+    //  Date range filter
     if (sellDateFrom) {
       const from = new Date(`${sellDateFrom}T00:00:00`);
       rows = rows.filter((r) => new Date(r.created_at) >= from);
@@ -2199,7 +2200,7 @@ export default function ExchangePage() {
       rows = rows.filter((r) => new Date(r.created_at) <= to);
     }
 
-    // ✅ Buyer country filter
+    //  Buyer country filter
     if (sellCountry !== "All") {
       rows = rows.filter((r) => {
         const meta = retailerGeoMeta?.[String(r.from_retailer_id)];
@@ -2207,7 +2208,7 @@ export default function ExchangePage() {
       });
     }
 
-    // ✅ Buyer state filter
+    //  Buyer state filter
     if (sellState !== "All") {
       rows = rows.filter((r) => {
         const meta = retailerGeoMeta?.[String(r.from_retailer_id)];
@@ -2245,26 +2246,26 @@ export default function ExchangePage() {
         _buyerName: prettyRetailerName(r.from_retailer_id),
       }));
 
-    // ✅ Product filter
+    //  Product filter
     if (sellProductQuery) {
       rows = rows.filter((r) =>
         r.product_name?.toLowerCase().includes(sellProductQuery.toLowerCase()),
       );
     }
 
-    // ✅ Buyer filter
+    //  Buyer filter
     if (sellBuyerQuery) {
       rows = rows.filter((r) =>
         r._buyerName?.toLowerCase().includes(sellBuyerQuery.toLowerCase()),
       );
     }
 
-    // ✅ Status filter
+    //  Status filter
     if (sellStatus && sellStatus !== "All") {
       rows = rows.filter((r) => r._status === sellStatus);
     }
 
-    // ✅ Date range filter
+    //  Date range filter
     if (sellDateFrom) {
       const from = new Date(`${sellDateFrom}T00:00:00`);
       rows = rows.filter((r) => new Date(r.created_at) >= from);
@@ -2275,7 +2276,7 @@ export default function ExchangePage() {
       rows = rows.filter((r) => new Date(r.created_at) <= to);
     }
 
-    // ✅ Buyer country filter
+    //  Buyer country filter
     if (sellCountry !== "All") {
       rows = rows.filter((r) => {
         const meta = retailerGeoMeta?.[String(r.from_retailer_id)];
@@ -2283,7 +2284,7 @@ export default function ExchangePage() {
       });
     }
 
-    // ✅ Buyer state filter
+    //  Buyer state filter
     if (sellState !== "All") {
       rows = rows.filter((r) => {
         const meta = retailerGeoMeta?.[String(r.from_retailer_id)];
@@ -3400,7 +3401,7 @@ export default function ExchangePage() {
                               <div className="ex-prod">
                                 <span className="thumb" aria-hidden="true">
                                   {" "}
-                                  🏷️
+                                  <Icon name="tag" />
                                 </span>
                                 <div className="ex-prod-text">
                                   <div className="ex-prod-name">
@@ -4396,7 +4397,7 @@ export default function ExchangePage() {
                             <div className="ex-prod">
                               <span className="thumb" aria-hidden="true">
                                 {" "}
-                                🏷️
+                                <Icon name="tag" />
                               </span>
                               <div className="ex-prod-text">
                                 <div className="ex-prod-name">{p.name}</div>

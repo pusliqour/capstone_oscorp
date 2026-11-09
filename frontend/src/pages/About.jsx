@@ -1,3 +1,4 @@
+import Icon from "../components/Icon";
 // src/pages/About.jsx
 import React from "react";
 import { Link } from "react-router-dom";
@@ -170,7 +171,7 @@ export default function About() {
 
                         <div className="hero-actions">
                             <a className="btn primary" href="#story">
-                                What is Jiran? →
+                                What is Jiran? <Icon name="arrowRight" size={16} />
                             </a>
                             <a className="btn ghost" href="#team">
                                 Meet the Team
@@ -436,7 +437,7 @@ export default function About() {
                             </div>
                         </div>
                         <Link to="/#connect" className="btn light">
-                            Contact →
+                            Contact <Icon name="arrowRight" size={16} />
                         </Link>
                     </div>
                 </div>

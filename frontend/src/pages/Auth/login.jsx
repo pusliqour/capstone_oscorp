@@ -1,3 +1,4 @@
+import Icon from "../../components/Icon";
 // src/pages/auth/Login.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -61,7 +62,7 @@ export default function Login() {
       <nav className="navbar">
         <div className="nav-left">
           <div className="nav-brand">
-            <img src={logo} alt="MarketMesh Logo" className="nav-logo" />
+            <img src={logo} alt="Jiran logo" className="nav-logo" />
             <span className="nav-title">Jiran</span>
           </div>
         </div>
@@ -100,7 +101,7 @@ export default function Login() {
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? "🙈" : "👁️"}
+              {<Icon name={showPassword ? "eyeOff" : "eye"} />}
             </button>
           </div>
 

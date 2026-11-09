@@ -13,7 +13,7 @@ import ProtectedRoute from "./routes/ProtectedRoutes.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
 import Loading from "./pages/Loading.jsx";
 
-// ✅ ADD THIS
+//  ADD THIS
 import About from "./pages/About.jsx";
 
 function App() {
@@ -24,7 +24,7 @@ function App() {
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
 
-          {/* ✅ ADD THIS */}
+          {/*  ADD THIS */}
           <Route path="/about" element={<About />} />
 
           <Route path="/login" element={<Login />} />

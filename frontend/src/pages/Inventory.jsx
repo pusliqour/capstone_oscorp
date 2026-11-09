@@ -1,3 +1,4 @@
+import Icon from "../components/Icon";
 // src/pages/Inventory.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -213,7 +214,15 @@ function ProductModal({
   categoryOptions = [],
   saveError,
 }) {
+  const dialogRef = useRef(null);
   const ADD_NEW = "__add_new__";
+  useEffect(() => {
+    if (!open || !dialogRef.current) return;
+    const previous = document.activeElement;
+    const dialog = dialogRef.current;
+    dialog.showModal();
+    return () => { dialog.close(); previous?.focus?.(); };
+  }, [open]);
 
   const [name, setName] = useState(initial?.name || "");
   const [sku, setSku] = useState(initial?.sku || "");
@@ -311,8 +320,10 @@ function ProductModal({
   if (!open) return null;
 
   return (
-    <div
-      className="modal-backdrop"
+    <dialog
+      ref={dialogRef}
+      className="modal-backdrop product-dialog"
+      onCancel={event => { event.preventDefault(); if (!submitting) onClose(); }}
       role="dialog"
       aria-modal="true"
       aria-label={initial ? "Edit product" : "Add product"}
@@ -334,7 +345,7 @@ function ProductModal({
             aria-label="Close"
             disabled={submitting}
           >
-            ✕
+            <Icon name="close" />
           </button>
         </div>
 
@@ -343,6 +354,7 @@ function ProductModal({
             <label className="field">
               <span className="label">Product name</span>
               <input
+                autoFocus
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Bottled Water (500ml)"
@@ -368,6 +380,7 @@ function ProductModal({
               <span className="label">Category</span>
 
               <select
+                aria-label="Category"
                 value={
                   categoryMode === "custom" ? "__add_new__" : categorySelect
                 }
@@ -447,7 +460,7 @@ function ProductModal({
           </div>
         </form>
       </div>
-    </div>
+    </dialog>
   );
 }
 
@@ -468,8 +481,8 @@ function ConnectPOSModal({ open, onClose, onConnectSquare, connecting }) {
             type="button"
             onClick={onClose}
             disabled={connecting}
-          >
-            ✕
+           aria-label="Close dialog">
+            <Icon name="close" />
           </button>
         </div>
 
@@ -541,7 +554,7 @@ function OrderDetailsModal({ open, onClose, order, items, loading, error }) {
             onClick={onClose}
             aria-label="Close"
           >
-            ✕
+            <Icon name="close" />
           </button>
         </div>
 
@@ -708,7 +721,7 @@ export default function Inventory() {
       return;
     }
 
-    // ✅ require active connection to decide what inventory to show
+    //  require active connection to decide what inventory to show
     const connId = posConnection?.id;
     if (!connId) {
       setInventory([]);
@@ -761,7 +774,7 @@ export default function Inventory() {
     (data || []).forEach((product) => {
       const vars = product.product_variations || [];
 
-      // ✅ only show variations that have inventory for this connection
+      //  only show variations that have inventory for this connection
       vars.forEach((variation) => {
         if (!variation.active) return;
 
@@ -818,7 +831,7 @@ export default function Inventory() {
       return;
     }
 
-    // ✅ require active connection (same idea as inventory)
+    //  require active connection (same idea as inventory)
     const connId = posConnection?.id;
     if (!connId) {
       setOrders([]);
@@ -889,15 +902,15 @@ export default function Inventory() {
     if (!user || !retailerId) return;
 
     (async () => {
-      await loadPosConnection(); // ✅ first
+      await loadPosConnection(); // <Icon name="success" /> first
     })();
   }, [user, retailerId]);
 
   useEffect(() => {
     if (!user || !retailerId) return;
-    if (!posConnection?.id) return;
+    if (!posConnection?.id) { setInventory([]); setInvLoading(false); return; }
 
-    loadInventory(); // ✅ only when we know which connection is active
+    loadInventory(); // <Icon name="success" /> only when we know which connection is active
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, retailerId, posConnection?.id]);
 
@@ -1535,7 +1548,7 @@ export default function Inventory() {
     const now = new Date().toISOString();
 
     // =========================
-    // ✅ SAFE CLEANUP (TENANT SCOPED)
+    //  SAFE CLEANUP (TENANT SCOPED)
     // =========================
     const { error: resetErr } = await supabase.rpc(
       "reset_inventory_for_connection",
@@ -1882,7 +1895,7 @@ export default function Inventory() {
         if (activeTab === "orders") await loadOrders(); // Refresh orders view to show it's empty
 
         alert(
-          `Inventory reset! Imported ${okRows.length} products. Existing orders cleared successfully ✅`,
+          `Inventory reset! Imported ${okRows.length} products. Existing orders cleared successfully`,
         );
         return;
       }
@@ -1949,7 +1962,7 @@ export default function Inventory() {
 
         if (activeTab === "orders") await loadOrders();
         alert(
-          `Processed ${res.totalOrdersInFile} orders: ${res.newOrdersInserted} new, ${res.totalOrdersInFile - res.newOrdersInserted} updated. Items: ${res.itemsCount} ✅`,
+          `Processed ${res.totalOrdersInFile} orders: ${res.newOrdersInserted} new, ${res.totalOrdersInFile - res.newOrdersInserted} updated. Items: ${res.itemsCount}`,
         );
 
         return;
@@ -2074,7 +2087,7 @@ export default function Inventory() {
     }
   };
 
-  // ✅ NEW: Connect to POS button where Update Inventory used to be
+  //  NEW: Connect to POS button where Update Inventory used to be
   const handleConnectPosButton = () => {
     setImportMenuOpen(false);
     setPosModalOpen(true);
@@ -2165,7 +2178,7 @@ export default function Inventory() {
                     onChange={handleImportChange}
                   />
 
-                  {/* ✅ Connect to POS now sits where Update Inventory used to be */}
+                  {/*  Connect to POS now sits where Update Inventory used to be */}
                   <div className="action-col import-wrap">
                     <div className="action-row">
                       <button
@@ -2239,7 +2252,7 @@ export default function Inventory() {
               </div>
 
               <div className="panel-actions">
-                {/* ✅ Sync now moved next to Reset filters */}
+                {/*  Sync now moved next to Reset filters */}
                 {activeTab === "inventory" ? (
                   <>
                     <button
@@ -2307,10 +2320,10 @@ export default function Inventory() {
                     onChange={(e) => setSortBy(e.target.value)}
                   >
                     <option value="updated">Recently updated</option>
-                    <option value="price_asc">Price (low → high)</option>
-                    <option value="price_desc">Price (high → low)</option>
-                    <option value="stock_asc">Stock (low → high)</option>
-                    <option value="stock_desc">Stock (high → low)</option>
+                    <option value="price_asc">Price (low to high)</option>
+                    <option value="price_desc">Price (high to low)</option>
+                    <option value="stock_asc">Stock (low to high)</option>
+                    <option value="stock_desc">Stock (high to low)</option>
                   </select>
                   <div className="panel-actions">
                     <button
@@ -2398,8 +2411,8 @@ export default function Inventory() {
                     value={orderSort}
                     onChange={(e) => setOrderSort(e.target.value)}
                   >
-                    <option value="desc">Latest → Oldest</option>
-                    <option value="asc">Oldest → Latest</option>
+                    <option value="desc">Latest to oldest</option>
+                    <option value="asc">Oldest to latest</option>
                   </select>
 
                   <button
@@ -2501,8 +2514,8 @@ export default function Inventory() {
               <button
                 className="iconbtn"
                 onClick={() => setManualImportOpen(false)}
-              >
-                ✕
+               aria-label="Close dialog" type="button">
+                <Icon name="close" />
               </button>
             </div>
 
@@ -2547,8 +2560,8 @@ export default function Inventory() {
                   Choose which column in your file maps to each required field.
                 </p>
               </div>
-              <button className="iconbtn" onClick={() => setMappingOpen(false)}>
-                ✕
+              <button className="iconbtn" onClick={() => setMappingOpen(false)} aria-label="Close dialog" type="button">
+                <Icon name="close" />
               </button>
             </div>
 
@@ -2715,8 +2728,8 @@ export default function Inventory() {
               <button
                 className="iconbtn"
                 onClick={() => setTemplateModalOpen(false)}
-              >
-                ✕
+               aria-label="Close dialog" type="button">
+                <Icon name="close" />
               </button>
             </div>
 
@@ -2748,7 +2761,7 @@ export default function Inventory() {
                         marginBottom: "4px",
                       }}
                     >
-                      📦 Inventory Details:
+                      <Icon name="package" /> Inventory Details:
                     </strong>
                     <div style={{ color: "#64748b" }}>
                       • <strong>Price / Qty:</strong> Numbers only (e.g.{" "}
@@ -2767,7 +2780,7 @@ export default function Inventory() {
                         marginBottom: "4px",
                       }}
                     >
-                      🛒 Order Details:
+                      <Icon name="cart" /> Order Details:
                     </strong>
                     <div style={{ color: "#64748b" }}>
                       • <strong>Date:</strong> <code>YYYY-MM-DD</code> (e.g.{" "}

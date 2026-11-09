@@ -1,3 +1,4 @@
+import Icon from "../components/Icon";
 // src/pages/Analytics.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -1146,7 +1147,7 @@ export default function AnalyticsPage() {
                         alignSelf: "center",
                       }}
                     >
-                      ⚠️ Provided orders data less than 30 days: Results may be
+                      <Icon name="warning" /> Provided orders data less than 30 days: Results may be
                       inaccurate.
                     </div>
                   )}
@@ -1581,7 +1582,7 @@ function ProductTable({
             <div className="intel-empty">
               <span className="empty-icon"></span>
               <p>
-                ⚠️ Orders data needed to classify products into {abcFilter}{" "}
+                <Icon name="warning" /> Orders data needed to classify products into {abcFilter}{" "}
                 category
               </p>
             </div>

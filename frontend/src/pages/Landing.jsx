@@ -1,3 +1,4 @@
+import Icon from "../components/Icon";
 // src/pages/Landing.jsx
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
@@ -179,7 +180,7 @@ export default function Landing() {
                 type="button"
                 onClick={() => scrollTo("features")}
               >
-                Explore Features →
+                Explore Features <Icon name="arrowRight" size={16} />
               </button>
               <button
                 className="btn ghost"
@@ -227,7 +228,7 @@ export default function Landing() {
 
           <div className="grid cards-2">
             <div className="card">
-              <div className="icon amber">💸</div>
+              <div className="icon amber"><Icon name="banknote" /></div>
               <h3>Slow-moving stock traps cash</h3>
               <p>
                 Every item that doesn’t move is money stuck on a shelf. That
@@ -236,7 +237,7 @@ export default function Landing() {
             </div>
 
             <div className="card">
-              <div className="icon purple">🔁</div>
+              <div className="icon purple"><Icon name="repeat" /></div>
               <h3>Reordering based on instinct</h3>
               <p>
                 “How much did we sell last time?” “Let’s order the same again.”
@@ -245,7 +246,7 @@ export default function Landing() {
             </div>
 
             <div className="card">
-              <div className="icon red">📉</div>
+              <div className="icon red"><Icon name="trendingDown" /></div>
               <h3>No clear way to trade excess stock</h3>
               <p>
                 You might have extra inventory. Another store might need it. But
@@ -282,7 +283,7 @@ export default function Landing() {
 
           <div className="mini-grid">
             <div className="mini-card">
-              <div className="mini-icon">🔌</div>
+              <div className="mini-icon"><Icon name="plug" /></div>
               <div className="mini-title">POS</div>
               <div className="mini-sub">
                 Your existing sales + inventory data.
@@ -290,7 +291,7 @@ export default function Landing() {
             </div>
 
             <div className="mini-card">
-              <div className="mini-icon">🧠</div>
+              <div className="mini-icon"><Icon name="brain" /></div>
               <div className="mini-title">Jiran</div>
               <div className="mini-sub">
                 Classification, insights, and recommendations.
@@ -298,7 +299,7 @@ export default function Landing() {
             </div>
 
             <div className="mini-card">
-              <div className="mini-icon">⚡</div>
+              <div className="mini-icon"><Icon name="zap" /></div>
               <div className="mini-title">Action</div>
               <div className="mini-sub">
                 Restock, discount, and trade with confidence.
@@ -306,15 +307,15 @@ export default function Landing() {
             </div>
 
             <div className="mini-card">
-              <div className="mini-icon">→</div>
+              <div className="mini-icon"><Icon name="arrowRight" size={16} /></div>
               <div className="mini-title">Flow</div>
-              <div className="mini-sub">POS → Jiran → Action</div>
+              <div className="mini-sub">POS <Icon name="arrowRight" size={16} /> Jiran <Icon name="arrowRight" size={16} /> Action</div>
             </div>
           </div>
 
           <div className="cta-strip">
             <div className="cta-left">
-              <div className="cta-title">POS → Jiran → Action</div>
+              <div className="cta-title">POS <Icon name="arrowRight" size={16} /> Jiran <Icon name="arrowRight" size={16} /> Action</div>
               <div className="cta-sub muted">Connect. Analyze. Act.</div>
             </div>
             <Link to="/Signup" className="btn light">
@@ -337,7 +338,7 @@ export default function Landing() {
 
           <div className="grid cards-3">
             <div className="card">
-              <div className="icon blue">📊</div>
+              <div className="icon blue"><Icon name="chart" /></div>
               <h3>INTELLIGENCE</h3>
               <p style={{ marginTop: 8 }}>
                 <b>Real-Time Inventory Intelligence</b>
@@ -359,7 +360,7 @@ export default function Landing() {
             </div>
 
             <div className="card">
-              <div className="icon teal">🔄</div>
+              <div className="icon teal"><Icon name="refresh" /></div>
               <h3>ACTION</h3>
               <p style={{ marginTop: 8 }}>
                 <b>Smarter Reordering</b>
@@ -382,7 +383,7 @@ export default function Landing() {
             </div>
 
             <div className="card">
-              <div className="icon purple">🤝</div>
+              <div className="icon purple"><Icon name="handshake" /></div>
               <h3>CONNECTION</h3>
               <p style={{ marginTop: 8 }}>
                 <b>B2B Inventory Exchange</b>
@@ -427,7 +428,7 @@ export default function Landing() {
                   <span className="tag">Admin Tools</span>
                 </div>
               </div>
-              <div className="stack-connector">↓</div>
+              <div className="stack-connector"><Icon name="arrowDown" /></div>
             </div>
 
             <div className="stack-row">
@@ -440,7 +441,7 @@ export default function Landing() {
                   <span className="tag">Notifications</span>
                 </div>
               </div>
-              <div className="stack-connector">↓</div>
+              <div className="stack-connector"><Icon name="arrowDown" /></div>
             </div>
 
             <div className="stack-row">
@@ -453,7 +454,7 @@ export default function Landing() {
                   <span className="tag">Anomaly</span>
                 </div>
               </div>
-              <div className="stack-connector">↓</div>
+              <div className="stack-connector"><Icon name="arrowDown" /></div>
             </div>
 
             <div className="stack-row">
@@ -514,8 +515,8 @@ export default function Landing() {
               ].map((row) => (
                 <div className="compare-row" key={row}>
                   <div className="compare-cell feature">{row}</div>
-                  <div className="compare-cell ok">✓</div>
-                  <div className="compare-cell bad">✕</div>
+                  <div className="compare-cell ok"><Icon name="check" label="Included" /></div>
+                  <div className="compare-cell bad"><Icon name="close" label="Not included" /></div>
                   <div className="compare-cell warn">—</div>
                 </div>
               ))}
@@ -566,12 +567,12 @@ export default function Landing() {
               target="_blank"
               rel="noreferrer"
             >
-              <div className="social-icon ig">📷</div>
+              <div className="social-icon ig"><Icon name="camera" /></div>
               <div className="social-text">
                 <div className="social-title">Instagram</div>
                 <div className="social-handle">jiran.ae</div>
               </div>
-              <div className="social-go">→</div>
+              <div className="social-go"><Icon name="arrowRight" size={16} /></div>
             </a>
 
             <a
@@ -585,13 +586,13 @@ export default function Landing() {
                 <div className="social-title">LinkedIn</div>
                 <div className="social-handle">Jiran</div>
               </div>
-              <div className="social-go">→</div>
+              <div className="social-go"><Icon name="arrowRight" size={16} /></div>
             </a>
           </div>
         </div>
       </section>
 
-      {/* ✅ Footer removed completely */}
+      {/*  Footer removed completely */}
     </div>
   );
 }

@@ -26,3 +26,9 @@ body {
   background: #ffffff;
   color: #0b0f14;
 }
+/* Shared SVG icons: one visual language, independent of emoji fonts. */
+.app-icon { display:inline-block; vertical-align:middle; flex-shrink:0; }
+.landing-bg .icon .app-icon,.landing-bg .mini-icon .app-icon { width:26px; height:26px; }
+.landing-bg .compare-cell .app-icon { margin:auto; }
+.password-toggle .app-icon { width:20px; height:20px; }
+.account { text-decoration:none; color:inherit; }

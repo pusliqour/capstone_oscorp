@@ -1,5 +1,6 @@
 """Exercise account-management transactions using disposable users only."""
 import json
+import os
 from pathlib import Path
 import secrets
 import sys
@@ -12,13 +13,16 @@ user=None
 try:
     email='uxcheck-'+secrets.token_hex(5)+'@jiran.test';password=secrets.token_urlsafe(18)
     user=admin.auth.admin.create_user({'email':email,'password':password,'email_confirm':True,'user_metadata':{'role':'retailer','full_name':'UX Test'}}).user
-    client=create_client(back['SUPABASE_URL'],front['VITE_SUPABASE_ANON_KEY']);client.auth.sign_in_with_password({'email':email,'password':password})
+    gateway=os.getenv('JIRAN_MANAGEMENT_URL',back['SUPABASE_URL'])
+    key=front['VITE_SUPABASE_ANON_KEY'] if gateway==back['SUPABASE_URL'] else 'sb_publishable_jiran_team_gateway'
+    client=create_client(gateway,key);client.auth.sign_in_with_password({'email':email,'password':password})
     def rpc(name,args=None):return client.rpc(name,args or {}).execute().data
     def denied(name,args):
         try:rpc(name,args)
         except Exception:return
         raise AssertionError('Expected rejection: '+name)
     rpc('create_my_store',{'shop_name':'Disposable UX Store'})
+    denied('save_my_profile',{'full_name':None,'phone':'','shop_name':'Disposable UX Store'})
     rpc('save_my_profile',{'full_name':'Updated UX Name','phone':'+971 50 123 4567','shop_name':'Renamed UX Store'})
     assert client.table('profiles').select('full_name').eq('id',user.id).single().execute().data['full_name']=='Updated UX Name'
     assert client.table('retailer_profiles').select('shop_name').eq('id',user.id).single().execute().data['shop_name']=='Renamed UX Store'
@@ -42,6 +46,9 @@ try:
     assert client.table('products').select('id').execute().data==[]
     rpc('remove_my_location')
     assert client.table('retailer_locations').select('id').execute().data==[]
+    next_password=secrets.token_urlsafe(18)
+    client.auth.update_user({'password':next_password})
+    client.auth.sign_in_with_password({'email':email,'password':next_password})
     denied('delete_my_store',{'confirmation':'wrong store'})
     rpc('delete_my_store',{'confirmation':'Renamed UX Store'})
     assert client.table('retailer_profiles').select('id').execute().data==[]

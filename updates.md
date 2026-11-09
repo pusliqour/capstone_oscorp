@@ -1,6 +1,6 @@
 # Jiran account and inventory experience updates
 
-Status: implementation checkpoint; browser validation and live deployment are in progress.
+Status: account-management and SVG-icon implementation verified locally and through the public API gateway. Source checkpoint is being pushed for continuation; final frontend Pages deployment still needs the new build to be published and checked.
 
 ## Implemented
 
@@ -20,11 +20,16 @@ Status: implementation checkpoint; browser validation and live deployment are in
 14. Connected account widgets to Settings and corrected brand links for GitHub Pages paths.
 15. Added database checks for valid coordinates, nonnegative stock/prices, ownership of stock connections, and RPC-only destructive deletion.
 
+16. Replaced emoji graphics throughout landing, authentication, inventory, analytics, marketplace and access-denied screens with a shared Lucide SVG icon component. Icon-only controls retain accessible names; decorative icons are hidden from screen readers.
+17. Preserved the source-only local Git checkpoint `08cf9b6`; final handoff and implementation changes are included in the next checkpoint.
+
 ## Verification
 
 - Frontend production build: passed at implementation checkpoint.
 - Disposable-account database integration: passed profile persistence, location create/edit/remove, zero-coordinate handling, product create/edit/delete, invalid-input rejection, cross-account denial, store delete/recreate and retained login.
-- Browser end-to-end verification: in progress.
+- Browser end-to-end verification: passed profile persistence, zero coordinates, unsaved-edit cancellation, product create/edit/delete, location removal, current-password change, store deletion and mobile fit.
+- Public HTTPS gateway integration: passed the account-management transactions and password update using disposable users.
+- Tracked browser test: `tests/account_management.cjs`; fixture lifecycle: `scripts/ux_fixture.py`.
 - The three team demo stores are not used for destructive testing.
 
 ## Research boundaries
@@ -34,3 +39,12 @@ These changes provide functional prototypes and test evidence. They are not resu
 ## Version control
 
 The existing local Git repository is retained. Implementation and validation checkpoints record source, migrations, test scripts and this document. Passwords, environment files, raw/normalized store data, test credentials, reports derived from private data and generated model artifacts remain outside commits.
+
+## Remaining work at handoff
+
+- Publish the final frontend build to `pusliqour/jiran` and verify the new Settings and icons on the live site. The backend gateway already supports the new operations.
+- Existing team login passwords remain unchanged (`team-demo-credentials.json` outside Git).
+- Manual inventory refresh still uses the legacy POS sync handler; adapt it to a plain inventory reload for imported/manual sources.
+- Settings guards unsaved edits through its header navigation and reload/close warnings; browser Back is not blocked.
+- Login email remains owner-managed. Full account deletion, multiple stores per account, POS connector restoration and uploaded-document management are outside this update.
+- The Mac, Docker, ML service, Python gateway and quick tunnel must stay running for the currently deployed demo.

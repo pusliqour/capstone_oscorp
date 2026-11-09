@@ -63,7 +63,7 @@
 
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 👈 key */
+  justify-content: space-between; /*  key */
   gap: 16px;
 
   padding: 20px 22px;
@@ -129,7 +129,7 @@
   background: transparent;
   color: var(--text-sub);
   font-size: 15px;
-  font-weight: 500; /* 👈 increase weight */
+  font-weight: 500; /*  increase weight */
   padding: 11px 14px;
   border-radius: 999px;
   cursor: pointer;

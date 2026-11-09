@@ -119,10 +119,10 @@
 
 .about-bg .nav-mid {
     position: absolute;
-    /* 👈 key */
+    /*  key */
     left: 50%;
     transform: translateX(-50%);
-    /* 👈 perfect center */
+    /*  perfect center */
 
     display: flex;
     gap: 8px;

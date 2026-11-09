@@ -1,3 +1,4 @@
+import Icon from "../../components/Icon";
 // src/pages/auth/Signup.jsx
 import { useEffect, useState } from "react";
 import { publicDemo, supabase } from "../../supaBase/Client";
@@ -489,7 +490,7 @@ export default function Signup() {
                         showPassword ? "Hide password" : "Show password"
                       }
                     >
-                      {showPassword ? "🙈" : "👁️"}
+                      {<Icon name={showPassword ? "eyeOff" : "eye"} />}
                     </button>
                   </div>
 
@@ -513,15 +514,15 @@ export default function Signup() {
                       className="password-toggle"
                       onClick={() => setShowConfirmPassword((v) => !v)}
                       aria-label={
-                        showConfirmPassword ? "Hide password" : "Show password"
+                        showConfirmPassword ? "Hide password confirmation" : "Show password confirmation"
                       }
                     >
-                      {showConfirmPassword ? "🙈" : "👁️"}
+                      {<Icon name={showConfirmPassword ? "eyeOff" : "eye"} />}
                     </button>
                   </div>
                 </div>
 
-                {/* ✅ IMPORTANT: only disable while loading so errors can show */}
+                {/*  IMPORTANT: only disable while loading so errors can show */}
                 <button type="button" onClick={goNext} disabled={loading}>
                   Next
                 </button>
@@ -595,7 +596,7 @@ export default function Signup() {
                       );
                     }}
                   >
-                    📍 Use Current Location
+                    <Icon name="mapPin" /> Use Current Location
                   </button>
 
                   <div className="location-or-separator">or</div>
@@ -636,7 +637,7 @@ export default function Signup() {
                   )}
 
                   <small className="auth-help-text">
-                    You can use your current location 📍, type your location, or
+                    You can use your current location, type your location, or
                     paste a Google Maps link.
                   </small>
 

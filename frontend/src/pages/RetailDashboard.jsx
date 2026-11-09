@@ -1,3 +1,4 @@
+import Icon from "../components/Icon";
 // src/pages/RetailDashboard.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -37,7 +38,7 @@ function Topbar({ displayName, role, onLogout }) {
       </nav>
 
       <div className="top-actions">
-        <div className="account">
+        <Link className="account" to="/settings" aria-label="Open account settings">
           <span className="avatar">
             <img src={Avatar} alt="avatar" />
           </span>{" "}
@@ -45,7 +46,7 @@ function Topbar({ displayName, role, onLogout }) {
             <span className="acct-name">{displayName}</span>
             <span className="acct-sub">{role}</span>
           </span>
-        </div>
+        </Link>
 
         <button className="btn ghost small" onClick={onLogout}>
           Logout
@@ -415,7 +416,7 @@ export default function RetailDashboard() {
                     <p className="muted">Loading...</p>
                   ) : lowStockAlerts.length === 0 && oosAlerts.length === 0 ? (
                     <div className="status-card-success">
-                      <span>✅ Nothing to worry about!</span>
+                      <span><Icon name="success" /> Nothing to worry about!</span>
                     </div>
                   ) : (
                     <>

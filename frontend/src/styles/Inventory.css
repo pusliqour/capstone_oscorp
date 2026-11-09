@@ -614,3 +614,7 @@
 .retail-page .inventory-management-table .thead > div,
 .retail-page .inventory-management-table .trow > div { display:block; }
 .retail-page .inventory-management-table .inventory-row-actions { display:flex; }
+
+.retail-page dialog.product-dialog { box-sizing:border-box; width:100vw; max-width:100vw; height:100dvh; max-height:100dvh; margin:0; padding:20px; border:0; background:transparent; }
+.retail-page dialog.product-dialog::backdrop { background:#142b2380; }
+.retail-page dialog.product-dialog .modal { max-height:calc(100dvh - 40px); overflow-y:auto; }
