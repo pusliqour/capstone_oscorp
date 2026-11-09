@@ -24,7 +24,7 @@ The user requested that all current work be committed/pushed so the next session
 
 ## Immediate next step
 
-Publish and verify the final frontend on Pages. The currently deployed Pages build predates these Settings/icon changes, while the gateway already supports them.
+The Settings/SVG frontend was published to Pages as `9bbae93`. The live landing page shows 33 SVG icons with no emoji text, and the password toggle was verified. Run the public-site management browser pass; the local browser and public API integration checks already passed. The commands below reproduce the deployment.
 
 ```bash
 cd /Users/zoro/Projects/ISDIA

@@ -1,6 +1,6 @@
 # Jiran account and inventory experience updates
 
-Status: account-management and SVG-icon implementation verified locally and through the public API gateway. Source checkpoint is being pushed for continuation; final frontend Pages deployment still needs the new build to be published and checked.
+Status: account-management and SVG-icon implementation verified locally and through the public API gateway. Source is pushed to the recovery branch. The frontend build containing Settings and SVG icons was published to Pages in commit `9bbae93`; live SVG rendering and the password visibility toggle were verified.
 
 ## Implemented
 
@@ -42,7 +42,7 @@ The existing local Git repository is retained. Implementation and validation che
 
 ## Remaining work at handoff
 
-- Publish the final frontend build to `pusliqour/jiran` and verify the new Settings and icons on the live site. The backend gateway already supports the new operations.
+- Pages build `9bbae93` now contains the new Settings and SVG icons. Live icon rendering and password visibility toggle passed; a full public-site management browser pass remains a useful follow-up. The full workflow already passed locally and through the public API gateway.
 - Existing team login passwords remain unchanged (`team-demo-credentials.json` outside Git).
 - Manual inventory refresh still uses the legacy POS sync handler; adapt it to a plain inventory reload for imported/manual sources.
 - Settings guards unsaved edits through its header navigation and reload/close warnings; browser Back is not blocked.
