@@ -607,3 +607,10 @@
     display: none;
   }
 }
+/* Keep product actions available on narrow screens without overflowing the page. */
+.retail-page .inventory-management-table { overflow-x:auto; }
+.retail-page .inventory-management-table .thead,
+.retail-page .inventory-management-table .trow:not(.trow-single) { grid-template-columns:minmax(200px,2fr) 110px 100px 85px 110px 145px; min-width:800px; }
+.retail-page .inventory-management-table .thead > div,
+.retail-page .inventory-management-table .trow > div { display:block; }
+.retail-page .inventory-management-table .inventory-row-actions { display:flex; }

@@ -12,9 +12,12 @@ build/
 venv/
 env/
 
-# ML outputs
+# ML outputs and private-data-derived artifacts
 ml_backend/ml_outputs/
 ml_backend/training/
+ml_backend/integration_data/
+ml_backend/saved_models/*
+!ml_backend/saved_models/.gitkeep
 *.log
 
 # Secrets and local service configuration
@@ -44,3 +47,12 @@ __MACOSX/
 # IDE
 .vscode/
 .idea/
+
+ml_backend/evaluation/
+
+/ml_outputs/
+
+ml_backend/candidate_models/
+ml_backend/previous_models/
+
+ml_backend/candidate_evaluation/

@@ -157,8 +157,13 @@ export default function RetailDashboard() {
           `,
           )
           .eq("retailer_id", retailerId)
-          .eq("pos_connection_id", posData.id)
+          .eq("pos_connection_id", posData?.id || "00000000-0000-0000-0000-000000000000")
           .eq("active", true);
+
+        if (!posData) {
+          setProducts([]); setLowStockAlerts([]); setOosAlerts([]); setTopSellers([]);
+          setProvider(null); setLastInventoryUpdate(null); return;
+        }
 
         // 3. Process Inventory & Alerts
         const aggregated = [];
@@ -223,7 +228,7 @@ export default function RetailDashboard() {
 
         // 4. Set Provider Info
         if (posData) {
-          const isManual = posData.provider === "manual";
+          const isManual = ["manual", "local_import", "jiran_square_import"].includes(posData.provider);
           const syncDate = isManual
             ? latestInventory
             : new Date(posData.last_synced_at);
@@ -235,9 +240,24 @@ export default function RetailDashboard() {
           });
         }
 
-        // 5. Fetch Top Sellers if enabled
+        // 5. Fetch Top Sellers if enabled. Historical demo imports are anchored
+        // to their newest order so the dashboard still shows a meaningful week.
         if (top_on) {
-          const since = new Date();
+          const { data: latestOrder } = await supabase
+            .from("orders")
+            .select("order_time")
+            .eq("retailer_id", retailerId)
+            .eq("pos_connection_id", posData?.id)
+            .eq("status", "completed")
+            .eq("is_active", true)
+            .order("order_time", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          const anchor = latestOrder?.order_time
+            ? new Date(latestOrder.order_time)
+            : new Date();
+          const since = new Date(anchor);
           since.setDate(since.getDate() - 7);
 
           const { data: topData } = await supabase

@@ -6,7 +6,7 @@ const ProtectedRoute = ({ allowedRoles = ["retailer"], children }) => {
   const location = useLocation();
 
   // Still loading auth/profile
-  if (loading) return null;
+  if (loading) return <div role="status" style={{padding:40,textAlign:"center"}}>Loading your account…</div>;
 
   // Not logged in
   if (!user) {

@@ -1,5 +1,9 @@
 # Jiran — Inventory Intelligence System
 
+> **Real-data bridge:** see [JIRAN_ML_INTEGRATION.md](JIRAN_ML_INTEGRATION.md)
+> for importing the private `jiran-ml` Square exports, retraining local model
+> artifacts, and connecting the Supabase watcher.
+
 Jiran is a capstone project that combines a React frontend with a Python ML backend to predict stock status and generate transfer/restock recommendations across multiple store locations.
 
 ---

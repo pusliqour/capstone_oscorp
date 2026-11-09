@@ -320,83 +320,12 @@ def build_metadata(
 
 
 def push_to_supabase(predictions: List[dict], transfers: List[dict], model_input: pd.DataFrame = None) -> None:
-    """
-    Push ML results to Supabase via RPC functions that handle ID resolution server-side.
-      - batch_insert_ml_predictions
-      - batch_insert_ml_transfers
-    """
-    import sys
-    sys.path.insert(0, BASE_DIR)
+    """Publish through the same atomic storefront bridge used by batch jobs."""
     from supabase_watcher import SUPABASE_URL, SUPABASE_KEY
     from supabase import create_client
-
+    from publish_results import publish_results
     client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-    # --- Predictions ---
-    pred_payload = [
-        {
-            "store_id":    p["store_id"],
-            "product_id":  p["product_id"],
-            "product_name": p.get("product_name", ""),
-            "prediction":  p["prediction"],
-            "confidence":  round(p["confidence"], 4),
-            "prob_dead":   round(p["probabilities"].get("Dead",    0), 4),
-            "prob_excess": round(p["probabilities"].get("Excess",  0), 4),
-            "prob_low":    round(p["probabilities"].get("Low",     0), 4),
-            "prob_optimum":round(p["probabilities"].get("Optimum", 0), 4),
-            "prob_slow":   round(p["probabilities"].get("Slow",    0), 4),
-        }
-        for p in predictions
-    ]
-    print(f"  Pushing {len(pred_payload)} predictions via RPC...")
-    res = client.rpc("batch_insert_ml_predictions", {"payload": pred_payload}).execute()
-    print(f"  predictions: {res.data}")
-
-    # --- Transfers ---
-    if not transfers:
-        print("  No transfers to push.")
-        return
-
-    # Build name lookup from predictions (original numeric product_id per store)
-    name_to_pid = {
-        (p["store_id"], p["product_name"].strip().lower()): p["product_id"]
-        for p in predictions
-    }
-
-    transfer_payload = []
-    skipped = 0
-    for t in transfers:
-        fp = name_to_pid.get((t["from_store"], t["product_name"].strip().lower()))
-        tp = name_to_pid.get((t["to_store"],   t["product_name"].strip().lower()))
-        if not fp or not tp:
-            skipped += 1
-            continue
-        transfer_payload.append({
-            "from_store":          t["from_store"],
-            "to_store":            t["to_store"],
-            "from_product_id":     fp,
-            "to_product_id":       tp,
-            "product_name":        t.get("product_name", ""),
-            "transfer_qty":        t["transfer_qty"],
-            "from_label":          t["from_label"],
-            "to_label":            t["to_label"],
-            "from_stock_before":   round(t["from_stock_before"],   1),
-            "from_stock_after":    round(t["from_stock_after"],    1),
-            "to_stock_before":     round(t["to_stock_before"],     1),
-            "to_stock_after":      round(t["to_stock_after"],      1),
-            "from_coverage_after": round(t["from_coverage_after"], 2),
-            "to_coverage_after":   round(t["to_coverage_after"],   2),
-            "demand_30d":          round(t["demand_30d"],          1),
-            "transfer_type":       t["transfer_type"],
-            "transfer_mode":       t["transfer_mode"],
-        })
-
-    if skipped:
-        print(f"  Skipped {skipped} transfers (unresolved product names).")
-
-    print(f"  Pushing {len(transfer_payload)} transfers via RPC...")
-    res = client.rpc("batch_insert_ml_transfers", {"payload": transfer_payload}).execute()
-    print(f"  transfers: {res.data}")
+    print(publish_results(client, {"predictions": predictions, "transfers": transfers}))
 
 
 def main() -> None:

@@ -27,8 +27,12 @@ import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional, Dict
+
+from inventory_policy import policy_metrics, stock_policy_label
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,7 +44,7 @@ logging.basicConfig(
 # Paths
 # ---------------------------------------------------------------------------
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-MODELS_DIR = os.path.join(BASE_DIR, "saved_models")
+MODELS_DIR = os.getenv("JIRAN_MODELS_DIR", os.path.join(BASE_DIR, "saved_models"))
 
 # ---------------------------------------------------------------------------
 # Load artifacts at startup
@@ -130,11 +134,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.exception_handler(RequestValidationError)
+async def invalid_request(request, exc):
+    # Non-finite input values cannot themselves be serialized as JSON.
+    return JSONResponse(status_code=422, content={"detail": [
+        {"loc": list(e["loc"]), "msg": e["msg"], "type": e["type"]} for e in exc.errors()
+    ]})
+
+
 # ---------------------------------------------------------------------------
 # Request / response schemas
 # ---------------------------------------------------------------------------
 
 class ProductInput(BaseModel):
+    model_config = {"allow_inf_nan": False}
+
     """
     One product-store record. Fields match what Supabase can provide.
     All sales aggregations can be computed via a Supabase RPC function.
@@ -145,38 +159,43 @@ class ProductInput(BaseModel):
     category:    str
 
     # From stock table
-    stock_qty:   float
-
+    stock_qty:   float = Field(..., ge=0, le=1e12)
     # From products table
-    retail_price:    float
-
+    retail_price:    float = Field(..., ge=0, le=1e12)
     # Aggregated from transactions (last 30 days)
-    recent_qty:   float = 0.0
-    recent_txns:  float = 0.0
-    recent_avg:   float = 0.0
-    recent_std:   float = 0.0
+    recent_qty:   float = Field(0.0, ge=0, le=1e12)
+    recent_txns:  float = Field(0.0, ge=0, le=1e12)
+    recent_avg:   float = Field(0.0, ge=0, le=1e12)
+    recent_std:   float = Field(0.0, ge=0, le=1e12)
 
     # Aggregated from transactions (older than 30 days)
-    historical_qty:   float = 0.0
-    historical_txns:  float = 0.0
-    historical_avg:   float = 0.0
+    historical_qty:   float = Field(0.0, ge=0, le=1e12)
+    historical_txns:  float = Field(0.0, ge=0, le=1e12)
+    historical_avg:   float = Field(0.0, ge=0, le=1e12)
 
     # All-time totals
-    total_sold: float = 0.0
-    num_sales:  float = 0.0
+    total_sold: float = Field(0.0, ge=0, le=1e12)
+    num_sales:  float = Field(0.0, ge=0, le=1e12)
 
     # Days since last transaction
-    days_since_last_sale: float = 0.0
+    days_since_last_sale: float = Field(0.0, ge=0, le=1e12)
 
     # Total transactions for this store (used to size the store)
     store_total_txns: float = Field(
-        0.0,
+        0.0, ge=0, le=1e12,
         description="Total transactions in this store. Leave 0 to use training-time value.",
     )
 
 
 class PredictRequest(BaseModel):
-    products: List[ProductInput]
+    products: List[ProductInput] = Field(..., min_length=1, max_length=5000)
+
+    @model_validator(mode="after")
+    def unique_pairs(self):
+        keys = [(p.store_id, p.product_id) for p in self.products]
+        if len(keys) != len(set(keys)):
+            raise ValueError("Each store/product pair must appear once per batch")
+        return self
 
 
 # ---------------------------------------------------------------------------
@@ -188,10 +207,10 @@ class InventoryRecord(BaseModel):
     store_id:             str
     product_id:           str
     category:             str
-    stock_qty:            float
-    retail_price:         float
-    recent_qty:           float = 0.0
-    recent_txns:          float = 0.0
+    stock_qty:            float = Field(..., ge=0, le=1e12)
+    retail_price:         float = Field(..., ge=0, le=1e12)
+    recent_qty:           float = Field(0.0, ge=0, le=1e12)
+    recent_txns:          float = Field(0.0, ge=0, le=1e12)
     days_since_last_sale: Optional[float] = 0.0
     product_name:         Optional[str]   = ""
 
@@ -220,8 +239,12 @@ class ProductPrediction(BaseModel):
     product_id:  str
     product_name: str
     prediction:  str      # Low | Optimum | Excess | Slow | Dead
-    confidence:  float    # max class probability
+    confidence:  float    # ensemble support for the policy decision
     probabilities: dict   # all 5 class probabilities
+    decision_source: str = "stock_policy"
+    model_prediction: str
+    demand_30d: float = 0.0
+    demand_source: str = "observed_recent_sales"
 
 
 class PredictResponse(BaseModel):
@@ -316,6 +339,7 @@ def get_forecast_features(store_id: str, product_id: str) -> dict:
     if key in forecasts_df.index:
         row = forecasts_df.loc[key]
         return {
+            "forecast_method": str(row.get("forecast_method", "prophet")),
             "forecast_7d":  float(row.get("forecast_7d",  0)),
             "forecast_14d": float(row.get("forecast_14d", 0)),
             "forecast_30d": float(row.get("forecast_30d", 0)),
@@ -328,6 +352,7 @@ def get_forecast_features(store_id: str, product_id: str) -> dict:
         }
     # Fallback: estimate forecast from recent sales velocity
     return {
+        "forecast_method": "observed_recent_sales",
         "forecast_7d":  0.0,
         "forecast_14d": 0.0,
         "forecast_30d": 0.0,
@@ -426,13 +451,12 @@ def build_feature_row(p: ProductInput) -> dict:
     # -- Explicit boundary features (mirrors label-rule metrics exactly) --
     forecast_30d = fc.get("forecast_30d", 0)
     forecast_7d  = fc.get("forecast_7d",  0)
-    # If no Prophet forecast, fall back to recent_qty as 30d demand proxy
-    demand_30d_est = forecast_30d if forecast_30d > 0 else max(p.recent_qty, 1.0)
-    demand_7d_est  = forecast_7d  if forecast_7d  > 0 else max(p.recent_qty / 4.0, 1.0)
-
-    coverage_30d_feat      = p.stock_qty / (demand_30d_est + 1)
-    days_of_stock_30d_feat = p.stock_qty / (demand_30d_est / 30 + 0.1)
-    stockout_risk_7d       = int(p.stock_qty < demand_7d_est)
+    metrics = policy_metrics(
+        stock_qty=p.stock_qty,
+        forecast_30d=forecast_30d,
+        forecast_7d=forecast_7d,
+        recent_qty=p.recent_qty,
+    )
     days_since_over_90     = int(p.days_since_last_sale > 90)
 
     # -- Store features --
@@ -474,10 +498,10 @@ def build_feature_row(p: ProductInput) -> dict:
         # Interaction
         "price_velocity_interaction": price_velocity_interaction,
         # Explicit boundary features
-        "coverage_30d_feat":      coverage_30d_feat,
+        "coverage_30d_feat":      metrics["coverage_30d_feat"],
         "days_since_over_90":     days_since_over_90,
-        "days_of_stock_30d_feat": days_of_stock_30d_feat,
-        "stockout_risk_7d":       stockout_risk_7d,
+        "days_of_stock_30d_feat": metrics["days_of_stock_30d_feat"],
+        "stockout_risk_7d":       metrics["stockout_risk_7d"],
     }
     return row
 
@@ -493,7 +517,7 @@ def health():
         "ai_available": AI_AVAILABLE,
         "ai_status": "ready" if AI_AVAILABLE else "null",
         "ai_unavailable_reason": None if AI_AVAILABLE else AI_UNAVAILABLE_REASON,
-        "model": "Jiran ML v2222 (RF + GB + XGB ensemble)" if AI_AVAILABLE else None,
+        "model": "Jiran ML v2222 (stock policy + RF + GB + XGB ensemble)" if AI_AVAILABLE else None,
         "features": len(FEATURE_COLS),
         "labels": ["Dead", "Excess", "Low", "Optimum", "Slow"] if AI_AVAILABLE else [],
     }
@@ -517,23 +541,32 @@ def _run_predictions(products: List[ProductInput]):
     rows = [build_feature_row(p) for p in products]
     X = pd.DataFrame(rows, columns=FEATURE_COLS).fillna(0)
     X_scaled = scaler.transform(X)
-    preds = ensemble.predict(X_scaled)
     proba = ensemble.predict_proba(X_scaled)
     class_labels = ensemble.classes_
 
     results = []
     for i, p in enumerate(products):
-        prob_dict = {
-            label: round(float(proba[i][j]), 4)
+        raw_probabilities = {
+            str(label): float(proba[i][j])
             for j, label in enumerate(class_labels)
+        }
+        model_label = max(
+            raw_probabilities, key=lambda label: raw_probabilities[label]
+        )
+        policy_label = stock_policy_label(rows[i])
+        prob_dict = {
+            label: round(value, 4) for label, value in raw_probabilities.items()
         }
         results.append(ProductPrediction(
             store_id=p.store_id,
             product_id=p.product_id,
             product_name=p.product_name or "",
-            prediction=str(preds[i]),
-            confidence=round(float(proba[i].max()), 4),
+            prediction=policy_label,
+            confidence=round(float(raw_probabilities.get(policy_label, 0.0)), 4),
             probabilities=prob_dict,
+            model_prediction=model_label,
+            demand_30d=float(rows[i]["forecast_30d"] if rows[i]["forecast_30d"] > 0 else max(p.recent_qty, 0.0)),
+            demand_source=str(rows[i].get("forecast_method", "observed_recent_sales")),
         ))
     return results
 

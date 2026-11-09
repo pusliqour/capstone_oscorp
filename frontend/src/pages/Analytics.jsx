@@ -161,13 +161,13 @@ const EmptyChartState = ({ title, type }) => (
 function Topbar({ displayName, role, onLogout, activePage }) {
   return (
     <header className="topbar">
-      <a href="/" className="brand brand-link" rel="noopener noreferrer">
+      <Link to="/" className="brand brand-link" rel="noopener noreferrer">
         <img src={Logo} alt="Jiran Logo" className="nav-logo" />
         <div className="brand-text">
           <h1>Jiran</h1>
           <p>Retailer Dashboard</p>
         </div>
-      </a>
+      </Link>
 
       <nav className="nav">
         {["dashboard", "inventory", "marketplace", "analytics", "settings"].map(
@@ -190,7 +190,7 @@ function Topbar({ displayName, role, onLogout, activePage }) {
       </nav>
 
       <div className="top-actions">
-        <button className="account" type="button">
+        <Link className="account" to="/settings" aria-label="Open account settings">
           <span className="avatar">
             <img src={Avatar} alt="avatar" />
           </span>{" "}
@@ -198,7 +198,7 @@ function Topbar({ displayName, role, onLogout, activePage }) {
             <span className="acct-name">{displayName}</span>
             <span className="acct-sub">{role}</span>
           </span>
-        </button>
+        </Link>
 
         <button className="btn ghost small" onClick={onLogout}>
           Logout
@@ -804,7 +804,8 @@ export default function AnalyticsPage() {
             product_variation_id,
             product_name,
             prediction,
-            confidence
+            confidence,
+            demand_30d
           `,
           )
           .eq("pos_connection_id", activeConnectionId)
@@ -825,7 +826,8 @@ export default function AnalyticsPage() {
               product_variation_id,
               product_name,
               prediction,
-              confidence
+              confidence,
+            demand_30d
             `,
             )
             .eq("retailer_id", retailerId)
@@ -852,56 +854,17 @@ export default function AnalyticsPage() {
 
         if (inventoryError) throw inventoryError;
 
-        const { data: demandData, error: demandError } = await supabase
-          .from("ml_inventory_transfer_recommendations")
-          .select(
-            `
-            from_pos_connection_id,
-            to_pos_connection_id,
-            from_product_variation_id,
-            to_product_variation_id,
-            demand_30d
-          `,
-          )
-          .or(
-            `from_pos_connection_id.eq.${activeConnectionId},to_pos_connection_id.eq.${activeConnectionId}`,
-          );
-
-        if (demandError) throw demandError;
-
         const stockMap = {};
         (inventoryData || []).forEach((row) => {
           const key = row.product_variation_id;
           stockMap[key] = (stockMap[key] || 0) + Number(row.quantity || 0);
         });
 
-        const demandMap = {};
-
-        (demandData || []).forEach((row) => {
-          const demandValue = Number(row.demand_30d || 0);
-
-          if (
-            row.from_pos_connection_id === activeConnectionId &&
-            variationIds.includes(row.from_product_variation_id)
-          ) {
-            const key = row.from_product_variation_id;
-            demandMap[key] = Math.max(Number(demandMap[key] || 0), demandValue);
-          }
-
-          if (
-            row.to_pos_connection_id === activeConnectionId &&
-            variationIds.includes(row.to_product_variation_id)
-          ) {
-            const key = row.to_product_variation_id;
-            demandMap[key] = Math.max(Number(demandMap[key] || 0), demandValue);
-          }
-        });
-
         const merged = (predictionsData || []).map((row) => ({
           id: row.product_variation_id,
           product: row.product_name,
           currentStock: stockMap[row.product_variation_id] || 0,
-          demand: demandMap[row.product_variation_id] || 0,
+          demand: row.demand_30d == null ? "Unavailable" : Number(row.demand_30d).toFixed(1),
           confidence: Number(row.confidence || 0),
         }));
 
@@ -1000,9 +963,7 @@ export default function AnalyticsPage() {
 
         if (retailerIds.length > 0) {
           const { data: retailerProfiles } = await supabase
-            .from("retailer_profiles")
-            .select("id, shop_name")
-            .in("id", retailerIds);
+            .rpc("get_retailer_names", { retailer_ids: retailerIds });
 
           shopNameMap = Object.fromEntries(
             (retailerProfiles || []).map((r) => [r.id, r.shop_name]),
@@ -1124,31 +1085,31 @@ export default function AnalyticsPage() {
                 <KPI
                   label="Dead"
                   value={predictionCounts.Dead}
-                  sub="ML classified"
+                  sub="Stock policy"
                   tone="amber"
                 />
                 <KPI
                   label="Excess"
                   value={predictionCounts.Excess}
-                  sub="ML classified"
+                  sub="Stock policy"
                   tone="purple"
                 />
                 <KPI
                   label="Low"
                   value={predictionCounts.Low}
-                  sub="ML classified"
+                  sub="Stock policy"
                   tone="blue"
                 />
                 <KPI
                   label="Optimum"
                   value={predictionCounts.Optimum}
-                  sub="ML classified"
+                  sub="Stock policy"
                   tone="slate"
                 />
                 <KPI
                   label="Slow"
                   value={predictionCounts.Slow}
-                  sub="ML classified"
+                  sub="Stock policy"
                   tone="purple"
                 />
               </div>
@@ -1239,7 +1200,7 @@ export default function AnalyticsPage() {
                         <div>PRODUCT</div>
                         <div>CURRENT STOCK</div>
                         <div>DEMAND</div>
-                        <div>CONFIDENCE</div>
+                        <div>MODEL SUPPORT</div>
                       </div>
 
                       <div className="prediction-table-body">
@@ -1424,8 +1385,8 @@ function ProductTable({
 
       try {
         const intelligenceReq = supabase
-          .from("connection_intelligence")
-          .select("*")
+          .from("products")
+          .select("product_id:id, name, updated_at")
           .eq("pos_connection_id", activeConnectionId);
 
         let salesReq = supabase
@@ -1525,7 +1486,15 @@ function ProductTable({
               };
             }),
           );
-          setRows(enriched);
+          const ranked = enriched.sort((a, b) => b.revenue - a.revenue);
+          const totalRevenue = ranked.reduce((sum, row) => sum + row.revenue, 0);
+          let cumulative = 0;
+          ranked.forEach((row) => {
+            const shareBefore = totalRevenue > 0 ? cumulative / totalRevenue : 1;
+            row.abc_class = shareBefore < 0.8 ? "A" : shareBefore < 0.95 ? "B" : "C";
+            cumulative += row.revenue;
+          });
+          setRows(ranked);
         }
       } catch (err) {
         console.error("Analytics fetch error:", err);

@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../supaBase/Client";
 import "../styles/Inventory.css";
+import "../styles/Management.css";
+import ConfirmDialog from "../components/ConfirmDialog";
 // import "../styles/RetailDashboard.css";
 import Logo from "/src/styles/Logo.png";
 import Avatar from "/src/styles/avatar.png";
@@ -177,7 +179,7 @@ const Topbar = ({ displayName, role, onLogout, activePage }) => (
     </nav>
 
     <div className="top-actions">
-      <button className="account" type="button">
+      <Link className="account" to="/settings" aria-label="Open account settings">
         <span className="avatar">
           <img src={Avatar} alt="avatar" />
         </span>{" "}
@@ -185,7 +187,7 @@ const Topbar = ({ displayName, role, onLogout, activePage }) => (
           <span className="acct-name">{displayName}</span>
           <span className="acct-sub">{role}</span>
         </span>
-      </button>
+      </Link>
 
       <button className="btn ghost small" onClick={onLogout}>
         Logout
@@ -209,6 +211,7 @@ function ProductModal({
   submitting,
   initial,
   categoryOptions = [],
+  saveError,
 }) {
   const ADD_NEW = "__add_new__";
 
@@ -244,7 +247,7 @@ function ProductModal({
     setStock(initial?.stock ?? "");
     setCustomerNote(initial?.customer_note || initial?.note || "");
     setErrors({});
-  }, [open, initial, categoryOptions]);
+  }, [open, initial]);
 
   const resolvedCategory = () => {
     const v = categoryMode === "custom" ? categoryCustom : categorySelect;
@@ -258,8 +261,8 @@ function ProductModal({
 
     if (!name.trim()) e.name = "Product name is required.";
     if (!nSku) e.sku = "SKU is required.";
-    if (nSku && !/^[A-Z0-9\-_.]+$/.test(nSku))
-      e.sku = "SKU must be letters/numbers and - _ . only (no spaces).";
+    if (nSku && !/^[A-Z0-9\-_:.]+$/.test(nSku))
+      e.sku = "SKU may contain letters, numbers, hyphens, underscores, colons and dots.";
     if (!cat) e.category = "Category is required.";
 
     const p = toNumber(price);
@@ -312,16 +315,16 @@ function ProductModal({
       className="modal-backdrop"
       role="dialog"
       aria-modal="true"
-      aria-label="Add product"
+      aria-label={initial ? "Edit product" : "Add product"}
     >
       <div className="modal">
         <div className="modal-head">
           <div>
             <h3 className="modal-title">
-              {initial ? "Update listing" : "Add product"}
+              {initial ? "Edit product" : "Add product"}
             </h3>
             <p className="modal-sub">
-              This will appear on the landing page for customers.
+              Update your store inventory. Marketplace listings are managed separately.
             </p>
           </div>
           <button
@@ -427,14 +430,7 @@ function ProductModal({
             </div>
           </div>
 
-          <label className="field">
-            <span className="label">Message for customers (optional)</span>
-            <textarea
-              value={customerNote}
-              onChange={(e) => setCustomerNote(e.target.value)}
-              rows={3}
-            />
-          </label>
+          {saveError && <p className="management-error" role="alert">{saveError}</p>}
 
           <div className="modal-actions">
             <button
@@ -446,7 +442,7 @@ function ProductModal({
               Cancel
             </button>
             <button className="btn primary" type="submit" disabled={submitting}>
-              {submitting ? "Saving..." : "Save to storefront"}
+              {submitting ? "Saving..." : "Save product"}
             </button>
           </div>
         </form>
@@ -654,6 +650,11 @@ export default function Inventory() {
   const [sortBy, setSortBy] = useState("updated");
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [productSaveError, setProductSaveError] = useState("");
+  const [deleteProduct, setDeleteProduct] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [inventoryNotice, setInventoryNotice] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const [posModalOpen, setPosModalOpen] = useState(false);
@@ -999,62 +1000,27 @@ export default function Inventory() {
     }
   };
 
-  const upsertProductAndListing = async ({
-    name,
-    sku,
-    category,
-    price,
-    stock,
-    customer_note,
-  }) => {
-    if (!retailerId) throw new Error("Missing retailer id.");
-
-    const { data: productRow, error: productErr } = await supabase
-      .from("products")
-      .upsert([{ sku, name: name.trim(), category: category.trim() }], {
-        onConflict: "retailer_id,sku",
-      })
-      .select("id, sku, name, category")
-      .single();
-
-    if (productErr)
-      throw new Error(productErr.message || "Failed to upsert product.");
-
-    const now = new Date().toISOString();
-
-    const { error: listingErr } = await supabase
-      .from("retailer_listings")
-      .upsert(
-        [
-          {
-            retailer_id: retailerId,
-            product_id: productRow.id,
-            price,
-            stock,
-            is_active: true,
-            updated_at: now,
-            customer_note: customer_note || null,
-          },
-        ],
-        { onConflict: "retailer_id,product_id" },
-      );
-
-    if (listingErr)
-      throw new Error(listingErr.message || "Failed to upsert listing.");
-
-    await loadInventory();
-  };
-
-  const handleModalSubmit = async (values) => {
+  const handleModalSubmit = async values => {
+    setSubmitting(true); setProductSaveError("");
     try {
-      setSubmitting(true);
-      await upsertProductAndListing(values);
-      setModalOpen(false);
-    } catch (e) {
-      alert(e?.message || "Something went wrong while saving.");
-    } finally {
-      setSubmitting(false);
-    }
+      const { error } = await supabase.rpc("save_my_product", {
+        variation_id: editingProduct?.id || null, product_name: values.name.trim(),
+        sku: values.sku, category: values.category, price: values.price, quantity: values.stock,
+      });
+      if (error) throw error;
+      await loadInventory(); setModalOpen(false);
+      setInventoryNotice(editingProduct ? "Product updated. Stock recommendations are being refreshed." : "Product added to your inventory.");
+    } catch (error) { setProductSaveError(error.message || "Could not save product. Try again."); }
+    finally { setSubmitting(false); }
+  };
+  const confirmProductDelete = async text => {
+    setSubmitting(true); setDeleteError("");
+    try {
+      const { error } = await supabase.rpc("delete_my_product", { variation_id: deleteProduct.id, confirmation: text });
+      if (error) throw error;
+      await loadInventory(); setDeleteProduct(null); setInventoryNotice("Product deleted. Historical orders have been retained.");
+    } catch (error) { setDeleteError(error.message || "Could not delete this product."); }
+    finally { setSubmitting(false); }
   };
 
   const parseCSV = (file) =>
@@ -2137,6 +2103,7 @@ export default function Inventory() {
                 </div>
 
                 <div className="hero-actions">
+                  <button className="btn primary" disabled={!posConnection?.id || submitting} onClick={() => { setEditingProduct(null); setProductSaveError(""); setModalOpen(true); }}>Add product</button>
                   {/* Import Data stays EXACTLY the same */}
                   <div className="action-col import-wrap">
                     <div className="action-row">
@@ -2356,15 +2323,18 @@ export default function Inventory() {
                   </div>
                 </div>
 
-                {invError && <div className="inline-error">{invError}</div>}
+                {inventoryNotice && <p role="status" className="management-notice">{inventoryNotice}</p>}
+                {!posConnection?.id && !invLoading && <p className="management-notice">Create a store in <Link to="/settings">Settings</Link> to start adding products.</p>}
+                {invError && <div className="inline-error" role="alert">{invError}</div>}
 
-                <div className="table">
+                <div className="table inventory-management-table">
                   <div className="thead">
                     <div>Product</div>
                     <div>Category</div>
                     <div>Price</div>
                     <div>Quantity</div>
                     <div>Status</div>
+                    <div>Actions</div>
                   </div>
 
                   <div className="inventory-scroll">
@@ -2375,7 +2345,7 @@ export default function Inventory() {
                     ) : filteredInventory.length === 0 ? (
                       <div className="trow trow-single">
                         <div className="muted">
-                          No listings match your filters.
+                          No products match your filters. Add a product or reset your filters.
                         </div>
                       </div>
                     ) : (
@@ -2408,6 +2378,10 @@ export default function Inventory() {
                               <span className={`status ${st.type}`}>
                                 {st.label}
                               </span>
+                            </div>
+                            <div className="inventory-row-actions">
+                              <button aria-label={`Edit ${row.name}`} onClick={() => { setEditingProduct(row); setProductSaveError(""); setModalOpen(true); }}>Edit</button>
+                              <button aria-label={`Delete ${row.name}`} onClick={() => { setDeleteError(""); setDeleteProduct(row); }}>Delete</button>
                             </div>
                           </div>
                         );
@@ -2503,9 +2477,12 @@ export default function Inventory() {
         onClose={() => !submitting && setModalOpen(false)}
         onSubmit={handleModalSubmit}
         submitting={submitting}
-        initial={null}
+        initial={editingProduct}
+        saveError={productSaveError}
         categoryOptions={categories.filter((c) => c !== "all")}
       />
+
+      {deleteProduct && <ConfirmDialog title="Delete this product?" match={deleteProduct.name} busy={submitting} error={deleteError} action="Delete product" onClose={() => setDeleteProduct(null)} onConfirm={confirmProductDelete}><p>The selected variation and its stock will be removed. If it is the last variation, its product and marketplace listing are also removed. Historical orders remain available. This cannot be undone.</p></ConfirmDialog>}
 
       <OrderDetailsModal
         open={orderDetailsOpen}

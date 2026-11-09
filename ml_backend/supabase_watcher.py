@@ -239,7 +239,11 @@ def process_trigger(trigger: dict):
              now_iso(), tid[:8], ttype, filter_store or "ALL", filter_prod or "ALL")
 
     # Claim the row immediately so other watcher instances skip it
-    mark_trigger(tid, "running")
+    claimed = get_client().table(TRIGGER_TABLE).update({
+        "status": "running", "completed_at": None, "error_msg": None,
+    }).eq("id", tid).eq("status", "pending").execute().data
+    if not claimed:
+        return
 
     try:
         rows = fetch_inventory(filter_store, filter_prod)
@@ -269,6 +273,8 @@ def process_trigger(trigger: dict):
         write_restocks_csv(rest_path, restocks)
         write_summary_json(summ_path, summary)
 
+        from publish_results import publish_results
+        publish_results(get_client(), result, include_transfers=(ttype != "predict-stock"))
         mark_trigger(tid, "done", result_file=pred_path)
         log.info("  Done — %d predictions, %d transfers, %d restocks",
                  len(predictions), len(transfers), len(restocks))

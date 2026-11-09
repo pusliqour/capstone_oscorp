@@ -23,11 +23,15 @@ import joblib
 import numpy as np
 import pandas as pd
 from prophet import Prophet
+from forecasting import daily_series, selected_forecast
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier, VotingClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, f1_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from xgboost import XGBClassifier
+
+from inventory_policy import policy_metrics, stock_policy_label
+from augmentation import PolicyAugmentedClassifier
 
 warnings.filterwarnings("ignore")
 
@@ -35,6 +39,7 @@ warnings.filterwarnings("ignore")
 # CLI args
 # ---------------------------------------------------------------------------
 parser = argparse.ArgumentParser(description="Jiran ML Training Pipeline")
+parser.add_argument("--output-dir", default=None, help="Isolated artifact directory")
 parser.add_argument("--data-dir",    default=None,  help="Path to data directory")
 parser.add_argument("--prophet-top", default=400,   type=int, help="Top N products for Prophet (default 400)")
 parser.add_argument("--rf-trees",    default=500,   type=int, help="Random Forest n_estimators (default 500)")
@@ -47,7 +52,7 @@ args = parser.parse_args()
 # ---------------------------------------------------------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = args.data_dir if args.data_dir else os.path.join(BASE_DIR, "training", "data")
-MODELS_DIR = os.path.join(BASE_DIR, "saved_models")
+MODELS_DIR = args.output_dir or os.path.join(BASE_DIR, "saved_models")
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 print(f"Data dir  : {DATA_DIR}")
@@ -116,40 +121,25 @@ def train_prophet_models(daily_data, top_n=100, horizons=None):
                 ["ds", "y"]
             ]
 
-            # Need at least 2 weeks of history
-            if len(sp_data) < 14:
-                continue
-
-            try:
-                m = Prophet(
-                    daily_seasonality=False,
-                    weekly_seasonality=True,
-                    yearly_seasonality=False,
-                    interval_width=0.95,
-                )
-                m.fit(sp_data)
-
-                future = m.make_future_dataframe(periods=max_horizon)
-                forecast = m.predict(future)
-                future_fc = forecast.tail(max_horizon).copy()
-
-                row = {"store_id": store_id, "product_id": product_id}
-                for h in horizons:
-                    hd = future_fc.head(h)
-                    row[f"forecast_{h}d"] = round(hd["yhat"].clip(lower=0).sum(), 1)
-                    row[f"forecast_{h}d_lower"] = round(
-                        hd["yhat_lower"].clip(lower=0).sum(), 1
-                    )
-                    row[f"forecast_{h}d_upper"] = round(
-                        hd["yhat_upper"].clip(lower=0).sum(), 1
-                    )
-
-                forecasts_list.append(row)
-                model_count += 1
-                stores_done += 1
-
-            except Exception:
-                continue
+            # Zero-fill calendar days through the dataset cutoff, including
+            # products whose most recent transaction predates the snapshot.
+            series = daily_series(sp_data, daily_data["ds"].max())
+            selected = selected_forecast(series, max_horizon)
+            values = selected["values"]
+            row = {"store_id": store_id, "product_id": product_id,
+                   "forecast_method": selected["method"],
+                   "validation_mae": selected["validation_mae"]}
+            for h in horizons:
+                demand = float(values[:h].sum())
+                # Empirical validation-error bands, not calibrated confidence intervals.
+                error = selected["daily_error"]
+                width = (error * h) if error is not None else demand
+                row[f"forecast_{h}d"] = round(demand, 1)
+                row[f"forecast_{h}d_lower"] = round(max(0, demand-width), 1)
+                row[f"forecast_{h}d_upper"] = round(demand+width, 1)
+            forecasts_list.append(row)
+            model_count += 1
+            stores_done += 1
 
         elapsed = time.time() - start_time
         avg_per_product = elapsed / (idx + 1)
@@ -218,7 +208,7 @@ last_sale["days_since_last_sale"] = (
 ).dt.days
 
 temporal = recent_velocity.merge(
-    historical_velocity, on=["store_id", "product_id"], how="left"
+    historical_velocity, on=["store_id", "product_id"], how="outer"
 )
 temporal = temporal.merge(
     last_sale[["store_id", "product_id", "days_since_last_sale"]],
@@ -236,7 +226,7 @@ temporal["is_dormant"] = (temporal["days_since_last_sale"] > 90).astype(int)  # 
 print("  Computing product features...")
 products["price_tier"] = pd.cut(
     products["retail_price"],
-    bins=[0, 3, 7, 15, 100],
+    bins=[-float("inf"), 3, 7, 15, float("inf")],
     labels=[0, 1, 2, 3],
 ).astype(float)
 products["is_perishable"] = products["category"].isin(
@@ -255,7 +245,7 @@ store_stats = (
 store_stats.columns = ["store_id", "store_total_txns"]
 store_stats["store_size_encoded"] = pd.cut(
     store_stats["store_total_txns"],
-    bins=[0, 200_000, 350_000, 1_000_000],
+    bins=[-float("inf"), 200_000, 350_000, float("inf")],
     labels=[0, 1, 2],
 ).astype(float)
 
@@ -312,10 +302,22 @@ sf = sf.merge(product_store, on=["store_id", "product_id"], how="left")
 sf = sf.fillna(0)
 
 # -- Derived features (used for both labeling and training) --
-sf["coverage_30d"] = sf["stock_qty"] / (sf["forecast_30d"] + 1)
-sf["coverage_7d"]  = sf["stock_qty"] / (sf["forecast_7d"]  + 1)
-sf["days_of_stock_30d"] = sf["stock_qty"] / (sf["forecast_30d"] / 30 + 0.1)
-sf["stockout_risk_7d"]  = (sf["stock_qty"] < sf["forecast_7d"]).astype(int)
+# The shared helper is also used by app.py, including its fallback from a
+# missing Prophet forecast to recent observed demand.
+policy_features = sf.apply(
+    lambda row: pd.Series(
+        policy_metrics(
+            stock_qty=row["stock_qty"],
+            forecast_30d=row["forecast_30d"],
+            forecast_7d=row["forecast_7d"],
+            recent_qty=row["recent_qty"],
+        )
+    ),
+    axis=1,
+)
+sf["coverage_30d"] = policy_features["coverage_30d_feat"]
+sf["days_of_stock_30d"] = policy_features["days_of_stock_30d_feat"]
+sf["stockout_risk_7d"] = policy_features["stockout_risk_7d"].astype(int)
 
 # -- Explicit boundary features (exact metrics used in label rules → makes thresholds learnable) --
 sf["coverage_30d_feat"]      = sf["coverage_30d"]          # same as above, named for clarity
@@ -336,32 +338,7 @@ sf["category_encoded"] = le_category.fit_transform(sf["category"].fillna("unknow
 # Step 4 — Smart labeling (mirrors notebook exactly)
 # ---------------------------------------------------------------------------
 print("  Assigning labels...")
-
-
-def smart_label(row):
-    coverage = row["coverage_30d"]
-    days_stock = row["days_of_stock_30d"]
-    velocity = row["velocity_trend"]
-    trend = row["forecast_acceleration"]
-    days_since = row["days_since_last_sale"]
-
-    if coverage > 8 or days_stock > 180 or days_since > 90 or (
-        coverage > 6 and velocity < 0.2
-    ):
-        return "Dead"
-    elif coverage > 4 or days_stock > 120 or (coverage > 3 and velocity < 0.5):
-        return "Slow"
-    elif coverage < 0.6 or days_stock < 14 or (
-        coverage < 0.8 and trend > 1.2
-    ) or row["stockout_risk_7d"] == 1:
-        return "Low"
-    elif 2.0 < coverage <= 4.0 and velocity > 0.5:
-        return "Excess"
-    else:
-        return "Optimum"
-
-
-sf["label"] = sf.apply(smart_label, axis=1)
+sf["label"] = sf.apply(stock_policy_label, axis=1)
 
 print("\n  Label distribution:")
 for label, count in sf["label"].value_counts().items():
@@ -369,7 +346,7 @@ for label, count in sf["label"].value_counts().items():
     print(f"    {label:8s}: {count:5d} ({pct:5.1f}%)")
 
 # ---------------------------------------------------------------------------
-# Step 5 — Train ensemble (41 clean features, no leakage)
+# Step 5 — Train ensemble (41 features for policy imitation)
 # ---------------------------------------------------------------------------
 FEATURE_COLS = [
     # Stock
@@ -399,17 +376,23 @@ FEATURE_COLS = [
     "days_of_stock_30d_feat", "stockout_risk_7d",
 ]
 
-print(f"\n--- Model 2: Ensemble training on {len(FEATURE_COLS)} features (no wholesale_price) ---")
+print(f"\n--- Model 2: Ensemble training on {len(FEATURE_COLS)} features (policy-generated labels) ---")
 
-from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.model_selection import GroupShuffleSplit, StratifiedGroupKFold, cross_validate
+from sklearn.pipeline import Pipeline
+from sklearn.base import clone
+from sklearn.dummy import DummyClassifier
 from sklearn.utils.class_weight import compute_sample_weight
 
 X = sf[FEATURE_COLS].fillna(0)
 y = sf["label"]
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
+groups = sf["product_id"]
+train_idx, test_idx = next(GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42).split(X, y, groups))
+X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
+if set(y_train) != set(y):
+    raise ValueError("Product holdout leaves a class absent from training; collect more independent data.")
 
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
@@ -418,22 +401,22 @@ X_all_scaled   = scaler.transform(X)
 
 print(f"  Building Random Forest ({args.rf_trees} trees)...")
 rf = RandomForestClassifier(
-    n_estimators=args.rf_trees, max_depth=20, class_weight="balanced",
-    min_samples_leaf=2, max_features="sqrt",
+    n_estimators=args.rf_trees, max_depth=6, class_weight="balanced",
+    min_samples_leaf=5, max_features="sqrt",
     random_state=42, n_jobs=-1,
 )
 
 print(f"  Building Gradient Boosting ({args.gb_trees} trees)...")
 gb = GradientBoostingClassifier(
-    n_estimators=args.gb_trees, learning_rate=0.05, max_depth=6,
+    n_estimators=args.gb_trees, learning_rate=0.05, max_depth=2,
     subsample=0.8, min_samples_leaf=3,
     random_state=42,
 )
 
 print(f"  Building XGBoost ({args.xgb_trees} trees)...")
 xgb = XGBClassifier(
-    n_estimators=args.xgb_trees, max_depth=6, learning_rate=0.05,
-    subsample=0.8, colsample_bytree=0.8, min_child_weight=3,
+    n_estimators=args.xgb_trees, max_depth=3, learning_rate=0.05,
+    subsample=0.8, colsample_bytree=0.8, min_child_weight=5, reg_lambda=5,
     random_state=42, n_jobs=-1, eval_metric="mlogloss",
 )
 
@@ -443,21 +426,28 @@ ensemble = VotingClassifier(
     n_jobs=-1,
 )
 
-# --- 5-fold cross-validation on full dataset ---
-print("\n  Running 5-fold cross-validation (this takes the bulk of time)...")
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+# Validation uses only the training partition. Products never cross folds.
+print("\n  Running product-grouped validation on training partition...")
+cv = StratifiedGroupKFold(n_splits=3, shuffle=True, random_state=42)
 t0 = time.time()
-cv_scores = cross_val_score(ensemble, X_all_scaled, y, cv=cv, scoring="accuracy", n_jobs=-1)
-cv_elapsed = (time.time() - t0) / 60
-print(f"  CV scores  : {[f'{s:.2%}' for s in cv_scores]}")
-print(f"  CV mean    : {cv_scores.mean():.2%} ± {cv_scores.std():.2%}")
-print(f"  CV time    : {cv_elapsed:.1f} min")
+validation = cross_validate(
+    PolicyAugmentedClassifier(clone(ensemble)),
+    X_train, y_train, groups=groups.iloc[train_idx], cv=cv,
+    scoring={"macro_f1": "f1_macro", "accuracy": "accuracy"},
+    return_train_score=True, error_score="raise", n_jobs=1,
+)
+cv_scores = validation["test_accuracy"]
+print("  Validation macro F1:", validation["test_macro_f1"].tolist())
 
 # --- Final fit on full training set with balanced sample weights ---
 print("\n  Fitting final model on train split (balanced sample weights)...")
 t1 = time.time()
 sample_weights = compute_sample_weight("balanced", y_train)
-ensemble.fit(X_train_scaled, y_train, sample_weight=sample_weights)
+augmented_model = PolicyAugmentedClassifier(ensemble).fit(X_train, y_train)
+ensemble = augmented_model.model_
+scaler = augmented_model.scaler_
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 fit_elapsed = (time.time() - t1) / 60
 
 y_pred   = ensemble.predict(X_test_scaled)
@@ -468,6 +458,32 @@ print(f"\n  Hold-out accuracy : {accuracy:.2%}")
 print(f"  CV accuracy       : {cv_scores.mean():.2%} ± {cv_scores.std():.2%}")
 print(f"  Total time        : {total_elapsed:.1f} min")
 print(f"\n{classification_report(y_test, y_pred)}")
+
+# This measures agreement with rule-generated labels, not business ground truth.
+labels = sorted(y.unique())
+baseline = DummyClassifier(strategy="most_frequent").fit(X_train, y_train)
+metrics = {
+    "training_only_synthetic_rows": augmented_model.synthetic_rows_,
+    "augmentation": "fold-local stock/demand/recency policy simulations; not independent evidence",
+    "evaluation_status": "development re-evaluation; historical holdout has already been inspected",
+    "target": "policy-generated stock labels; not independently annotated outcomes",
+    "split": "product-group holdout; grouped CV on training partition only",
+    "seed": 42, "train_rows": len(train_idx), "test_rows": len(test_idx),
+    "train_products": sorted(groups.iloc[train_idx].unique().tolist()),
+    "test_products": sorted(groups.iloc[test_idx].unique().tolist()),
+    "macro_f1": f1_score(y_test, y_pred, average="macro", labels=labels, zero_division=0),
+    "weighted_f1": f1_score(y_test, y_pred, average="weighted", zero_division=0),
+    "train_macro_f1": f1_score(y_train, ensemble.predict(X_train_scaled), average="macro", labels=labels, zero_division=0),
+    "baseline_macro_f1": f1_score(y_test, baseline.predict(X_test), average="macro", labels=labels, zero_division=0),
+    "validation_macro_f1": validation["test_macro_f1"].tolist(),
+    "validation_train_macro_f1": validation["train_macro_f1"].tolist(),
+    "labels": labels, "confusion_matrix": confusion_matrix(y_test, y_pred, labels=labels).tolist(),
+    "classification_report": classification_report(y_test, y_pred, labels=labels, output_dict=True, zero_division=0),
+    "limitations": ["Only three stores", "One stock snapshot", "Forecast accuracy needs temporal backtesting", "Rule agreement is not business effectiveness"],
+}
+with open(os.path.join(MODELS_DIR, "evaluation.json"), "w") as f:
+    json.dump(metrics, f, indent=2)
+sf.to_csv(os.path.join(MODELS_DIR, "training_features.csv"), index=False)
 
 # Feature importance from RF base learner
 rf_model = ensemble.named_estimators_["rf"]

@@ -41,8 +41,8 @@ const estimateMinutes = (km) =>
 function Topbar({ displayName, role, onLogout, activePage }) {
   return (
     <header className="topbar">
-      <a
-        href="/"
+      <Link
+        to="/"
         className="brand brand-link"
         // target="_blank"
         rel="noopener noreferrer"
@@ -53,7 +53,7 @@ function Topbar({ displayName, role, onLogout, activePage }) {
           <h1>Jiran</h1>
           <p>Retailer Dashboard</p>
         </div>
-      </a>
+      </Link>
 
       <nav className="nav" aria-label="Primary navigation">
         <Link
@@ -89,7 +89,7 @@ function Topbar({ displayName, role, onLogout, activePage }) {
       </nav>
 
       <div className="top-actions">
-        <button className="account" type="button">
+        <Link className="account" to="/settings" aria-label="Open account settings">
           <span className="avatar">
             <img src={Avatar} alt="avatar" />
           </span>{" "}
@@ -97,7 +97,7 @@ function Topbar({ displayName, role, onLogout, activePage }) {
             <span className="acct-name">{displayName}</span>
             <span className="acct-sub">{role}</span>
           </span>
-        </button>
+        </Link>
 
         <button className="btn ghost small" onClick={onLogout}>
           Logout

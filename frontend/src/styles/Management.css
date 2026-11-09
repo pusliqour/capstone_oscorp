@@ -1,0 +1,39 @@
+.management-page { --management-green:#166534; color:#172b24; padding-bottom:70px; background:#f5f7f5; min-height:100vh; }
+.management-page .management-header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px 4%; background:#fff; border-bottom:1px solid #dfe7df; flex-wrap:wrap; }
+.management-header .brand-link { color:#174b30; font-size:24px; font-weight:800; text-decoration:none; }
+.management-nav { display:flex; gap:6px; flex-wrap:wrap; }
+.management-nav a { padding:9px 12px; color:#42564a; text-decoration:none; border-radius:8px; }
+.management-nav a[aria-current] { color:#14532d; background:#e8f2e9; font-weight:700; }
+.management-main { width:min(1040px,92%); margin:36px auto; }
+.management-intro { margin-bottom:26px; }
+.management-intro h1 { font-size:32px; margin:0 0 8px; }
+.management-intro p,.management-help { color:#5a6c61; line-height:1.6; }
+.management-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start; }
+.management-card { padding:26px; border:1px solid #dce5de; border-radius:16px; background:#fff; box-shadow:0 4px 16px #12321d04; }
+.management-card h2 { margin:0 0 8px; font-size:21px; }
+.management-card > p { margin:0 0 20px; }
+.management-field { display:flex; flex-direction:column; gap:7px; margin-bottom:16px; font-size:14px; font-weight:600; color:#324e3c; }
+.management-field input { font:inherit; font-weight:400; width:100%; box-sizing:border-box; padding:12px; border:1px solid #aebfb3; border-radius:8px; color:#1b3325; background:#fff; min-width:0; }
+.management-field input:focus { outline:3px solid #9ddbb1; outline-offset:2px; }
+.management-field input[readonly] { background:#f3f6f3; color:#526759; }
+.management-page .management-actions,.management-dialog .management-actions { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:10px; margin-top:20px; }
+.management-page .btn,.management-dialog .btn { min-height:42px; padding:10px 16px; border:1px solid #aebfb3; background:#fff; border-radius:8px; color:#23442e; cursor:pointer; font:inherit; font-weight:600; }
+.management-page .btn.primary { background:#1d633c; color:#fff; border-color:#1d633c; }
+.management-page .btn:disabled,.management-dialog .btn:disabled { opacity:.5; cursor:not-allowed; }
+.management-page .management-danger,.management-dialog .management-danger { color:#fff; background:#b42318; border-color:#b42318; }
+.management-error { color:#a32117; padding:12px; border:1px solid #f0c1bd; border-radius:8px; background:#fff4f2; }
+.management-notice { padding:14px 18px; border-radius:10px; background:#edf8ef; border:1px solid #badbc1; margin:0 0 20px; }
+.management-columns { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.management-card fieldset { margin:0; padding:0; border:0; min-width:0; }
+.management-check { display:flex; gap:12px; padding:12px 0; align-items:center; }
+.management-check input { width:20px; height:20px; accent-color:#1d633c; }
+.management-dialog { width:min(480px,calc(100vw - 40px)); padding:28px; border:0; border-radius:16px; color:#263c2c; box-sizing:border-box; box-shadow:0 20px 80px #0004; }
+.management-dialog::backdrop { background:#142b2380; }
+.management-dialog h2 { margin-top:0; }
+.dialog-description { line-height:1.6; margin-bottom:20px; color:#536359; }
+.management-card dl { margin:0; }.management-card dt { color:#617167; font-size:13px; }.management-card dd { margin:4px 0 18px; font-weight:600; overflow-wrap:anywhere; }
+.management-wide { grid-column:1/-1; }
+.management-danger-zone { border-color:#e6b5ae; }
+.management-activity { padding-left:20px; color:#536359; line-height:1.8; }
+.inventory-row-actions { display:flex; flex-wrap:wrap; gap:6px; }.inventory-row-actions button { padding:7px 11px; border:1px solid #c9d6cc; border-radius:7px; background:white; cursor:pointer; }.inventory-row-actions button:last-child { color:#a32117; }
+@media(max-width:700px) { .management-grid,.management-columns { grid-template-columns:1fr; }.management-card { padding:20px; }.management-header { flex-direction:column; align-items:flex-start!important; }.management-main { margin-top:24px; }.management-page .management-actions button { flex:1; } }

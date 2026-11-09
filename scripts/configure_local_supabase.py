@@ -36,7 +36,8 @@ files = {
     ROOT / "ml_backend/.env": (
         f"SUPABASE_URL={api_url}\n"
         f"SUPABASE_KEY={service}\n"
-        "ML_API_URL=http://127.0.0.1:8001\nOUTPUT_DIR=./ml_outputs\nPOLL_INTERVAL=10\n"
+        "ML_API_URL=http://127.0.0.1:8001\nENABLE_SUPABASE_WATCHER=true\n"
+        f"OUTPUT_DIR={ROOT / 'ml_backend/ml_outputs'}\nPOLL_INTERVAL=10\n"
     ),
 }
 for path, content in files.items():
