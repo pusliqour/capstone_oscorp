@@ -1,14 +1,17 @@
 # Handoff from codex
-_11 Nov 2026 01:06 · written by the agent itself_
+_11 Nov 2026 01:17 · written by the agent itself_
 
 ## Done
-Imported archive into 50 labelled app stores without replacing original three. Added authenticated archive explorer, business directory, complete SQL sales aggregation and real audit history. Repaired marketplace optional-location/private-profile joins; checked atomic exchange lifecycle updates both stocks exactly once. Import rerun inserts zero rows. Integration source-total, isolation, reservation, cancellation, dismissal, completion, rollback and browser management/archive/mobile/archive-account checks passed.
+Archive-to-app connection and atomic exchanges complete. Original team stores preserved; 50 synthetic storefronts, 5960 stock rows, 9100 daily orders and 500 listings added. Source 914ea7c and Pages a5448d5 pushed. Local integration and published-site archive/account browser checks passed. Import rerun inserts zero duplicates.
 
 ## Remaining
-Stable hosting; confirm real Excel provenance; repair archive classifier OOD/inactivity; independent forecasting and retailer-reviewed outcomes; participant study. No real locations/phones/exchange histories in supplied ZIP. Raw files deliberately private and local-only.
+Stable hosting; verify original Excel origin; ML inactivity/OOD and independent outcome/forecast validation; usability study. ZIP contains no real retailer addresses/phones or historical exchanges. Private raw files/models remain local and must be supplied separately on another machine.
 
 ## Next step
-Start from AGENTS.md and DATA_SOURCES.json; then REMAINING.md. Do not describe archive as isolated-only or invent absent source fields. Continue stable-hosting or ML/OOD task.
+Read AGENTS.md, DATA_SOURCES.json and docs/ARCHIVE_APP_CONNECTION.md. Continue hosting or ML/OOD tasks in REMAINING.md. Existing team accounts can browse /data-explorer now.
+
+## Blocked on
+No verified real retailer outcome/location/contact dataset. Hosting still depends on Mac/tunnel. Do not portray historical synthetic stock as live trading.
 
 ## Files that matter
 - `AGENTS.md`
@@ -17,7 +20,6 @@ Start from AGENTS.md and DATA_SOURCES.json; then REMAINING.md. Do not describe a
 - `scripts/connect_archive_storefront.py`
 - `scripts/verify_archive_app.py`
 - `tests/archive_app.cjs`
-- `HANDOFF.md`
 - `REMAINING.md`
 
 Task: T13

@@ -14,6 +14,8 @@ The original recovery loaded the archive into `jiran_archive_lab`, but the retai
 
 ## Verification
 
+The published site at https://pusliqour.github.io/jiran/ passed the archive browser checks through the HTTPS gateway after Pages commit `a5448d5`. Team login source browsing and an archive account dashboard/analytics/inventory were verified. Source implementation checkpoint: `914ea7c`.
+
 - Full-history archive sales totals match the normalized source CSV, including records beyond the API response cap.
 - Disposable-account checks cover source pagination, anonymous denial, private isolation, marketplace visibility, approvals, reservations, cancellation, dismissal, two-party completion, stock conservation, idempotence and rollback.
 - Browser checks cover source search/history/mobile fit, populated marketplace names, and original account/profile/location/product workflows.

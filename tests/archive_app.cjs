@@ -40,7 +40,7 @@ const base = process.env.JIRAN_TEST_URL || 'http://127.0.0.1:5173';
   const archiveContext=await browser.newContext();const archivePage=await archiveContext.newPage();
   const archiveErrors=[];archivePage.on('pageerror',error=>archiveErrors.push(error.message));
   archivePage.on('console',message=>{if(message.type()==='error')archiveErrors.push(message.text())});
-  await archivePage.goto(base+'/login');await archivePage.getByPlaceholder('Email',{exact:true}).fill(archiveEmail);await archivePage.getByPlaceholder('Password',{exact:true}).fill(archiveAccount.password);
+  await archivePage.goto(base+'/');await archivePage.getByRole('link',{name:'Log In',exact:true}).click();await archivePage.getByPlaceholder('Email',{exact:true}).fill(archiveEmail);await archivePage.getByPlaceholder('Password',{exact:true}).fill(archiveAccount.password);
   await archivePage.getByRole('button',{name:'Login',exact:true}).click();await archivePage.waitForURL('**/retailer-dashboard');
   await archivePage.getByLabel('Dataset source',{exact:true}).waitFor();
   await archivePage.getByRole('link',{name:'Analytics',exact:true}).click();
