@@ -48,3 +48,20 @@ The existing local Git repository is retained. Implementation and validation che
 - Settings guards unsaved edits through its header navigation and reload/close warnings; browser Back is not blocked.
 - Login email remains owner-managed. Full account deletion, multiple stores per account, POS connector restoration and uploaded-document management are outside this update.
 - The Mac, Docker, ML service, Python gateway and quick tunnel must stay running for the currently deployed demo.
+
+
+## Archive recovery — 10 November 2026
+
+- Inspected and fingerprinted `Jiran.zip`; safely recovered its nested large transaction archive outside Git.
+- Added `improvements.md` with completed and remaining improvements, as requested.
+- Validated 17,025,416 synthetic transaction lines, 2,555 products and 5,960 stock records across 50 stores.
+- Added a disk-backed, memory-bounded recovery pipeline and preserved full catalog metadata.
+- Identified 80,369 transactions after the stock snapshot and excluded future information from snapshot features.
+- Rebuilt isolated classifier/forecast artifacts and measured store-group and temporal development performance.
+- Restored separate Supabase research tables under `jiran_archive_lab`; preserved the public app's existing data.
+- Added a read-only local research API on port 8003, with explicit provenance, separate policy/model outputs and disagreement review flags.
+- Recorded the classifier's failure on 365-day-inactivity scenarios; the research candidate was not promoted to production.
+- Added regression tests for duplicate IDs, cross-store product references, temporal leakage and forecast-series selection.
+- Recovery details and reproduction commands are in `docs/ARCHIVE_RECOVERY.md`.
+
+- Final verification: 22 unit/regression tests passed; research API scenario/invalid-input checks, Studio/API-doc rendering and existing demo account/isolation checks passed.

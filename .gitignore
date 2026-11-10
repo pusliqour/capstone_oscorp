@@ -56,3 +56,9 @@ ml_backend/candidate_models/
 ml_backend/previous_models/
 
 ml_backend/candidate_evaluation/
+
+# Recovered archives and disk-backed research artifacts
+archive_lab/
+archive_recovery/
+*.duckdb
+*.duckdb.wal

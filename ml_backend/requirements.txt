@@ -10,3 +10,6 @@ prophet
 pydantic
 supabase
 requests
+
+# Disk-backed archive validation and research recovery
+duckdb>=1.4,<2

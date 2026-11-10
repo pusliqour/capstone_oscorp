@@ -1,3 +1,17 @@
+# Current archive-recovery checkpoint — 10 November 2026
+
+Current branch: `recovery/jiran-archive-20261110`. The user's supplied `/Users/zoro/Downloads/Jiran.zip` has been recovered and validated. See `docs/ARCHIVE_RECOVERY.md` for results and exact commands, and `improvements.md` for the requested improvement list.
+
+Recovered generated data: 2,555 products, 50 stores, 5,960 stock rows, 17,025,416 transaction lines and 1,013,393 daily aggregates. Raw and derived data stay outside Git at `/Users/zoro/Downloads/Jiran-recovery-20261110/`.
+
+Local Supabase research schema: `jiran_archive_lab`; direct Studio URL `http://127.0.0.1:54323/project/default/editor?schema=jiran_archive_lab`. Research API: `http://127.0.0.1:8003/docs`. The separate Studio container is `jiran-studio-local`; start it with `docker start jiran-studio-local` if it stops.
+
+The rebuilt research model has high agreement with synthetic policy labels, but fails the tested 365-day-inactivity edge case. Its API returns the authoritative policy separately and flags disagreement. Do not promote it to the team demo without further work and independent evidence. The old production tables and model remain intact.
+
+Next steps: review the recovered data with the user, confirm whether/which datasets should become team-facing demonstrations, address research-model inactivity/OOD behavior, and obtain independent real-store evidence before making business-accuracy claims. No supplied legacy SQL was applied to public tables.
+
+---
+
 # Resume Jiran here
 
 ## Checkpoint
