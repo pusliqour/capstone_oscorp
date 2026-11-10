@@ -5,7 +5,7 @@ from pathlib import Path
 import requests
 URL=os.getenv('JIRAN_GATEWAY_URL','http://127.0.0.1:8787')
 ROOT=Path(__file__).resolve().parents[1]
-creds=json.loads((Path.home()/'Documents/Jiran/team-demo-credentials.json').read_text())
+creds=json.loads((ROOT/'.private/operator/team-demo-credentials.json').read_text())
 for email,account in creds.items():
     response=requests.post(URL+'/auth/v1/token?grant_type=password',json={'email':email,'password':account['password']},timeout=30)
     response.raise_for_status();session=response.json();headers={'authorization':'Bearer '+session['access_token'],'apikey':'sb_publishable_jiran_team_gateway'}

@@ -29,7 +29,7 @@
 
 ## Archive recovery completed
 
-25. **Recover the supplied archive:** `/Users/zoro/Downloads/Jiran.zip` has been extracted safely and fingerprinted outside the source repository.
+25. **Recover the supplied archive:** `/Users/zoro/Projects/Jiran/Private/archives/Jiran-user-20261110.zip` has been extracted safely and fingerprinted outside the source repository.
 26. **Restore the missing large transaction history:** Its nested `ml:sample.zip` contains approximately 1 GB of transactions, alongside 2,555 catalog products and 5,960 stock records across 50 stores. The complete file contains 17,025,416 validated transaction lines; uniqueness, numeric values and product/store relationships passed checks.
 27. **Separate data provenance:** The archive documentation explicitly describes the large dataset as generated. Keep it separate from the existing three-store dataset, whose original authenticity remains unconfirmed.
 28. **Rebuild missing artifacts:** The archive contained no saved `.pkl` or `.joblib` files. New research artifacts were trained and tested in isolation; the live demo model was not replaced.
@@ -52,3 +52,11 @@
 39. **Local research API:** Rebuilt archive models run separately at `http://127.0.0.1:8003/docs`; scenario requests do not write to production.
 40. **Explicit candidate limits:** The archive classifier's high policy-agreement score does not make it production-ready. It failed the 365-day-inactivity stress scenario; policy/model disagreement is exposed for review.
 41. **Research validation:** Classifier evaluation holds out complete stores, and forecast evaluation uses rolling future windows with series selection performed before the first test window. Generated data is never described as independently collected business evidence.
+
+
+## Workspace and continuity
+
+42. **One canonical project:** `/Users/zoro/Projects/Jiran` now contains the source, data, archives, evidence, historical copies and deployment checkout. Existing paths are compatibility links.
+43. **GRC synchronized:** Updated the previously stale project identity/status, recorded completed milestones and added concrete remaining work with a current handoff.
+44. **Clear entry points:** `START_HERE.md`, `REMAINING.md`, `Jiran.code-workspace` and `GRC_DASHBOARD.html` make the project easy to reopen and navigate.
+45. **Private-data separation:** Credentials, raw data and nested repository history are local under `Private`; only source, docs, tests, migrations and safe GRC metadata are pushed.

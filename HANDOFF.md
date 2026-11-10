@@ -1,82 +1,61 @@
-# Current archive-recovery checkpoint — 10 November 2026
-
-Current branch: `recovery/jiran-archive-20261110`. The user's supplied `/Users/zoro/Downloads/Jiran.zip` has been recovered and validated. See `docs/ARCHIVE_RECOVERY.md` for results and exact commands, and `improvements.md` for the requested improvement list.
-
-Recovered generated data: 2,555 products, 50 stores, 5,960 stock rows, 17,025,416 transaction lines and 1,013,393 daily aggregates. Raw and derived data stay outside Git at `/Users/zoro/Downloads/Jiran-recovery-20261110/`.
-
-Local Supabase research schema: `jiran_archive_lab`; direct Studio URL `http://127.0.0.1:54323/project/default/editor?schema=jiran_archive_lab`. Research API: `http://127.0.0.1:8003/docs`. The separate Studio container is `jiran-studio-local`; start it with `docker start jiran-studio-local` if it stops.
-
-The rebuilt research model has high agreement with synthetic policy labels, but fails the tested 365-day-inactivity edge case. Its API returns the authoritative policy separately and flags disagreement. Do not promote it to the team demo without further work and independent evidence. The old production tables and model remain intact.
-
-Next steps: review the recovered data with the user, confirm whether/which datasets should become team-facing demonstrations, address research-model inactivity/OOD behavior, and obtain independent real-store evidence before making business-accuracy claims. No supplied legacy SQL was applied to public tables.
-
----
-
 # Resume Jiran here
 
-## Checkpoint
+**Canonical folder:** `/Users/zoro/Projects/Jiran`.
+**Branch:** `recovery/jiran-archive-20261110`.
+**Entry point:** `START_HERE.md`.
+**Current priorities:** `REMAINING.md` and the `.grc` task board.
 
-Working source: `/Users/zoro/Projects/ISDIA`, branch `recovery/isdia-paper`.
-User's source fork: `https://github.com/pusliqour/capstone_oscorp` (public; source only).
-Pages checkout: `/Users/zoro/Projects/jiran-pages-live`, branch `main`.
-The user requested that all current work be committed/pushed so the next session can resume.
+## Completed
 
-## Completed and verified
+- Working GitHub Pages team app, local Supabase and authenticated Python gateway through a temporary HTTPS tunnel.
+- Three account-scoped demo stores with 175 inventory entries, 802 orders and 3,737 order lines.
+- Account/store profiles, location and product CRUD, typed-name deletion, password changes, preferences, accessible dialogs, mobile forms and consistent SVG icons.
+- Live main ML pipeline with atomic publication to the dashboard and honest evaluation limits.
+- Supabase Studio at `http://127.0.0.1:54323/project/default/editor`.
+- Recovery of the user-supplied ZIP: 2,555 products, 50 stores, 5,960 stock rows and 17,025,416 generated transaction lines. Separate `jiran_archive_lab` schema has the catalog, stock, 1,013,393 daily aggregates, forecasts, classifications and metrics.
+- Rebuilt isolated research models/API, future-data cutoff tests, complete-store classifier holdout, rolling temporal forecast evaluation and explicit model-disagreement flags.
+- Consolidated current source, private material, historical checkouts and deployment into one folder. Old paths are compatibility links. Private material is excluded from source Git and GRC scans.
 
-- Connected Pages frontend to local Supabase through a Python session-wrapping gateway and HTTPS tunnel.
-- Three team accounts loaded with 175 inventory rows, 802 orders and 3,737 order lines; private credentials remain in `~/Documents/Jiran/team-demo-credentials.json`.
-- ML and forecast improvements, development evaluation and limitations: `docs/ML_CHANGES.md`.
-- New account/store Settings screen, editable full name/phone/store name, create/delete store, create/edit/remove primary location, current-password changes and preferences.
-- Transactional, authenticated RPCs for account and product management; typed-name deletion confirmation; historical orders retained when deleting products.
-- Product create/edit/delete UI, accessible dialogs, contextual success/error states and recent-account activity.
-- Emoji graphics replaced with Lucide SVG icons through `frontend/src/components/Icon.jsx`.
-- Account-management SQL migrations through `202611090006_profile_name_validation.sql` applied locally.
-- Backend disposable-account integration passed directly and through the public HTTPS gateway, including password change and cross-account denial.
-- Browser workflow passed creation/editing/deletion, location 0/0, unsaved cancellation, password change, store deletion and mobile layout.
-- Production frontend build passed. Existing ML suite has 18 passing tests from the preceding phase.
-- Full changes: `updates.md`.
+## Important limits
 
-## Immediate next step
+- Data provenance remains a gate: original three-store Excel authenticity is unconfirmed; the 50-store archive is generated data.
+- The research model fails the 365-day-inactivity scenario. High policy-agreement F1 is not independent business accuracy. It was not promoted into the live main model.
+- The temporary tunnel requires the Mac and services to remain running. Its hostname changes if recreated.
+- Historical paper/research material is preserved; it is draft evidence, not publication acceptance or a participant study.
 
-The Settings/SVG frontend was published to Pages as `9bbae93`. The live landing page shows 33 SVG icons with no emoji text, and the password toggle was verified. Run the public-site management browser pass; the local browser and public API integration checks already passed. The commands below reproduce the deployment.
+## Where material lives now
 
-```bash
-cd /Users/zoro/Projects/ISDIA
-JIRAN_PUBLIC_SUPABASE_URL=https://navy-genre-bind-fleece.trycloudflare.com \
-JIRAN_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_jiran_team_gateway \
-VITE_TEAM_DEMO=true bash scripts/build-pages.sh
-```
+- Credentials and screenshots: `Private/operator/`.
+- Original ZIPs: `Private/archives/`.
+- Research recovery and exact metrics: `Private/recovery/20261110/`.
+- Original ML checkout and operational Excel source: `Private/reference/original-ml-repository/`.
+- Older preview and export snapshots: `Private/reference/` and `Private/history/`.
+- Active Pages checkout: `Deployment/pages/`.
+- Current operational docs: `docs/`; all-improvements list: `improvements.md`; change record: `updates.md`.
 
-Copy only `frontend/dist/` into the Pages checkout, retaining `.git` and old hashed assets for cached clients. Review, commit and push `main`. Do not copy environment files, credentials, model artifacts or spreadsheets. Verify live Settings, CRUD and SVG icons with a disposable account.
-
-## Running services at handoff
-
-- Supabase local API: `http://127.0.0.1:54321` (Docker)
-- Frontend dev: `http://127.0.0.1:5173`
-- Private ML API and watcher: `http://127.0.0.1:8001`
-- Python gateway: `http://127.0.0.1:8787` (`scripts/team_gateway.py`)
-- HTTPS tunnel: `https://navy-genre-bind-fleece.trycloudflare.com`
-- Team site: `https://pusliqour.github.io/jiran/`
-
-The gateway was restarted for account endpoints; old browser sessions may need a fresh sign-in. Keep the Mac awake and all services running. A recreated quick tunnel gets a different URL and requires a frontend rebuild/deployment. Gateway sessions are held in memory.
+The private consolidation journal is `Private/consolidation-manifest.json`. No content was deleted.
 
 ## Repeat checks
 
 ```bash
-.venv/bin/python scripts/verify_account_management.py
-JIRAN_MANAGEMENT_URL=https://navy-genre-bind-fleece.trycloudflare.com .venv/bin/python scripts/verify_account_management.py
-PLAYWRIGHT_MODULE=/Users/zoro/.cache/uv/archive-v0/QM3HCTxcuiJa0OVA/playwright/driver/package node tests/account_management.cjs
+cd /Users/zoro/Projects/Jiran
+.venv/bin/python -m unittest discover -s ml_backend/tests -v
 .venv/bin/python scripts/verify_demo.py
+.venv/bin/python scripts/verify_account_management.py
 npm --prefix frontend run build
 ```
 
-Browser tests create and clean `uxbrowser-*` accounts, using an owner-only temporary credential file. Never run destructive tests against the three team stores. If interrupted, run `.venv/bin/python scripts/ux_fixture.py cleanup`.
+Browser workflow:
 
-## Important limits
+```bash
+PLAYWRIGHT_MODULE=/Users/zoro/.cache/uv/archive-v0/QM3HCTxcuiJa0OVA/playwright/driver/package \
+node tests/account_management.cjs
+```
 
-- Raw source data is unconfirmed. Six existing Excel files came from `../jiran-ml/data/real`, repo `M4MD-M7SN/jiran-ml`, commit `4adc1ee`. All identify openpyxl as workbook creator. The user will confirm their authenticity later. No raw data belongs in this public source fork.
-- Perfect development F1 is agreement with known policy labels after training-only simulations, not independent business accuracy. Forecast MAE improved, but RMSE worsened. More independent stores/periods and reviewed labels are still needed.
-- Manual/imported inventory refresh still invokes the old POS sync handler; change it to a local reload. POS connection restoration is separate.
-- Unsaved edits are guarded through Settings header links and browser reload/close, not browser Back navigation.
-- Email changes, full login-account deletion, multiple stores and uploaded-document management remain outside this update.
-- No passwords, service keys, `.env` files, raw data, private evaluation outputs or trained models should be committed or pushed.
+Run destructive checks only on disposable accounts. Their helper is `scripts/ux_fixture.py`; never delete the three team stores as a smoke test.
+
+The default Supabase Docker `project_id` remains `ISDIA` to preserve existing containers and volumes; this is an internal identifier, not a second workspace. Existing `.venv` launcher paths remain valid through the old source-path symlink.
+
+## Next action
+
+Use GRC at this canonical folder, review the first outstanding task in `REMAINING.md`, and choose the stable-hosting/data-validation work before claiming production readiness. Commit source/docs/tests/GRC metadata and push `fork`; publish only compiled assets from `Deployment/pages` when changing the live frontend. Never push `Private`, `.env` files, datasets or models.

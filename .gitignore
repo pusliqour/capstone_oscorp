@@ -62,3 +62,9 @@ archive_lab/
 archive_recovery/
 *.duckdb
 *.duckdb.wal
+
+# Consolidated local material; never publish credentials, datasets or nested repos
+/.private/
+/Private
+/.deploy/
+/Deployment

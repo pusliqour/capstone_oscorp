@@ -1,3 +1,5 @@
+> **Current workspace:** `/Users/zoro/Projects/Jiran`. Start with [START_HERE.md](START_HERE.md) for the folder map, running services, credentials location and GRC. See [REMAINING.md](REMAINING.md) for current work. Older setup/research notes below remain as project history.
+
 # Oscorp Capstone — Jiran Inventory Intelligence
 # Jiran — AI-Assisted Inventory Optimization & Retailer Marketplace
 

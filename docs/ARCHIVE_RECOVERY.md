@@ -2,7 +2,7 @@
 
 ## What was recovered
 
-The supplied `/Users/zoro/Downloads/Jiran.zip` was inspected and extracted to `/Users/zoro/Downloads/Jiran-recovery-20261110`. Its nested `Jiran/ml:sample.zip` contained the missing large transaction CSV. Neither the supplied SQL nor its Python training/serving programs were executed. Source files and extracted files were fingerprinted; the outer and nested product/stock CSVs matched exactly.
+The supplied `/Users/zoro/Projects/Jiran/Private/archives/Jiran-user-20261110.zip` was inspected and extracted to `/Users/zoro/Projects/Jiran/Private/recovery/20261110`. Its nested `Jiran/ml:sample.zip` contained the missing large transaction CSV. Neither the supplied SQL nor its Python training/serving programs were executed. Source files and extracted files were fingerprinted; the outer and nested product/stock CSVs matched exactly.
 
 | Recovered asset | Verified count |
 |---|---:|
@@ -52,16 +52,16 @@ These are development research results on generated data; the classifier test sp
 Use the existing `.venv` and the dependencies in `ml_backend/requirements.txt` (the tested DuckDB version is 1.5.6). Archive/data/model paths are deliberately outside the Git repository.
 
 ```bash
-cd /Users/zoro/Projects/ISDIA
+cd /Users/zoro/Projects/Jiran
 .venv/bin/python ml_backend/recover_archive_data.py \
-  --source /Users/zoro/Downloads/Jiran-recovery-20261110/nested/data \
-  --output /Users/zoro/Downloads/Jiran-recovery-20261110/lab
+  --source /Users/zoro/Projects/Jiran/Private/recovery/20261110/nested/data \
+  --output /Users/zoro/Projects/Jiran/Private/recovery/20261110/lab
 .venv/bin/python ml_backend/train_archive_lab.py \
-  --lab /Users/zoro/Downloads/Jiran-recovery-20261110/lab
+  --lab /Users/zoro/Projects/Jiran/Private/recovery/20261110/lab
 npx supabase migration up --local
 .venv/bin/python scripts/load_archive_lab.py \
-  --lab /Users/zoro/Downloads/Jiran-recovery-20261110/lab
-ARCHIVE_LAB_DIR=/Users/zoro/Downloads/Jiran-recovery-20261110/lab \
+  --lab /Users/zoro/Projects/Jiran/Private/recovery/20261110/lab
+ARCHIVE_LAB_DIR=/Users/zoro/Projects/Jiran/Private/recovery/20261110/lab \
 .venv/bin/uvicorn archive_lab_api:app --app-dir ml_backend \
   --host 127.0.0.1 --port 8003 --no-access-log
 ```
@@ -75,7 +75,7 @@ Repeat verification:
 ```bash
 .venv/bin/python -m unittest discover -s ml_backend/tests -v
 .venv/bin/python scripts/verify_archive_lab.py \
-  --output /Users/zoro/Downloads/Jiran-recovery-20261110/lab/models/scenario_tests.json
+  --output /Users/zoro/Projects/Jiran/Private/recovery/20261110/lab/models/scenario_tests.json
 .venv/bin/python scripts/verify_demo.py
 ```
 

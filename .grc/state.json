@@ -1,7 +1,7 @@
 {
-  "now": "Jiran is publicly hosted and verified at https://pusliqour.github.io/jiran/. The public build makes no backend calls and labels auth as local-only; the full operational stack remains local.",
-  "next": "For a functional public application rather than a static architecture preview, provision a secure public backend, migrate the local schema, configure secrets through a deployment platform, and run end-to-end security tests.",
-  "blocked": "Historical Supabase and validated AI data remain unavailable. The authenticated GitHub account pusliqour has pull-only access to M4MD-M7SN/capstone_oscorp, so the Pages deployment lives in pusliqour/jiran.",
-  "last_agent": "hermes/gpt-5.6-sol",
-  "updated": "2026-10-24T20:48:07+04:00"
+  "now": "Jiran source, private archives/data/operator documents, historical checkouts and Pages deployment are consolidated under /Users/zoro/Projects/Jiran. Old locations are compatibility symlinks. Team demo/account UX/SVG icons and isolated synthetic archive recovery are implemented; final relocation checks are in progress.",
+  "next": "Verify relocated services and tests, then use REMAINING.md to address stable hosting, source confirmation and research-model inactivity/OOD behavior.",
+  "blocked": "Real-world provenance of the original three-store Excel files and independent retailer-reviewed outcome labels remain unavailable. Temporary team hosting depends on this Mac and its tunnel.",
+  "last_agent": "codex",
+  "updated": "2026-11-10T18:06:19+04:00"
 }

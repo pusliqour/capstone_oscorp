@@ -5,7 +5,7 @@
 - Team site: https://pusliqour.github.io/jiran/
 - HTTPS gateway: https://navy-genre-bind-fleece.trycloudflare.com
 - Pages commit: `666faccef60d9424cd070283bd601ddf92fb2a7b`
-- Credentials: `~/Documents/Jiran/team-demo-credentials.json` (owner-only; not in Git)
+- Credentials: `Private/operator/team-demo-credentials.json` (owner-only; not in Git)
 - Accounts: `research01@jiran.test`, `research02@jiran.test`, `research03@jiran.test`
 
 The site has been tested in a browser: team login, populated Analytics and refresh/session persistence. Three-account isolation, refresh-token rotation, logout, anonymous denial and rejection of raw development JWTs were tested through the public HTTPS gateway.
@@ -18,7 +18,7 @@ GitHub Pages hosts the React frontend. HTTPS requests go through Cloudflare Tunn
 
 The database is on port 54321. The private FastAPI ML service is on port 8001. Its watcher processes jobs and atomically publishes results to the retailer-facing tables. Python inference is not exposed to the public tunnel.
 
-The working source is `/Users/zoro/Projects/ISDIA`; Pages deploys built files from `/Users/zoro/Projects/jiran-pages-live`. Raw spreadsheets and model artifacts are kept out of the Pages repository. Credentials are supplied separately.
+The working source is `/Users/zoro/Projects/Jiran`; Pages deploys built files from `/Users/zoro/Projects/Jiran/Deployment/pages`. Raw spreadsheets and model artifacts are kept out of the Pages repository. Credentials are supplied separately.
 
 ## Restart instructions
 
@@ -32,7 +32,7 @@ Restarting the gateway invalidates its in-memory sessions; team members sign in 
 
 ## Data origin — unconfirmed
 
-The demo uses existing local files from `/Users/zoro/Projects/jiran-ml/data/real`, from repository `https://github.com/M4MD-M7SN/jiran-ml`, commit `4adc1ee6c939246a2306cee8f5b8ea5c720d6ffb`:
+The demo uses existing local files from `/Users/zoro/Projects/Jiran/Private/reference/original-ml-repository/data/real`, from repository `https://github.com/M4MD-M7SN/jiran-ml`, commit `4adc1ee6c939246a2306cee8f5b8ea5c720d6ffb`:
 
 - `jiran_square_catalog_store_a.xlsx`, `_b.xlsx`, `_c.xlsx`
 - `orders_single_sheet_import_store_a.xlsx`, `_b.xlsx`, `_c.xlsx`
@@ -41,7 +41,7 @@ The importer normalized these into 129 catalog products, 175 store/product inven
 
 The source repository calls these real data, but that claim has not been independently verified. All six workbook metadata records identify `openpyxl` as creator and the same creation timestamp (`2026-04-12 14:10:22`). This is consistent with programmatically written workbooks; it does not prove whether their contents were synthesized or exported from actual shops. Original collection, consent and business authenticity remain unconfirmed. The user-facing team demo identifies the source as awaiting confirmation. No raw workbooks were uploaded to Pages.
 
-The file hashes and workbook metadata are recorded in `~/Documents/Jiran/DATA-PROVENANCE.json`. Confirm the source before claiming real business accuracy or adding more business data.
+The file hashes and workbook metadata are recorded in `Private/operator/DATA-PROVENANCE.json`. Confirm the source before claiming real business accuracy or adding more business data.
 
 ## Evaluation and maintenance
 

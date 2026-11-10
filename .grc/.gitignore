@@ -5,3 +5,8 @@ graph.json
 genie*.jsonl
 resolved-tasks.json
 checkpoints/
+
+# Generated dashboard projections and transient locks
+custom-dashboard.html
+*.lock
+*.tmp

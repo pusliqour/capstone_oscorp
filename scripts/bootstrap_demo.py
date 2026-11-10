@@ -17,7 +17,7 @@ if url not in ('http://127.0.0.1:54321', 'http://localhost:54321'):
     raise SystemExit('This bootstrap is restricted to local Supabase.')
 client = create_client(url, values['SUPABASE_KEY'])
 users = {u.email: u for u in client.auth.admin.list_users()}
-credential_path = Path.home()/'Documents/Jiran/team-demo-credentials.json'
+credential_path = ROOT/'.private/operator/team-demo-credentials.json'
 credential_path.parent.mkdir(parents=True, exist_ok=True)
 credentials = json.loads(credential_path.read_text()) if credential_path.exists() else {}
 for store, email in STORE_LOGIN_EMAILS.items():

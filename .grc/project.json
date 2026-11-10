@@ -1,8 +1,10 @@
 {
-  "name": "ISDIA",
-  "goal": "Describe in one sentence what this project is for.",
+  "name": "Jiran",
+  "goal": "Build and evaluate an auditable retailer inventory and stock-exchange platform with a working team demo, provenance-controlled data and honest ML evidence.",
   "status": "active",
   "dashboard": ".grc/dashboard.html",
   "flow": [],
-  "sections": []
+  "sections": [],
+  "canonical_workspace": "/Users/zoro/Projects/Jiran",
+  "entry_point": "START_HERE.md"
 }

@@ -134,5 +134,126 @@
       }
     ],
     "notes": "Same visual language as the project, but operationally honest about built, broken, recovered, and planned components. Standalone dark themed recovery dashboard and high-level architecture HTML created; desktop/mobile overflow and browser-console checks passed; GRC dashboard linked."
+  },
+  {
+    "id": "T5",
+    "title": "Consolidate Jiran into one canonical workspace and synchronize GRC",
+    "status": "doing",
+    "last_agent": "codex",
+    "subtasks": [
+      {
+        "text": "Inventory and preserve all known Jiran folders and running-service paths",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Move project, archives, data, reports and deployment checkout under /Users/zoro/Projects/Jiran with compatibility links",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Create a single entry-point index and a verified remaining-work list",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Refresh GRC identity, task board and handoff",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Verify services and tests, then commit and push source-only changes",
+        "done": false
+      }
+    ],
+    "notes": "User explicitly requested GRC integration, one-place directory organization, a push and a clear remaining-work summary. Do not delete source data or expose private credentials/artifacts. Inventoried the active source, Pages checkout, original ML repository, old preview checkout, Downloads archive/recovery/spreadsheets, operator documents and two historical Desktop exports. Will relocate rather than delete, retaining old-path symlinks. Canonical /Users/zoro/Projects/Jiran is in place. Ten related folders/files were relocated with compatibility links, plus the source alias. Added START_HERE, REMAINING, VS Code workspace and local GRC launcher. GRC identity/status and T6–T12 milestones/backlog are current. Local services return HTTP 200; tests/build and account isolation passed."
+  },
+  {
+    "id": "T6",
+    "title": "Working team demo, account management and SVG icon release",
+    "status": "done",
+    "last_agent": "codex",
+    "subtasks": [
+      {
+        "text": "Connect Pages to authenticated local backend",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Implement account/store/location/product management and isolation tests",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Replace emoji graphics with accessible SVG icons and verify live release",
+        "done": true,
+        "agent": "codex"
+      }
+    ],
+    "notes": "Implemented across Nov 9–10. Pages commit 9bbae93; source checkpoints 08cf9b6, a46bc8d and 663fa2b. Full local management browser flow and public gateway CRUD/password/isolation checks passed. Main source remains in this workspace."
+  },
+  {
+    "id": "T7",
+    "title": "Recover supplied archive into an isolated synthetic research lab",
+    "status": "done",
+    "last_agent": "codex",
+    "subtasks": [
+      {
+        "text": "Validate archive and full 17,025,416 transaction lines",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Restore catalog, stock, daily aggregates and metrics into jiran_archive_lab",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Rebuild and evaluate separate models/API without replacing the live model",
+        "done": true,
+        "agent": "codex"
+      }
+    ],
+    "notes": "Completed at source commit 6f3807c. 50 stores, 2,555 products, 5,960 stock rows, 1,013,393 daily aggregates. 22 unit tests passed. Detected and excluded 80,369 post-snapshot transactions; archive classifier fails inactive-365-day stress. See docs/ARCHIVE_RECOVERY.md."
+  },
+  {
+    "id": "T8",
+    "title": "Provide stable team hosting, startup and backups",
+    "status": "todo",
+    "last_agent": "codex",
+    "subtasks": [],
+    "notes": "Priority 1. Replace temporary tunnel/laptop dependency with a stable backend or named tunnel/domain. Add health checks, backups and tested recovery. Current app is functional while this Mac and services remain online."
+  },
+  {
+    "id": "T9",
+    "title": "Confirm source provenance and intended team dataset",
+    "status": "todo",
+    "last_agent": "codex",
+    "subtasks": [],
+    "notes": "Priority 2. Original three-store Excel authenticity is unverified; recovered 50-store archive is explicitly generated. Obtain user confirmation before promoting data into the public demo; collect independent reviewed outcome labels."
+  },
+  {
+    "id": "T10",
+    "title": "Fix research-model inactivity and out-of-distribution behavior",
+    "status": "todo",
+    "last_agent": "codex",
+    "subtasks": [],
+    "notes": "Priority 3. Generated-data classifier has high policy-label F1 but 0/10 agreement on inactive-365-day scenarios. Add conservative abstention/OOD handling or fold-local augmentation, evaluate new groups/time windows, and retain policy/model separation. Do not promote based on synthetic F1 alone."
+  },
+  {
+    "id": "T11",
+    "title": "Finish remaining UX and optional connector gaps",
+    "status": "todo",
+    "last_agent": "codex",
+    "subtasks": [],
+    "notes": "Priority 4. Manual/import refresh still invokes legacy POS sync. Browser Back does not guard unsaved edits. Run a full current public-site management browser pass. Managed email changes, full account deletion, multiple stores, uploaded-document management and Square/Apideck restoration are separate pending work."
+  },
+  {
+    "id": "T12",
+    "title": "Complete independent evaluation and design-research paper evidence",
+    "status": "todo",
+    "last_agent": "codex",
+    "subtasks": [],
+    "notes": "Priority 5. Collect independent real stores and dated snapshots, reserve untouched evaluation groups/periods, evaluate large errors and uncertainty, run participant usability tasks, and finalize paper authorship/contact/template/venue decisions. Existing paper is a draft, not acceptance evidence."
   }
 ]

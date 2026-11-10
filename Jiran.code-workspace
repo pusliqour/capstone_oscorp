@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "name": "Jiran",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      ".private": true,
+      ".deploy": true
+    },
+    "search.exclude": {
+      "Private/**": true,
+      "Deployment/**": true,
+      ".private/**": true,
+      ".deploy/**": true
+    }
+  }
+}

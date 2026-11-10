@@ -9,7 +9,7 @@ backend=env(ROOT/'ml_backend/.env');frontend=env(ROOT/'frontend/.env.local')
 url=backend['SUPABASE_URL']
 assert url=='http://127.0.0.1:54321','Local integration test only'
 admin=create_client(url,backend['SUPABASE_KEY']);anon=create_client(url,frontend['VITE_SUPABASE_ANON_KEY'])
-credentials=json.loads((Path.home()/'Documents/Jiran/team-demo-credentials.json').read_text())
+credentials=json.loads((ROOT/'.private/operator/team-demo-credentials.json').read_text())
 all_products=admin.table('products').select('id,retailer_id,price').execute().data
 for email,account in credentials.items():
     client=create_client(url,frontend['VITE_SUPABASE_ANON_KEY'])

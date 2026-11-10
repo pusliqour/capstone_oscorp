@@ -65,3 +65,16 @@ The existing local Git repository is retained. Implementation and validation che
 - Recovery details and reproduction commands are in `docs/ARCHIVE_RECOVERY.md`.
 
 - Final verification: 22 unit/regression tests passed; research API scenario/invalid-input checks, Studio/API-doc rendering and existing demo account/isolation checks passed.
+
+
+## Canonical workspace and GRC — 10 November 2026
+
+- Consolidated known Jiran source, operator documents, credentials, ZIPs, recovered data, original ML checkout, preview/export history and Pages deployment under `/Users/zoro/Projects/Jiran`.
+- Retained compatibility links at the old Projects, Documents, Downloads and Desktop locations. No content was deleted or merged destructively.
+- Added visible `Private` and `Deployment` shortcuts to hidden local storage; private material and nested repositories remain excluded from source Git and GRC scans.
+- Added `START_HERE.md`, `REMAINING.md`, `Jiran.code-workspace` and the local `GRC_DASHBOARD.html` launcher. Current docs point to the canonical locations.
+- Refreshed GRC's project name, goal, completed milestones, remaining tasks and resume/handoff state. Historical October tasks remain intact.
+- Updated credential/test helpers to use the canonical private operator folder.
+- Kept Supabase's internal Docker project ID `ISDIA` and old virtual-environment launcher links so existing data volumes and processes remain intact.
+
+- Consolidation verification passed: all five local services returned HTTP 200; 22 unit/regression tests, production build, full disposable-account browser workflow, demo isolation and gateway login/refresh/logout checks passed. Eleven compatibility links and private-data exclusions were verified.

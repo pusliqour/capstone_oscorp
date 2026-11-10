@@ -381,7 +381,7 @@ def main() -> None:
     parser.add_argument(
         "--source-dir",
         type=Path,
-        default=projects_dir / "jiran-ml" / "data" / "real",
+        default=Path(__file__).resolve().parents[1] / ".private/reference/original-ml-repository/data/real",
         help="Directory containing the six Square XLSX exports",
     )
     parser.add_argument(
