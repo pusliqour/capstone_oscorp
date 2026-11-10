@@ -151,6 +151,7 @@ function ContactModal({
   const {
     location_label,
     phone: contactPhone,
+    contact_email,
     full_name,
     latitude: contactLat,
     longitude: contactLon,
@@ -257,6 +258,10 @@ function ContactModal({
               </div>
             </div>
 
+            <div className="contact-card span2">
+              <div className="contact-label">Contact email</div>
+              <div className="contact-value">{contact_email || "Not set"}</div>
+            </div>
             <div className="contact-card span2">
               <div className="contact-label">Owner</div>
               <div className="contact-value">

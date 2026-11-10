@@ -1,7 +1,7 @@
 {
-  "now": "Archive-to-app connection and atomic exchanges complete. Original team stores preserved; 50 synthetic storefronts, 5960 stock rows, 9100 daily orders and 500 listings added. Source 914ea7c and Pages a5448d5 pushed. Local integration and published-site archive/account browser checks passed. Import rerun inserts zero duplicates.",
-  "next": "Read AGENTS.md, DATA_SOURCES.json and docs/ARCHIVE_APP_CONNECTION.md. Continue hosting or ML/OOD tasks in REMAINING.md. Existing team accounts can browse /data-explorer now.",
-  "blocked": "No verified real retailer outcome/location/contact dataset. Hosting still depends on Mac/tunnel. Do not portray historical synthetic stock as live trading.",
+  "now": "User explicitly authorized fictional address/contact filler. Filled only missing fields on 50 synthetic archive stores: FICTIONAL DEMO addresses, invalid +000 phones, example.invalid emails. Preserved team stores and owner edits. Fixed contact RPC parameter/returned fields. Verified all 50 records, contact lookup, original account isolation and build.",
+  "next": "Read DATA_SOURCES.json and docs/ARCHIVE_APP_CONNECTION.md. Demo addresses/contact filler are intentional, labelled placeholders authorized by user; do not remove them for missing provenance or portray them as real.",
+  "blocked": "",
   "last_agent": "codex",
-  "updated": "2026-11-11T01:17:22+04:00"
+  "updated": "2026-11-11T01:22:23+04:00"
 }

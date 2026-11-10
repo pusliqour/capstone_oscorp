@@ -90,3 +90,10 @@ The existing local Git repository is retained. Implementation and validation che
 - Added real listing/request audit events and activity refresh/load-more; no fabricated historical exchanges or user activity.
 - Fixed imported inventory Refresh to reload records without invoking an unavailable POS connector.
 - Added AGENTS.md, DATA_SOURCES.json and docs/ARCHIVE_APP_CONNECTION.md so another agent can discover the data, reproduce imports and respect private-file exclusions.
+
+
+## 11 November 2026 — requested fictional contact filler
+
+- Filled missing addresses and phone/contact emails for the fifty synthetic archive stores; preserved original team accounts and owner-entered values.
+- Addresses are explicitly marked FICTIONAL DEMO; phone numbers use invalid +000 and email uses example.invalid. No real business contacts were sourced. Coordinates remain unset.
+- Fixed the contact RPC argument and returned address/name/email fields to match the dialog; real contacts require ownership or an accepted exchange.

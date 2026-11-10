@@ -48,3 +48,8 @@ Prerequisite on another machine: recover the supplied ZIP, rebuild the isolated 
 ## Limits that remain
 
 The dataset is synthetic, stock is historical, and model evaluation is development evidence. The learned classifier's long-inactivity failure is not fixed by this data bridge. Real retailer locations, real exchange outcomes, independent ML validation, permanent hosting, live POS integration, and participant usability evidence remain outstanding.
+
+
+## Requested fictional contact filler — 11 November
+
+The user authorized filler addresses/contact details for demonstration. Migration `202611110001_demo_contact_fillers.sql` fills missing fields on the fifty synthetic archive stores only, without overwriting original team stores or existing owner-entered values. Addresses begin `[FICTIONAL DEMO]`, phones use invalid country code `+000`, and emails use `example.invalid`. These are not recovered real business records. Coordinates remain null. The contact dialog RPC now matches its frontend parameter and returns names, location and contact email; real contact disclosure requires ownership or an accepted/completed exchange. Verified all fifty records, the RPC, original account isolation and the frontend build.
