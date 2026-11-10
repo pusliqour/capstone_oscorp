@@ -1,7 +1,7 @@
 {
-  "now": "Jiran source, private archives/data/operator documents, historical checkouts and Pages deployment are consolidated under /Users/zoro/Projects/Jiran. Old locations are compatibility symlinks. Team demo/account UX/SVG icons and isolated synthetic archive recovery are implemented; final relocation checks are in progress.",
-  "next": "Verify relocated services and tests, then use REMAINING.md to address stable hosting, source confirmation and research-model inactivity/OOD behavior.",
-  "blocked": "Real-world provenance of the original three-store Excel files and independent retailer-reviewed outcome labels remain unavailable. Temporary team hosting depends on this Mac and its tunnel.",
+  "now": "Workspace consolidation is complete and verified: /Users/zoro/Projects/Jiran contains active source, Private local material and Deployment checkout. Old paths are compatibility links. Source checkpoint cd1dd90 is pushed. Team app, account UX/SVG release, local Studio and isolated archive lab are functional. T5, T6 and T7 are complete.",
+  "next": "Review REMAINING.md and start T8: choose stable hosting/startup/backups. Also resolve T9 data provenance before promoting any dataset.",
+  "blocked": "Unverified original Excel provenance, missing independent retailer-reviewed outcome evidence, archive-model inactivity/OOD failure, and temporary Mac/tunnel hosting. These are recorded as outstanding tasks T8–T12.",
   "last_agent": "codex",
-  "updated": "2026-11-10T18:06:19+04:00"
+  "updated": "2026-11-10T18:21:28+04:00"
 }

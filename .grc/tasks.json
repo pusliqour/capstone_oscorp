@@ -138,7 +138,7 @@
   {
     "id": "T5",
     "title": "Consolidate Jiran into one canonical workspace and synchronize GRC",
-    "status": "doing",
+    "status": "done",
     "last_agent": "codex",
     "subtasks": [
       {
@@ -163,10 +163,11 @@
       },
       {
         "text": "Verify services and tests, then commit and push source-only changes",
-        "done": false
+        "done": true,
+        "agent": "codex"
       }
     ],
-    "notes": "User explicitly requested GRC integration, one-place directory organization, a push and a clear remaining-work summary. Do not delete source data or expose private credentials/artifacts. Inventoried the active source, Pages checkout, original ML repository, old preview checkout, Downloads archive/recovery/spreadsheets, operator documents and two historical Desktop exports. Will relocate rather than delete, retaining old-path symlinks. Canonical /Users/zoro/Projects/Jiran is in place. Ten related folders/files were relocated with compatibility links, plus the source alias. Added START_HERE, REMAINING, VS Code workspace and local GRC launcher. GRC identity/status and T6–T12 milestones/backlog are current. Local services return HTTP 200; tests/build and account isolation passed."
+    "notes": "User explicitly requested GRC integration, one-place directory organization, a push and a clear remaining-work summary. Do not delete source data or expose private credentials/artifacts. Inventoried the active source, Pages checkout, original ML repository, old preview checkout, Downloads archive/recovery/spreadsheets, operator documents and two historical Desktop exports. Will relocate rather than delete, retaining old-path symlinks. Canonical /Users/zoro/Projects/Jiran is in place. Ten related folders/files were relocated with compatibility links, plus the source alias. Added START_HERE, REMAINING, VS Code workspace and local GRC launcher. GRC identity/status and T6–T12 milestones/backlog are current. Local services return HTTP 200; tests/build and account isolation passed. Completed and pushed source checkpoint cd1dd90. All five services returned HTTP 200; 22 tests, frontend build, full browser workflow, demo isolation and gateway checks passed after relocation. Eleven compatibility links preserve old paths. Credentials/data/nested repos remain local under Private/Deployment and are absent from source index and GRC scan."
   },
   {
     "id": "T6",
