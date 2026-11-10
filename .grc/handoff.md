@@ -1,19 +1,25 @@
 # Handoff from codex
-_11 Nov 2026 01:22 · written by the agent itself_
+_11 Nov 2026 03:43 · written by the agent itself_
 
 ## Done
-User explicitly authorized fictional address/contact filler. Filled only missing fields on 50 synthetic archive stores: FICTIONAL DEMO addresses, invalid +000 phones, example.invalid emails. Preserved team stores and owner edits. Fixed contact RPC parameter/returned fields. Verified all 50 records, contact lookup, original account isolation and build.
+Replaced 50 fictional fillers with official public business references: 45 Al Maya branches, 5 Choithrams branches. Stored source URLs, dates, hashes and branch/corporate contact scope. Added source directory and attribution UI. Verified 50 contacts, original account isolation, browser flows and build. Pages release b855f93.
 
 ## Remaining
-Real geographic coordinates, verified retailer identities/outcomes, stable hosting and ML OOD/independent evaluation still outstanding. Demo filler is not source evidence.
+Stable hosting and ML OOD/independent validation remain. Public addresses are official branch/locality labels, not verified full postal addresses. Coordinates remain unset. Companies are reference businesses, not project participants or sources of synthetic stock.
 
 ## Next step
-Read DATA_SOURCES.json and docs/ARCHIVE_APP_CONNECTION.md. Demo addresses/contact filler are intentional, labelled placeholders authorized by user; do not remove them for missing provenance or portray them as real.
+Read DATA_SOURCES.json, data/public-businesses.json and docs/ARCHIVE_APP_CONNECTION.md. Treat public-contact reference data separately from generated stock. Do not restore fictional filler or invent branch-specific emails/phone numbers.
+
+## Blocked on
+No verified real retailer outcome dataset. Mac/tunnel hosting remains temporary.
 
 ## Files that matter
-- `supabase/migrations/202611110001_demo_contact_fillers.sql`
+- `scripts/import_public_businesses.py`
+- `data/public-businesses.json`
 - `DATA_SOURCES.json`
 - `AGENTS.md`
 - `docs/ARCHIVE_APP_CONNECTION.md`
+- `supabase/migrations/202611110002_public_business_references.sql`
+- `supabase/migrations/202611110003_public_business_directory.sql`
 
 Task: T13

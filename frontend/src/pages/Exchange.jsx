@@ -166,7 +166,7 @@ function ContactModal({
   const phone = contactPhone || "";
   const fullName = full_name || "";
 
-  const waNumber = toWhatsAppNumber(phone);
+  const waNumber = contact?.reference_business_name ? "" : toWhatsAppNumber(phone);
   const waLink = waNumber ? `https://wa.me/${waNumber}` : "";
 
   const distanceKm =
@@ -211,6 +211,7 @@ function ContactModal({
         </div>
 
         <div className="ex-modal-body">
+          {contact?.reference_business_name && <p className="management-notice"><strong>Public business reference: {contact.reference_business_name}.</strong> Used for demonstration location/contact details only; this business did not supply the synthetic stock and is not a verified participant. Phone: {contact.phone_scope}. Email: {contact.email_scope}. <a href={contact.reference_source_url} target="_blank" rel="noopener noreferrer">Official listing</a> · <a href={contact.reference_contact_source_url} target="_blank" rel="noopener noreferrer">Contact source</a>. Checked {new Date(contact.reference_checked_at).toLocaleDateString()}.</p>}
           <div className="contact-grid">
             <div className="contact-card">
               <div className="contact-label">Shop</div>
@@ -263,7 +264,7 @@ function ContactModal({
               <div className="contact-value">{contact_email || "Not set"}</div>
             </div>
             <div className="contact-card span2">
-              <div className="contact-label">Owner</div>
+              <div className="contact-label">{contact?.reference_business_name ? "Reference business" : "Owner"}</div>
               <div className="contact-value">
                 {fullName || <span className="muted">—</span>}
               </div>

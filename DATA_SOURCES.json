@@ -59,8 +59,31 @@
         "address_marker": "[FICTIONAL DEMO]",
         "phone_prefix": "+000",
         "email_domain": "example.invalid",
-        "coordinates": "not supplied; left null"
+        "coordinates": "not supplied; left null",
+        "status": "Superseded by user-requested official public-business references; historical migration retained"
       }
+    },
+    {
+      "id": "uae-public-business-references-20261111",
+      "origin": "public_official_listing",
+      "records": 50,
+      "file": "data/public-businesses.json",
+      "script": "scripts/import_public_businesses.py",
+      "database_table": "public.business_references",
+      "mapping": "retailer_profiles.reference_business_id",
+      "sources": [
+        "https://www.almaya.ae/supermarket.php",
+        "https://www.almaya.ae/contact-us.php",
+        "https://choithramsgcc.com/en/storelocator/",
+        "https://choithramsgcc.com/en/contactus"
+      ],
+      "counts": {
+        "al_maya_group_branches": 45,
+        "choithrams_branches": 5
+      },
+      "meaning": "Demo location/contact references only; not participants, real account owners or synthetic stock sources",
+      "precision": "Official branch/locality labels with source map links; full postal addresses and coordinates not inferred",
+      "contacts": "Al Maya branch phones plus corporate email; Choithrams central store-support phone/email explicitly labelled"
     }
   ],
   "private_material": "Excluded from Git; available locally through Private. Never copy credentials or raw datasets into GRC or public commits.",

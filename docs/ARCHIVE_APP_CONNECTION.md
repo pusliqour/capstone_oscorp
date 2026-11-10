@@ -53,3 +53,12 @@ The dataset is synthetic, stock is historical, and model evaluation is developme
 ## Requested fictional contact filler — 11 November
 
 The user authorized filler addresses/contact details for demonstration. Migration `202611110001_demo_contact_fillers.sql` fills missing fields on the fifty synthetic archive stores only, without overwriting original team stores or existing owner-entered values. Addresses begin `[FICTIONAL DEMO]`, phones use invalid country code `+000`, and emails use `example.invalid`. These are not recovered real business records. Coordinates remain null. The contact dialog RPC now matches its frontend parameter and returns names, location and contact email; real contact disclosure requires ownership or an accepted/completed exchange. Verified all fifty records, the RPC, original account isolation and the frontend build.
+
+
+## 11 November 2026 — official public-business reference contacts
+
+- At the user’s explicit request, replaced fifty fictional demo contact/location placeholders with sourced public-business references: 45 Al Maya Group branches and five Choithrams branches.
+- Scraped only official locator/contact pages; saved business names, branch/locality addresses, source map links, phone/email scope, source URLs, timestamps and source hashes in data/public-businesses.json and Supabase business_references.
+- Al Maya phone numbers are branch numbers; its email is corporate. Choithrams phone/email are central store-support contacts, not asserted branch lines. Complete street/postal addresses and coordinates are not invented.
+- Retained synthetic account/store names and stock provenance; source businesses are explicitly not participating retailers or suppliers of synthetic inventory. Original team accounts and owner-entered details are preserved.
+- Added a browsable public-reference directory under Archive data and source attribution in archive account banners/contact dialogs. No messages or calls were sent.

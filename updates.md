@@ -97,3 +97,12 @@ The existing local Git repository is retained. Implementation and validation che
 - Filled missing addresses and phone/contact emails for the fifty synthetic archive stores; preserved original team accounts and owner-entered values.
 - Addresses are explicitly marked FICTIONAL DEMO; phone numbers use invalid +000 and email uses example.invalid. No real business contacts were sourced. Coordinates remain unset.
 - Fixed the contact RPC argument and returned address/name/email fields to match the dialog; real contacts require ownership or an accepted exchange.
+
+
+## 11 November 2026 — official public-business reference contacts
+
+- At the user’s explicit request, replaced fifty fictional demo contact/location placeholders with sourced public-business references: 45 Al Maya Group branches and five Choithrams branches.
+- Scraped only official locator/contact pages; saved business names, branch/locality addresses, source map links, phone/email scope, source URLs, timestamps and source hashes in data/public-businesses.json and Supabase business_references.
+- Al Maya phone numbers are branch numbers; its email is corporate. Choithrams phone/email are central store-support contacts, not asserted branch lines. Complete street/postal addresses and coordinates are not invented.
+- Retained synthetic account/store names and stock provenance; source businesses are explicitly not participating retailers or suppliers of synthetic inventory. Original team accounts and owner-entered details are preserved.
+- Added a browsable public-reference directory under Archive data and source attribution in archive account banners/contact dialogs. No messages or calls were sent.

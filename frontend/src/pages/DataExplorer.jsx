@@ -8,6 +8,8 @@ const number = value => value == null ? "Unavailable" : Number(value).toLocaleSt
 const date = value => value ? new Date(value).toLocaleDateString() : "Unavailable";
 export default function DataExplorer() {
   const [overview, setOverview] = useState(null);
+  const [businesses, setBusinesses] = useState([]);
+  const [businessError, setBusinessError] = useState("");
   const [store, setStore] = useState("");
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
@@ -21,6 +23,7 @@ export default function DataExplorer() {
   const [salesError, setSalesError] = useState("");
   useEffect(() => {
     let active = true;
+    supabase.rpc("business_reference_directory").then(({data,error}) => { if(active) { setBusinesses(data || []); setBusinessError(error?.message || ""); } });
     supabase.rpc("archive_overview").then(({ data, error }) => { if (active) { if (error) setError(error.message); else setOverview(data); } });
     return () => { active = false; };
   }, []);
@@ -52,8 +55,9 @@ export default function DataExplorer() {
       {error && <p role="alert" className="management-error">{error}</p>}
       {overview && <><div className="archive-stats">{[["Stores",overview.stores],["Catalog products",overview.products],["Inventory records",overview.stock_rows],["Daily sales records",overview.daily_rows],["Source transaction lines",overview.transaction_lines]].map(([label,value]) => <article className="management-card" key={label}><h2>{label}</h2><strong>{number(value)}</strong></article>)}</div>
         <p>Sales coverage: {date(overview.first_date)} – {date(overview.last_date)}. Stock snapshot: {date(overview.snapshot_date)}. Prices use the archive catalog; sales values in store analytics are estimates from those prices.</p>
-        <details className="management-card"><summary>Data gaps and model limitations</summary><p>{overview.model_limit}</p><ul>{overview.missing_fields.map(field => <li key={field}>{field} — absent from the source; not invented.</li>)}</ul><p>Archive stores are labelled “Synthetic archive” in the marketplace. They include explicitly fictional address/contact placeholders added at your request. Geographic coordinates remain unset until entered by an owner. Import events and subsequent actions create the activity history.</p></details>
+        <details className="management-card"><summary>Data gaps and model limitations</summary><p>{overview.model_limit}</p><ul>{overview.missing_fields.map(field => <li key={field}>{field} — absent from the source; not invented.</li>)}</ul><p>Archive stores are labelled “Synthetic archive” in the marketplace. Their demo address/contact placeholders have been replaced with sourced public business references. These companies are not verified participants or sources of this synthetic inventory. Source pages may provide branch localities rather than complete postal addresses. Geographic coordinates remain unset. Import events and subsequent actions create the activity history.</p></details>
       </>}
+      <details className="management-card"><summary>Public business addresses and contacts ({businesses.length})</summary><p>Scraped from official store locators and corporate contact pages. Reference contacts only; no business participation or stock ownership is implied. Corporate/support contacts are labelled separately from branch phone numbers. Addresses reproduce official branch/locality labels; full postal addresses are not inferred.</p>{businessError && <p role="alert">{businessError}</p>}<div className="archive-table" tabIndex="0"><table><thead><tr><th>Business / locality</th><th>Phone</th><th>Email</th><th>Sources</th></tr></thead><tbody>{businesses.map(business => <tr key={business.id}><td>{business.business_name}<br/><small>{business.address}</small></td><td>{business.phone}<br/><small>{business.phone_scope}</small></td><td>{business.contact_email || "Not published"}<br/><small>{business.email_scope}</small></td><td><a href={business.source_url} target="_blank" rel="noopener noreferrer">Official locator</a><br/><a href={business.contact_source_url} target="_blank" rel="noopener noreferrer">Contact source</a><br/><small>Checked {date(business.checked_at)}</small></td></tr>)}</tbody></table></div></details>
       <form className="archive-filters" onSubmit={event => { event.preventDefault(); setPage(0); setQuery(search.trim()); setSelected(null); }}>
         <label htmlFor="archive-store">Store<select id="archive-store" aria-label="Store" value={store} onChange={event => { setStore(event.target.value); setPage(0); setSelected(null); }}><option value="">All 50 archive stores</option>{overview?.stores_available?.map(item => <option key={item.store_id} value={item.store_id}>{item.store_id} ({item.products} products)</option>)}</select></label>
         <label htmlFor="archive-search">Product name or ID<input id="archive-search" aria-label="Product name or ID" value={search} maxLength={120} onChange={event => setSearch(event.target.value)} /></label><button className="btn primary" type="submit">Search</button>
