@@ -147,6 +147,7 @@ const Topbar = ({ displayName, role, onLogout, activePage }) => (
     </a>
 
     <nav className="nav" aria-label="Primary navigation">
+        <Link className="nav-item" to="/data-explorer">Archive data</Link>
       <Link
         className={`nav-item ${activePage === "dashboard" ? "active" : ""}`}
         to="/retailer-dashboard"
@@ -992,6 +993,13 @@ export default function Inventory() {
   const liveSync = computeLiveSyncState(posConnection);
 
   const handleSyncNow = async () => {
+    if (posConnection && !["square", "apideck"].includes(posConnection.provider)) {
+      setSyncing(true);
+      try { await loadInventory(); await loadOrders(); setInventoryNotice("Imported inventory reloaded. Source dates are unchanged."); }
+      finally { setSyncing(false); }
+      return;
+    }
+
     if (!retailerId) return;
 
     try {

@@ -171,6 +171,7 @@ function Topbar({ displayName, role, onLogout, activePage }) {
       </Link>
 
       <nav className="nav">
+        <Link className="nav-item" to="/data-explorer">Archive data</Link>
         {["dashboard", "inventory", "marketplace", "analytics", "settings"].map(
           (page) => (
             <Link
@@ -719,67 +720,10 @@ export default function AnalyticsPage() {
 
     const fetchCategoryRevenue = async () => {
       try {
-        const { data: productsData } = await supabase
-          .from("products")
-          .select("name, category")
-          .eq("retailer_id", retailerId)
-          .eq("pos_connection_id", activeConnectionId);
-
-        const nameToCategory = {};
-        productsData?.forEach((p) => {
-          nameToCategory[p.name.toLowerCase().trim()] =
-            p.category || "Uncategorized";
-        });
-
-        let itemsQuery = supabase
-          .from("order_items")
-          .select(
-            `
-            total_amount,
-            item_name,
-            orders!inner ( pos_connection_id, order_time )
-          `,
-          )
-          .eq("orders.pos_connection_id", activeConnectionId);
-
-        itemsQuery = applyTimeRangeToQuery(
-          itemsQuery,
-          "orders.order_time",
-          timeRange,
-        );
-
-        const { data: itemsData, error } = await itemsQuery;
+        const bounds = getTimeRangeBounds(timeRange);
+        const { data, error } = await supabase.rpc("my_sales_summary", { connection_id: activeConnectionId, since_time: bounds?.start || null, until_time: bounds?.end || null });
         if (error) throw error;
-
-        if (itemsData) {
-          const categoryMap = {};
-
-          itemsData.forEach((item) => {
-            const itemName = item.item_name
-              ? item.item_name.toLowerCase().trim()
-              : "";
-
-            let matchedCategory = "Uncategorized";
-
-            for (const [prodName, cat] of Object.entries(nameToCategory)) {
-              if (itemName.includes(prodName)) {
-                matchedCategory = cat;
-                break;
-              }
-            }
-
-            const amount = Number(item.total_amount || 0);
-            categoryMap[matchedCategory] =
-              (categoryMap[matchedCategory] || 0) + amount;
-          });
-
-          setCategoryRevenue(
-            Object.entries(categoryMap).map(([cat, val]) => ({
-              label: cat,
-              value: val,
-            })),
-          );
-        }
+        setCategoryRevenue(data.categories);
       } catch (err) {
         console.error("Revenue Mapping Error:", err);
       }
@@ -866,7 +810,7 @@ export default function AnalyticsPage() {
           product: row.product_name,
           currentStock: stockMap[row.product_variation_id] || 0,
           demand: row.demand_30d == null ? "Unavailable" : Number(row.demand_30d).toFixed(1),
-          confidence: Number(row.confidence || 0),
+          confidence: row.confidence == null ? null : Number(row.confidence),
         }));
 
         setPredictionRows(merged);
@@ -1215,7 +1159,7 @@ export default function AnalyticsPage() {
                               </div>
                               <div>{row.currentStock}</div>
                               <div>{row.demand}</div>
-                              <div>{(row.confidence * 100).toFixed(1)}%</div>
+                              <div>{row.confidence == null ? "Not calibrated" : `${(row.confidence * 100).toFixed(1)}%`}</div>
                             </div>
                           ))
                         ) : (
@@ -1390,22 +1334,8 @@ function ProductTable({
           .select("product_id:id, name, updated_at")
           .eq("pos_connection_id", activeConnectionId);
 
-        let salesReq = supabase
-          .from("order_items")
-          .select(
-            `
-            item_name,
-            total_amount,
-            orders!inner ( id, pos_connection_id, order_time )
-          `,
-          )
-          .eq("orders.pos_connection_id", activeConnectionId);
-
-        salesReq = applyTimeRangeToQuery(
-          salesReq,
-          "orders.order_time",
-          timeRange,
-        );
+        const bounds = getTimeRangeBounds(timeRange);
+        const salesReq = supabase.rpc("my_sales_summary", { connection_id: activeConnectionId, since_time: bounds?.start || null, until_time: bounds?.end || null });
 
         const [intelRes, salesRes] = await Promise.all([
           intelligenceReq,
@@ -1416,7 +1346,7 @@ function ProductTable({
         if (salesRes.error) throw salesRes.error;
 
         const intelligence = intelRes.data || [];
-        const salesData = salesRes.data || [];
+        const salesData = salesRes.data?.product_sales || [];
 
         if (intelligence.length > 0) {
           const productMatchers = intelligence
@@ -1440,14 +1370,12 @@ function ProductTable({
 
             const current = salesMap[matchedProduct.productId] || {
               revenue: 0,
-              orderIds: new Set(),
+              orderCount: 0,
             };
 
             current.revenue += Number(item.total_amount || 0);
 
-            if (item.orders?.id) {
-              current.orderIds.add(item.orders.id);
-            }
+            current.orderCount += Number(item.order_count || 0);
 
             salesMap[matchedProduct.productId] = current;
           });
@@ -1480,7 +1408,7 @@ function ProductTable({
                 abc_class: item.abc_class,
                 stock: totalStock,
                 totalOrders: salesForProduct
-                  ? salesForProduct.orderIds.size
+                  ? salesForProduct.orderCount
                   : 0,
                 revenue: salesForProduct ? salesForProduct.revenue : 0,
                 lastUpdated: item.updated_at || new Date().toISOString(),

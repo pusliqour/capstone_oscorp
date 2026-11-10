@@ -1,7 +1,7 @@
 {
-  "now": "Workspace consolidation is complete and verified: /Users/zoro/Projects/Jiran contains active source, Private local material and Deployment checkout. Old paths are compatibility links. Source checkpoint cd1dd90 is pushed. Team app, account UX/SVG release, local Studio and isolated archive lab are functional. T5, T6 and T7 are complete.",
-  "next": "Review REMAINING.md and start T8: choose stable hosting/startup/backups. Also resolve T9 data provenance before promoting any dataset.",
-  "blocked": "Unverified original Excel provenance, missing independent retailer-reviewed outcome evidence, archive-model inactivity/OOD failure, and temporary Mac/tunnel hosting. These are recorded as outstanding tasks T8–T12.",
+  "now": "Imported archive into 50 labelled app stores without replacing original three. Added authenticated archive explorer, business directory, complete SQL sales aggregation and real audit history. Repaired marketplace optional-location/private-profile joins; checked atomic exchange lifecycle updates both stocks exactly once. Import rerun inserts zero rows. Integration source-total, isolation, reservati",
+  "next": "Start from AGENTS.md and DATA_SOURCES.json; then REMAINING.md. Do not describe archive as isolated-only or invent absent source fields. Continue stable-hosting or ML/OOD task.",
+  "blocked": "",
   "last_agent": "codex",
-  "updated": "2026-11-10T18:21:28+04:00"
+  "updated": "2026-11-11T01:06:08+04:00"
 }

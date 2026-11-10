@@ -14,7 +14,7 @@ all_products=admin.table('products').select('id,retailer_id,price').execute().da
 for email,account in credentials.items():
     client=create_client(url,frontend['VITE_SUPABASE_ANON_KEY'])
     user=client.auth.sign_in_with_password({'email':email,'password':account['password']}).user
-    products=client.table('products').select('id,retailer_id').execute().data
+    products=client.table('products').select('id,retailer_id').eq('retailer_id',user.id).execute().data
     assert products and all(p['retailer_id']==user.id for p in products)
     foreign=next(p for p in all_products if p['retailer_id']!=user.id)
     assert client.table('products').update({'price':foreign['price']}).eq('id',foreign['id']).execute().data==[]

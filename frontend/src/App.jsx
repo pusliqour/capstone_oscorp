@@ -8,6 +8,8 @@ import Analytics from "./pages/Analytics.jsx";
 import RetailDashboard from "./pages/RetailDashboard.jsx";
 import Inventory from "./pages/Inventory.jsx";
 import Exchange from "./pages/Exchange.jsx";
+import DatasetNotice from "./components/DatasetNotice.jsx";
+import DataExplorer from "./pages/DataExplorer.jsx";
 import Settings from "./pages/Settings.jsx";
 import ProtectedRoute from "./routes/ProtectedRoutes.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
@@ -20,6 +22,7 @@ function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AuthProvider>
+        <DatasetNotice />
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
@@ -33,6 +36,7 @@ function App() {
           <Route path="/loading" element={<Loading />} />
 
           {/* Retailer-only routes */}
+          <Route path="/data-explorer" element={<ProtectedRoute allowedRoles={["retailer"]}><DataExplorer /></ProtectedRoute>} />
           <Route
             path="/retailer-dashboard"
             element={

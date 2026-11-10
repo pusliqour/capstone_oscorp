@@ -56,3 +56,8 @@ The file hashes and workbook metadata are recorded in `Private/operator/DATA-PRO
 Do not run `bootstrap_demo.py` just to refresh predictions. It rebuilds the dedicated demo accounts' storefront rows and removes their previous prediction mappings. Use the batch runner for predictions.
 
 Stock categories follow an explicit inventory policy. Ensemble support is shown separately and is not a calibrated probability of business success. Demand is derived from a historically selected weekly baseline, recent mean, Prophet, or observed-sales fallback. Empirical error bands are not calibrated confidence intervals. See `ML_CHANGES.md` for improvements and their limits.
+
+
+## Archive connection update
+
+Archive data is now available to every team login via **Archive data**. The marketplace has 500 labelled synthetic demonstration listings from fifty recovered archive stores. Existing team inventory is preserved. Source and imported daily summaries are described in `ARCHIVE_APP_CONNECTION.md` and `../DATA_SOURCES.json`. No real retailer addresses or historical exchanges were supplied. Exchange actions now use the checked atomic RPC rather than direct status writes.

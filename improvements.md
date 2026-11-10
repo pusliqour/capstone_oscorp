@@ -60,3 +60,15 @@
 43. **GRC synchronized:** Updated the previously stale project identity/status, recorded completed milestones and added concrete remaining work with a current handoff.
 44. **Clear entry points:** `START_HERE.md`, `REMAINING.md`, `Jiran.code-workspace` and `GRC_DASHBOARD.html` make the project easy to reopen and navigate.
 45. **Private-data separation:** Credentials, raw data and nested repository history are local under `Private`; only source, docs, tests, migrations and safe GRC metadata are pushed.
+
+
+## 10 November 2026 — archive application connection
+
+- Connected the user-supplied generated archive to fifty labelled synthetic storefronts without replacing the three original team stores.
+- Imported 5,960 inventory entries, 9,100 daily order summaries, 1,013,393 daily product sales entries, 5,960 policy/model results, fifty connection summaries and 500 labelled demo listings.
+- Added authenticated Archive data navigation, source counts/dates, search, store filtering, pagination, daily sales history and visible model/source limitations.
+- Fixed marketplace listings disappearing when sellers lack locations or their private profiles are correctly hidden.
+- Replaced client-side exchange state writes with checked database transitions, reservations, two-party confirmation, atomic stock transfer, rollback and idempotence.
+- Added real listing/request audit events and activity refresh/load-more; no fabricated historical exchanges or user activity.
+- Fixed imported inventory Refresh to reload records without invoking an unavailable POS connector.
+- Added AGENTS.md, DATA_SOURCES.json and docs/ARCHIVE_APP_CONNECTION.md so another agent can discover the data, reproduce imports and respect private-file exclusions.

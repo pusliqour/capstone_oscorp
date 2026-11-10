@@ -27,7 +27,7 @@ ANON=frontend['VITE_SUPABASE_ANON_KEY']
 SECRET=secrets.token_bytes(32)
 PUBLIC_KEY='sb_publishable_jiran_team_gateway'
 TABLES={'account_activity','profiles','retailer_profiles','retailer_locations','pos_connections','products','product_variations','product_inventory','orders','order_items','retailer_listings','exchange_requests','exchange_request_dismissals','ml_inventory_predictions','ml_inventory_transfer_recommendations','connection_intelligence'}
-RPCS={'get_retailer_names','get_retailer_contact','save_my_profile','create_my_store','save_my_location','remove_my_location','delete_my_store','save_my_product','delete_my_product'}
+RPCS={'my_sales_summary','retailer_directory','archive_overview','archive_inventory','archive_sales','exchange_action','get_retailer_names','get_retailer_contact','save_my_profile','create_my_store','save_my_location','remove_my_location','delete_my_store','save_my_product','delete_my_product'}
 SESSIONS={}
 REFRESH={}
 LOGIN_ATTEMPTS=defaultdict(deque)
@@ -57,7 +57,7 @@ def forget(token):
     if record:REFRESH.pop(record['gateway_refresh'],None)
 
 @app.get('/health')
-async def health():return {'status':'ok','mode':'local-team-gateway','data_provenance':'unverified imported demo files'}
+async def health():return {'status':'ok','mode':'local-team-gateway','data_provenance':'unverified three-store import plus explicitly synthetic Jiran.zip archive'}
 
 @app.api_route('/{path:path}',methods=['GET','HEAD','POST','PUT','PATCH','DELETE'])
 async def proxy(path:str,request:Request):

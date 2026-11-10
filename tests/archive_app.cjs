@@ -1,0 +1,55 @@
+const fs = require('fs');
+const path = require('path');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const root = path.resolve(__dirname, '..');
+const base = process.env.JIRAN_TEST_URL || 'http://127.0.0.1:5173';
+(async () => {
+ const creds = JSON.parse(fs.readFileSync(path.join(root, '.private/operator/team-demo-credentials.json')));
+ const [email, account] = Object.entries(creds)[0];
+ const browser = await chromium.launch({headless:true});
+ try {
+  const page = await browser.newPage({viewport:{width:1440,height:1000}}); const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.goto(base + '/login');
+  await page.getByPlaceholder('Email',{exact:true}).fill(email);
+  await page.getByPlaceholder('Password',{exact:true}).fill(account.password);
+  await page.getByRole('button',{name:'Login',exact:true}).click();
+  await page.waitForURL('**/retailer-dashboard');
+  await page.getByRole('link',{name:'Archive data',exact:true}).click();
+  await page.getByRole('heading',{name:'Recovered archive data'}).waitFor();
+  await page.getByText('5,960 matching inventory records',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'Next',exact:true}).click();
+  await page.getByText('Page 2 of 120',{exact:true}).waitFor();
+  await page.getByLabel('Store',{exact:true}).selectOption('store_AA');
+  await page.getByLabel('Product name or ID',{exact:true}).fill('Coca Cola');
+  await page.getByRole('button',{name:'Search',exact:true}).click();
+  await page.getByText('1 matching inventory records',{exact:true}).waitFor();
+  await page.getByRole('button',{name:'View sales for Coca Cola at store_AA',exact:true}).click();
+  await page.getByRole('heading',{name:'Coca Cola — store_AA'}).waitFor();
+  await page.locator('.archive-history tbody tr').first().waitFor();
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:path.join(root,'.private/operator/archive-mobile.png'),fullPage:true});
+  if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error('Archive mobile overflow');
+  await page.setViewportSize({width:1440,height:1000});
+  await page.getByRole('link',{name:'Marketplace',exact:true}).click();
+  await page.getByText('Synthetic archive store_AA',{exact:false}).first().waitFor();
+  if(errors.length)throw new Error(errors.join('\n'));
+  console.log('Browser archive navigation, pagination, filters, daily history, mobile fit and marketplace store names passed');
+  const archiveCreds=JSON.parse(fs.readFileSync(path.join(root,'.private/operator/archive-demo-credentials.json')));
+  const [archiveEmail,archiveAccount]=Object.entries(archiveCreds)[0];
+  const archiveContext=await browser.newContext();const archivePage=await archiveContext.newPage();
+  const archiveErrors=[];archivePage.on('pageerror',error=>archiveErrors.push(error.message));
+  archivePage.on('console',message=>{if(message.type()==='error')archiveErrors.push(message.text())});
+  await archivePage.goto(base+'/login');await archivePage.getByPlaceholder('Email',{exact:true}).fill(archiveEmail);await archivePage.getByPlaceholder('Password',{exact:true}).fill(archiveAccount.password);
+  await archivePage.getByRole('button',{name:'Login',exact:true}).click();await archivePage.waitForURL('**/retailer-dashboard');
+  await archivePage.getByLabel('Dataset source',{exact:true}).waitFor();
+  await archivePage.getByRole('link',{name:'Analytics',exact:true}).click();
+  await archivePage.waitForResponse(response=>response.url().includes('/rpc/my_sales_summary') && response.status()===200);
+  await archivePage.getByRole('link',{name:'Inventory',exact:true}).click();
+  await archivePage.getByRole('button',{name:'Add product',exact:true}).waitFor();
+  if(archiveErrors.length)throw new Error(archiveErrors.join('\n'));
+  console.log('Archive-store dashboard notice, analytics aggregate and inventory login passed');
+  await archiveContext.close();
+
+ } finally { await browser.close(); }
+})().catch(error=>{console.error(error);process.exit(1)});

@@ -1,5 +1,7 @@
 # Jiran.zip recovery — 10 November 2026
 
+**Later update:** the user subsequently authorized connecting this archive to the app. See `ARCHIVE_APP_CONNECTION.md`: fifty labelled synthetic storefronts and an authenticated archive explorer now exist. Statements below about isolation describe the initial recovery stage; the original research tables and models remain preserved.
+
 ## What was recovered
 
 The supplied `/Users/zoro/Projects/Jiran/Private/archives/Jiran-user-20261110.zip` was inspected and extracted to `/Users/zoro/Projects/Jiran/Private/recovery/20261110`. Its nested `Jiran/ml:sample.zip` contained the missing large transaction CSV. Neither the supplied SQL nor its Python training/serving programs were executed. Source files and extracted files were fingerprinted; the outer and nested product/stock CSVs matched exactly.

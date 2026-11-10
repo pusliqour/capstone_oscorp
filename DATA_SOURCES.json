@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "canonical_workspace": "/Users/zoro/Projects/Jiran",
+  "sources": [
+    {
+      "id": "original-three-store-excel",
+      "origin": "unverified_import",
+      "source_directory": "Private/reference/original-ml-repository/data/real",
+      "normalized_directory": "ml_backend/training/data",
+      "purpose": "Original three team stores and operational ML",
+      "authenticity": "Unconfirmed; do not describe as verified real retailer data"
+    },
+    {
+      "id": "jiran-archive-20261110",
+      "origin": "synthetic_generated",
+      "source_archive": "Private/archives/Jiran-user-20261110.zip",
+      "recovery_directory": "Private/recovery/20261110",
+      "normalized_directory": "Private/recovery/20261110/lab",
+      "database_schema": "jiran_archive_lab",
+      "public_mapping_table": "jiran_archive_lab.store_accounts",
+      "app_route": "/data-explorer",
+      "source_store_prefix": "store_",
+      "store_display_prefix": "Synthetic archive",
+      "public_product_marker": "products.data_origin = synthetic_generated",
+      "public_order_marker": "orders.source = synthetic_archive_daily_aggregate",
+      "source_counts": {"stores":50,"catalog_products":2555,"stock_rows":5960,"transaction_lines":17025416,"daily_sales_rows":1013393},
+      "application_counts": {"stores":50,"inventory_rows":5960,"daily_summary_orders":9100,"daily_product_items":1013393,"demonstration_listings":500},
+      "source_missing": ["real retailer identities", "verified geographic coordinates", "retailer phone numbers", "historical exchange requests", "historical account activity"],
+      "stock_as_of": "2026-02-25",
+      "sales_range": ["2025-08-29","2026-02-26"],
+      "forecast_warning": "Historical snapshot estimates. Learned labels are compared to policy labels; long-inactivity failure remains. Not independent business validation.",
+      "import_script": "scripts/connect_archive_storefront.py",
+      "verification_script": "scripts/verify_archive_app.py"
+    }
+  ],
+  "private_material": "Excluded from Git; available locally through Private. Never copy credentials or raw datasets into GRC or public commits.",
+  "external_agent_entrypoint": "AGENTS.md"
+}

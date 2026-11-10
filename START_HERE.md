@@ -46,11 +46,11 @@ The public site currently depends on this Mac, Docker, the Python gateway and th
 - Screenshots, earlier operator notes and evidence: `Private/operator/`.
 - Source-only historical export snapshots: `Private/history/`; older archives: `Private/archives/`.
 
-The recovered archive is explicitly generated data. Its 50-store research schema is separate from the three-store public demo. Its high policy-agreement F1 is not real-world validation, and the model still fails the inactivity stress scenario.
+The recovered archive is explicitly generated data. Its research schema is preserved, and its 50 labelled synthetic stores, inventory and daily sales are now also mapped into the public application. Open **Archive data** from the app navigation; the original three team stores are preserved. See `docs/ARCHIVE_APP_CONNECTION.md`. Its high policy-agreement F1 is not real-world validation, and the model still fails the inactivity stress scenario.
 
 ## Start or resume work
 
-1. Read `REMAINING.md` and the latest `.grc` context before changing code.
+1. Read `AGENTS.md`, `DATA_SOURCES.json`, `REMAINING.md` and the latest `.grc` context before changing code.
 2. Start Docker Desktop, then run `bash scripts/run-local.sh` from this folder for the local app and main ML service.
 3. Studio is a separate existing container: `docker start jiran-studio-local` if needed.
 4. The team gateway runs with `.venv/bin/uvicorn scripts.team_gateway:app --host 127.0.0.1 --port 8787`; tunnel instructions are in `docs/TEAM_DEMO.md`.

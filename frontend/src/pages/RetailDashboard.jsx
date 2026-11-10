@@ -20,6 +20,7 @@ function Topbar({ displayName, role, onLogout }) {
       </Link>
 
       <nav className="nav">
+        <Link className="nav-item" to="/data-explorer">Archive data</Link>
         <Link className="nav-item active" to="/retailer-dashboard">
           Dashboard
         </Link>
@@ -229,7 +230,7 @@ export default function RetailDashboard() {
 
         // 4. Set Provider Info
         if (posData) {
-          const isManual = ["manual", "local_import", "jiran_square_import"].includes(posData.provider);
+          const isManual = ["manual", "local_import", "jiran_square_import", "archive_daily_import"].includes(posData.provider);
           const syncDate = isManual
             ? latestInventory
             : new Date(posData.last_synced_at);
@@ -261,34 +262,9 @@ export default function RetailDashboard() {
           const since = new Date(anchor);
           since.setDate(since.getDate() - 7);
 
-          const { data: topData } = await supabase
-            .from("order_items")
-            .select(
-              `
-              item_name, quantity,
-              orders:order_id!inner ( retailer_id, order_time, status, is_active )
-            `,
-            )
-            .eq("orders.retailer_id", retailerId)
-            .eq("orders.pos_connection_id", posData?.id)
-            .eq("orders.status", "completed")
-            .eq("orders.is_active", true)
-            .gte("orders.order_time", since.toISOString());
-
-          const totals = new Map();
-          (topData || []).forEach((row) => {
-            const name = row.item_name?.trim();
-            if (!name) return;
-            const prev = totals.get(name) || { name, sold: 0 };
-            prev.sold += Number(row.quantity ?? 0);
-            totals.set(name, prev);
-          });
-
-          setTopSellers(
-            Array.from(totals.values())
-              .sort((a, b) => b.sold - a.sold)
-              .slice(0, 10),
-          );
+          const { data: summary, error: salesError } = await supabase.rpc("my_sales_summary", { connection_id: posData.id, since_time: since.toISOString() });
+          if (salesError) throw salesError;
+          setTopSellers(summary.top_sellers);
         }
       } catch (err) {
         console.error("Dashboard Load Error:", err);

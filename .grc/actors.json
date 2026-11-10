@@ -9,7 +9,17 @@
       "public_key_fingerprint": "SHA256:Lb5xrlWaCw75+vHjePMXJbmUwqF63+l/dzdAwW6R/WA",
       "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKdWDrl4TW3Nk3vkshxs9GmAp9DSZPUGyKI54HbxGLFF grc:agent-codex-76be681dd78ceb20",
       "created_at": "2026-11-10T17:55:02+04:00",
-      "updated_at": "2026-11-10T18:21:28+04:00"
+      "updated_at": "2026-11-11T01:08:35+04:00"
+    },
+    {
+      "id": "agent-grc-genie-qwen3-8b-76fb8eb7b2966837",
+      "kind": "agent",
+      "name": "grc-genie/qwen3:8b",
+      "signature_algorithm": "ssh-ed25519",
+      "public_key_fingerprint": "SHA256:R7el3E9d7jFwwJAlOPXR1yXpdADGzO90UCvh5O+BIdc",
+      "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK3T6MUp8YIEJU5HqeOhVJHPesSlek75ExPCzU1qdbwQ grc:agent-grc-genie-qwen3-8b-76fb8eb7b2966837",
+      "created_at": "2026-10-27T01:47:54+04:00",
+      "updated_at": "2026-11-10T18:37:34+04:00"
     }
   ]
 }

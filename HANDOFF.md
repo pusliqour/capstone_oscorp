@@ -5,6 +5,10 @@
 **Entry point:** `START_HERE.md`.
 **Current priorities:** `REMAINING.md` and the `.grc` task board.
 
+## Latest: archive now connected to the app
+
+Read `AGENTS.md`, `DATA_SOURCES.json` and `docs/ARCHIVE_APP_CONNECTION.md` first. The user explicitly authorized using the supplied ZIP to extend the app. Fifty labelled synthetic archive stores now have public inventory, daily sales summaries, policy/model results and demo listings. `/data-explorer` exposes bounded source browsing to all signed-in retailers. Existing team stores are preserved. Exchange state changes and stock settlement now use the checked, atomic `exchange_action` RPC. Never revert to browser status writes. Native GRC registration is complete.
+
 ## Completed
 
 - Working GitHub Pages team app, local Supabase and authenticated Python gateway through a temporary HTTPS tunnel.
@@ -35,6 +39,14 @@
 
 The private consolidation journal is `Private/consolidation-manifest.json`. No content was deleted.
 
+## New integration checks
+
+```bash
+.venv/bin/python scripts/verify_archive_app.py
+.venv/bin/python scripts/verify_gateway.py
+PLAYWRIGHT_MODULE=/Users/zoro/.cache/uv/archive-v0/QM3HCTxcuiJa0OVA/playwright/driver/package node tests/archive_app.cjs
+```
+
 ## Repeat checks
 
 ```bash
@@ -58,4 +70,4 @@ The default Supabase Docker `project_id` remains `ISDIA` to preserve existing co
 
 ## Next action
 
-Use GRC at this canonical folder, review the first outstanding task in `REMAINING.md`, and choose the stable-hosting/data-validation work before claiming production readiness. Commit source/docs/tests/GRC metadata and push `fork`; publish only compiled assets from `Deployment/pages` when changing the live frontend. Never push `Private`, `.env` files, datasets or models.
+Use GRC at this canonical folder and read `AGENTS.md` and `DATA_SOURCES.json` to discover the imported archive. Review `REMAINING.md` for hosting, real source verification and independent ML/UX evidence. Commit source/docs/tests/GRC metadata and push `fork`; publish only compiled assets from `Deployment/pages` when changing the live frontend. Never push `Private`, `.env` files, datasets or models.

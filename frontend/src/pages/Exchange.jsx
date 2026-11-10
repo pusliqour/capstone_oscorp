@@ -57,6 +57,7 @@ function Topbar({ displayName, role, onLogout, activePage }) {
       </Link>
 
       <nav className="nav" aria-label="Primary navigation">
+        <Link className="nav-item" to="/data-explorer">Archive data</Link>
         <Link
           className={`nav-item ${activePage === "dashboard" ? "active" : ""}`}
           to="/retailer-dashboard"
@@ -1177,7 +1178,7 @@ export default function ExchangePage() {
     Main mode + sub tabs
   ================================ */
   const [mode, setMode] = useState("buy"); // buy | sell
-  const [buyTab, setBuyTab] = useState("buy_product"); // buy_product | available_products | manage_requests
+  const [buyTab, setBuyTab] = useState("available_products"); // buy_product | available_products | manage_requests
   const [sellTab, setSellTab] = useState("sell_product"); // sell_product | view_requests | manage_listings
 
   /* ===============================
@@ -1372,10 +1373,7 @@ export default function ExchangePage() {
     setRetailersError("");
     setRetailersLoading(true);
 
-    const { data, error } = await supabase
-      .from("retailer_profiles")
-      .select("id, shop_name, store_id")
-      .order("shop_name", { ascending: true });
+    const { data, error } = await supabase.rpc("retailer_directory");
 
     if (error) {
       setRetailersError(error.message || "Failed to load retailers.");
@@ -1507,20 +1505,12 @@ export default function ExchangePage() {
           stock,
           is_active,
           created_at,
+          data_origin,
           product:products!inner (
             id,
             sku,
             name,
             category
-          ),
-          retailer:retailer_profiles!inner (
-            id,
-            shop_name,
-            retailer_locations!inner (
-              city,
-              state,
-              country
-            )
           )
         `,
         )
@@ -1536,12 +1526,19 @@ export default function ExchangePage() {
       const { data, error } = await query;
       if (error) throw error;
 
+      const retailerIds = [...new Set((data || []).map(row => row.retailer_id))];
+      const namesResult = retailerIds.length ? await supabase.rpc("get_retailer_names", { retailer_ids: retailerIds }) : { data: [] };
+      if (namesResult.error) throw namesResult.error;
+      const names = Object.fromEntries((namesResult.data || []).map(row => [row.id, row.shop_name]));
+      const geoResult = retailerIds.length ? await supabase.from("retailer_locations").select("retailer_id,city,state,country").in("retailer_id", retailerIds).eq("is_primary", true) : { data: [] };
+      if (geoResult.error) throw geoResult.error;
+      const geography = Object.fromEntries((geoResult.data || []).map(row => [row.retailer_id, row]));
       const rows = (data || []).map((r) => {
-        const loc = r.retailer?.retailer_locations?.[0] || {};
+        const loc = geography[r.retailer_id] || {};
         return {
           id: r.id,
           retailer_id: r.retailer_id,
-          retailer_shop: r.retailer?.shop_name || null,
+          retailer_shop: names[r.retailer_id] || "Store name unavailable",
           product_id: r.product_id,
           name: r.product?.name || "Unnamed product",
           sku: r.product?.sku || r.product_id,
@@ -2468,61 +2465,20 @@ export default function ExchangePage() {
   /* ===============================
     Actions — Seller accept/decline
   ================================ */
-  const acceptRequest = async (row) => {
-    if (!retailerId) return alert("Missing retailer id.");
-    if (!row?.id) return;
-
+  const performExchangeAction = async (row, action) => {
+    if (!retailerId || !row?.id) return;
     try {
       setSending(true);
-
-      // accepting seller becomes matched seller (and request is no longer open)
-      const { error } = await supabase
-        .from("exchange_requests")
-        .update({
-          to_retailer_id: retailerId,
-          status: "accepted",
-        })
-        .eq("id", row.id);
-
+      const { data, error } = await supabase.rpc("exchange_action", { request_id: row.id, action });
       if (error) throw error;
-
-      await loadMyRequests();
-      await loadSellerRequests();
-      alert("Accepted.");
-    } catch (e) {
-      alert(e?.message || "Failed to accept request.");
-    } finally {
-      setSending(false);
-    }
+      await Promise.all([loadMyRequests(), loadSellerRequests(), loadMarketplaceListings(), loadMyListings()]);
+      if (action === "complete") alert(data?.status === "completed" ? "Exchange completed. Both inventories and the listing have been updated." : "Confirmation saved. Waiting for the other retailer.");
+      else alert(action === "accept" ? "Request accepted." : action === "cancel" ? "Request cancelled." : "Request declined for your store.");
+    } catch (error) { alert(error?.message || "Could not update request."); }
+    finally { setSending(false); }
   };
-
-  const declineRequest = async (row) => {
-    if (!retailerId) return alert("Missing retailer id.");
-    if (!row?.id) return;
-
-    try {
-      setSending(true);
-
-      // decline closes it (buyer sees declined; seller removes it)
-      const { error } = await supabase
-        .from("exchange_requests")
-        .update({
-          to_retailer_id: retailerId,
-          status: "declined",
-        })
-        .eq("id", row.id);
-
-      if (error) throw error;
-
-      await loadMyRequests();
-      await loadSellerRequests();
-      alert("Declined.");
-    } catch (e) {
-      alert(e?.message || "Failed to decline request.");
-    } finally {
-      setSending(false);
-    }
-  };
+  const acceptRequest = row => performExchangeAction(row, "accept");
+  const declineRequest = row => performExchangeAction(row, "decline");
 
   const dismissOpenRequest = async (row) => {
     if (!retailerId) return alert("Missing retailer id.");
@@ -2561,130 +2517,10 @@ export default function ExchangePage() {
     - if open request: removes from open requests as well (same row)
     - if listing request: removes from seller "from your listings" and unreserves
   ================================ */
-  const deleteMyRequest = async (row) => {
-    if (!retailerId) return alert("Missing retailer id.");
-    if (!row?.id) return;
-
-    const st = safeLower(row.status);
-    // you wanted delete while requested (open request) and also for listing-based before completion
-    if (st === "completed") return alert("This request is already completed.");
-
-    const ok = confirm("Delete this request? This can’t be undone.");
-    if (!ok) return;
-
-    try {
-      setSending(true);
-
-      const { error } = await supabase
-        .from("exchange_requests")
-        .delete()
-        .match({ id: row.id, from_retailer_id: retailerId });
-      if (error) throw error;
-
-      await loadMyRequests();
-      await loadSellerRequests();
-      alert("Deleted.");
-    } catch (e) {
-      alert(e?.message || "Failed to delete request.");
-    } finally {
-      setSending(false);
-    }
+  const deleteMyRequest = row => {
+    if (confirm("Cancel this request? Its history will remain available.")) return performExchangeAction(row, "cancel");
   };
-
-  /* ===============================
-    Actions — Completion handshake
-    - Each side sets their completion flag
-    - If both true => status completed + remove from views
-    - If listing-based: subtract from listing stock (reserved becomes actual deduction)
-  ================================ */
-  const markCompleted = async (row, who) => {
-    if (!retailerId) return alert("Missing retailer id.");
-    if (!row?.id) return;
-
-    const isBuyer = who === "buyer";
-    const isSeller = who === "seller";
-
-    try {
-      setSending(true);
-
-      // 1) set my completion flag
-      const update = isBuyer
-        ? { buyer_completed: true }
-        : { seller_completed: true };
-
-      const { error: uErr } = await supabase
-        .from("exchange_requests")
-        .update(update)
-        .eq("id", row.id);
-      if (uErr) throw uErr;
-
-      // 2) re-fetch the row to check if both completed
-      const { data: fresh, error: fErr } = await supabase
-        .from("exchange_requests")
-        .select(
-          "id, request_kind, listing_id, quantity, buyer_completed, seller_completed, status",
-        )
-        .eq("id", row.id)
-        .maybeSingle();
-
-      if (fErr) throw fErr;
-
-      const bothDone = !!fresh?.buyer_completed && !!fresh?.seller_completed;
-
-      if (!bothDone) {
-        // status stays accepted, UI shows "Confirm completion" for other side
-        await loadMyRequests();
-        await loadSellerRequests();
-        alert(
-          "Marked as completed. Waiting for the other retailer to confirm completion.",
-        );
-        return;
-      }
-
-      // 3) both done -> finalize
-      const { error: sErr } = await supabase
-        .from("exchange_requests")
-        .update({ status: "completed" })
-        .eq("id", row.id);
-      if (sErr) throw sErr;
-
-      // 4) if listing-based, subtract from listing stock
-      if (safeLower(fresh?.request_kind) === "listing" && fresh?.listing_id) {
-        // best-effort: decrement listing stock by request quantity
-        // (clamp at >= 0 done in SQL via GREATEST if you want, but here we just try)
-        const qtyN = Number(fresh?.quantity || 0);
-
-        // fetch current stock
-        const cur = await supabase
-          .from("retailer_listings")
-          .select("id, stock")
-          .eq("id", fresh.listing_id)
-          .maybeSingle();
-        if (!cur.error && cur.data) {
-          const next = Math.max(0, Number(cur.data.stock ?? 0) - qtyN);
-
-          await supabase
-            .from("retailer_listings")
-            .update({
-              stock: next,
-              is_active: next > 0,
-            })
-            .eq("id", fresh.listing_id);
-        }
-      }
-
-      await loadMarketplaceListings();
-      await loadMyListings();
-      await loadMyRequests();
-      await loadSellerRequests();
-
-      alert("Completed! Please update your inventory now.");
-    } catch (e) {
-      alert(e?.message || "Failed to complete request.");
-    } finally {
-      setSending(false);
-    }
-  };
+  const markCompleted = row => performExchangeAction(row, "complete");
 
   /* ===============================
     Listing modal open/close + submit
@@ -3442,7 +3278,7 @@ export default function ExchangePage() {
                               </div>
 
                               <p className="listing-location">
-                                {p.city}, {p.country}
+                                {[p.city, p.country].filter(Boolean).join(", ") || "Location not supplied"}
                               </p>
 
                               <div>

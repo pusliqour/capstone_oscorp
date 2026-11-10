@@ -231,7 +231,7 @@
     "status": "todo",
     "last_agent": "codex",
     "subtasks": [],
-    "notes": "Priority 2. Original three-store Excel authenticity is unverified; recovered 50-store archive is explicitly generated. Obtain user confirmation before promoting data into the public demo; collect independent reviewed outcome labels."
+    "notes": "Priority 2. Original three-store Excel authenticity is unverified; recovered 50-store archive is explicitly generated. Obtain user confirmation before promoting data into the public demo; collect independent reviewed outcome labels. User has explicitly authorized displaying the supplied synthetic archive in the app (T13). That intended-use decision is resolved. Remaining provenance work concerns original Excel authenticity and obtaining independently verified real retailer data; no need to ask permission again for the existing labelled synthetic demo."
   },
   {
     "id": "T10",
@@ -247,7 +247,7 @@
     "status": "todo",
     "last_agent": "codex",
     "subtasks": [],
-    "notes": "Priority 4. Manual/import refresh still invokes legacy POS sync. Browser Back does not guard unsaved edits. Run a full current public-site management browser pass. Managed email changes, full account deletion, multiple stores, uploaded-document management and Square/Apideck restoration are separate pending work."
+    "notes": "Priority 4. Manual/import refresh still invokes legacy POS sync. Browser Back does not guard unsaved edits. Run a full current public-site management browser pass. Managed email changes, full account deletion, multiple stores, uploaded-document management and Square/Apideck restoration are separate pending work. T13 fixes imported-data Refresh, archive data discovery, populated marketplace directory/listings, sales aggregation, account activity pagination and atomic exchange workflows. Remaining gaps: browser-Back unsaved edits, optional POS connectors, managed email/account deletion/multiple stores and uploaded-document management."
   },
   {
     "id": "T12",
@@ -256,5 +256,34 @@
     "last_agent": "codex",
     "subtasks": [],
     "notes": "Priority 5. Collect independent real stores and dated snapshots, reserve untouched evaluation groups/periods, evaluate large errors and uncertainty, run participant usability tasks, and finalize paper authorship/contact/template/venue decisions. Existing paper is a draft, not acceptance evidence."
+  },
+  {
+    "id": "T13",
+    "title": "Connect archive recovery to retailer app and complete exchange lifecycle",
+    "status": "done",
+    "last_agent": "codex",
+    "subtasks": [
+      {
+        "text": "Audit source-to-app gap and document missing fields",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Import archive storefront inventory, daily sales, provenance and policy/model output",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Expose archive explorer and repair exchange operations with isolation tests",
+        "done": true,
+        "agent": "codex"
+      },
+      {
+        "text": "Verify application and update portable GRC handoff",
+        "done": true,
+        "agent": "codex"
+      }
+    ],
+    "notes": "User explicitly authorizes using supplied ZIP to populate and extend app. Preserve existing team stores, identify synthetic data, do not invent real addresses or historical exchanges. Archive app bridge loaded 50 synthetic stores, 5960 inventory/policy rows, 9100 daily orders, 1013393 item aggregates, 500 listings. Preserved original team stores. Authenticated explorer and business-only directory added. Atomic exchange RPC verified with disposable accounts incl reservations, stock conservation, replay and rollback. Full-history sales totals match source CSV; browser archive/mobile/marketplace/archive-account and management tests passed. Source discovery: AGENTS.md, DATA_SOURCES.json, docs/ARCHIVE_APP_CONNECTION.md. No real addresses or historical exchanges invented."
   }
 ]

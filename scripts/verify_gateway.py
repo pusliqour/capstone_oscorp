@@ -10,8 +10,10 @@ for email,account in creds.items():
     response=requests.post(URL+'/auth/v1/token?grant_type=password',json={'email':email,'password':account['password']},timeout=30)
     response.raise_for_status();session=response.json();headers={'authorization':'Bearer '+session['access_token'],'apikey':'sb_publishable_jiran_team_gateway'}
     user=requests.get(URL+'/auth/v1/user',headers=headers,timeout=30);user.raise_for_status()
-    response=requests.get(URL+'/rest/v1/products?select=id,retailer_id',headers=headers,timeout=30);response.raise_for_status();rows=response.json()
+    response=requests.get(URL+'/rest/v1/products?select=id,retailer_id&retailer_id=eq.'+user.json()['id'],headers=headers,timeout=30);response.raise_for_status();rows=response.json()
     assert rows and all(r['retailer_id']==user.json()['id'] for r in rows)
+    overview=requests.post(URL+'/rest/v1/rpc/archive_overview',headers=headers,json={},timeout=30);overview.raise_for_status();assert overview.json()['stock_rows']==5960
+    directory=requests.post(URL+'/rest/v1/rpc/retailer_directory',headers=headers,json={},timeout=30);directory.raise_for_status();assert sum(r['data_origin']=='synthetic_generated' for r in directory.json())==50
     assert requests.get(URL+'/rest/v1/ml_inventory',headers=headers,timeout=30).status_code==403
     assert requests.get(URL+'/auth/v1/admin/users',headers=headers,timeout=30).status_code==403
     fresh=requests.post(URL+'/auth/v1/token?grant_type=refresh_token',json={'refresh_token':session['refresh_token']},timeout=30);fresh.raise_for_status()
