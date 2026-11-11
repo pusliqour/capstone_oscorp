@@ -285,5 +285,13 @@
       }
     ],
     "notes": "User explicitly authorizes using supplied ZIP to populate and extend app. Preserve existing team stores, identify synthetic data, do not invent real addresses or historical exchanges. Archive app bridge loaded 50 synthetic stores, 5960 inventory/policy rows, 9100 daily orders, 1013393 item aggregates, 500 listings. Preserved original team stores. Authenticated explorer and business-only directory added. Atomic exchange RPC verified with disposable accounts incl reservations, stock conservation, replay and rollback. Full-history sales totals match source CSV; browser archive/mobile/marketplace/archive-account and management tests passed. Source discovery: AGENTS.md, DATA_SOURCES.json, docs/ARCHIVE_APP_CONNECTION.md. No real addresses or historical exchanges invented."
+  },
+  {
+    "id": "T14",
+    "title": "Add 7/14/30/60-day recommended stock-range matrix",
+    "status": "done",
+    "last_agent": "codex",
+    "subtasks": [],
+    "notes": "User requested explicit per-horizon stock ranges during voice report walkthrough. Policy target bands, not probability intervals or proven optimality. Preserve Claude's simulation/ML changes and cancelled permanent-hosting task. API predictions now include horizon-specific stock_plan for 7/14/30/60 days, persisted atomically in Supabase and rendered in Analytics → Stock Metrics. Uses own-horizon forecast plus explicit lead/safety/review policy buffers; cold start defers bounds, unknown delivery/age and open orders flagged, no statistical-confidence/optimality claim. All 6135 records populated (5960 archive plans preserve historical as_of). 41 backend tests passed, exact live API example and local browser matrix passed, frontend build passed. Existing public tunnel does not resolve; hosting left unchanged per user cancellation of T8."
   }
 ]

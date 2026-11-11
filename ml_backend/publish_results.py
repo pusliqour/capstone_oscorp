@@ -25,7 +25,7 @@ def publish_results(client, result, *, include_transfers=True):
         key = (p['store_id'], p['product_id'])
         if key not in lookup:
             raise ValueError(f'Prediction has no storefront mapping: {key}')
-        predictions.append({**lookup[key], **{k: p[k] for k in ('product_name', 'prediction', 'confidence', 'model_prediction', 'decision_source', 'demand_30d', 'demand_source')}})
+        predictions.append({**lookup[key], **{k: p[k] for k in ('product_name', 'prediction', 'confidence', 'model_prediction', 'decision_source', 'demand_30d', 'demand_source', 'stock_plan')}})
     if not predictions:
         raise ValueError('Refusing to publish empty predictions')
     transfers = []

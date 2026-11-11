@@ -71,3 +71,6 @@ The default Supabase Docker `project_id` remains `ISDIA` to preserve existing co
 ## Next action
 
 Use GRC at this canonical folder and read `AGENTS.md` and `DATA_SOURCES.json` to discover the imported archive. Review `REMAINING.md` for hosting, real source verification and independent ML/UX evidence. Commit source/docs/tests/GRC metadata and push `fork`; publish only compiled assets from `Deployment/pages` when changing the live frontend. Never push `Private`, `.env` files, datasets or models.
+
+
+Latest requested implementation: stock planning matrices for 7/14/30/60 days are in API predictions, Supabase stock_plan JSON and Analytics → Stock Metrics. See docs/STOCK_PLANNING.md for formulas, assumptions and tests. Matrix bands are policy targets, not calibrated prediction intervals or proven optimality. Preserve Claude’s subsequent simulation/report work; stable hosting T8 was cancelled by user, so do not resume permanent-hosting work.

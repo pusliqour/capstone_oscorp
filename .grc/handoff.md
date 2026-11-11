@@ -1,25 +1,24 @@
 # Handoff from codex
-_11 Nov 2026 03:43 · written by the agent itself_
+_12 Nov 2026 02:22 · written by the agent itself_
 
 ## Done
-Replaced 50 fictional fillers with official public business references: 45 Al Maya branches, 5 Choithrams branches. Stored source URLs, dates, hashes and branch/corporate contact scope. Added source directory and attribution UI. Verified 50 contacts, original account isolation, browser flows and build. Pages release b855f93.
+Implemented four-horizon stock planning matrix in API, atomic DB publication and Analytics Stock Metrics. All 6135 records populated; archive plans preserve historical snapshot. 41 backend tests, exact live API example, local browser and build passed. Pages frontend c7da704 pushed.
 
 ## Remaining
-Stable hosting and ML OOD/independent validation remain. Public addresses are official branch/locality labels, not verified full postal addresses. Coordinates remain unset. Companies are reference businesses, not project participants or sources of synthetic stock.
+Stock buffers are explicit policy assumptions, not calibrated intervals/proven optima. Delivery times/age may be unknown. Public tunnel currently does not resolve; hosting deliberately unchanged (T8 cancelled). Continue voice breakdownreport.md walkthrough from section 2; user wants one point at a time.
 
 ## Next step
-Read DATA_SOURCES.json, data/public-businesses.json and docs/ARCHIVE_APP_CONNECTION.md. Treat public-contact reference data separately from generated stock. Do not restore fictional filler or invent branch-specific emails/phone numbers.
+Read docs/STOCK_PLANNING.md. Continue explaining report section 2 and address user concerns one at a time; preserve Claude simulation work and never claim 0.99 policy agreement as business accuracy.
 
 ## Blocked on
-No verified real retailer outcome dataset. Mac/tunnel hosting remains temporary.
+Existing public tunnel unavailable. Do not resume cancelled permanent hosting work without user instruction.
 
 ## Files that matter
-- `scripts/import_public_businesses.py`
-- `data/public-businesses.json`
-- `DATA_SOURCES.json`
-- `AGENTS.md`
-- `docs/ARCHIVE_APP_CONNECTION.md`
-- `supabase/migrations/202611110002_public_business_references.sql`
-- `supabase/migrations/202611110003_public_business_directory.sql`
+- `docs/STOCK_PLANNING.md`
+- `ml_backend/stock_planning.py`
+- `ml_backend/tests/test_stock_planning.py`
+- `frontend/src/components/StockPlanningMatrix.jsx`
+- `tests/stock_planning.cjs`
+- `breakdownreport.md`
 
-Task: T13
+Task: T14

@@ -1,3 +1,4 @@
+import StockPlanningMatrix from "../components/StockPlanningMatrix";
 import Icon from "../components/Icon";
 // src/pages/Analytics.jsx
 import React, { useEffect, useState } from "react";
@@ -752,7 +753,7 @@ export default function AnalyticsPage() {
             product_name,
             prediction,
             confidence,
-            demand_30d
+            demand_30d, stock_plan
           `,
           )
           .eq("pos_connection_id", activeConnectionId)
@@ -774,7 +775,7 @@ export default function AnalyticsPage() {
               product_name,
               prediction,
               confidence,
-            demand_30d
+            demand_30d, stock_plan
             `,
             )
             .eq("retailer_id", retailerId)
@@ -813,6 +814,7 @@ export default function AnalyticsPage() {
           currentStock: stockMap[row.product_variation_id] || 0,
           demand: row.demand_30d == null ? "Unavailable" : Number(row.demand_30d).toFixed(1),
           confidence: row.confidence == null ? null : Number(row.confidence),
+          stockPlan: row.stock_plan,
         }));
 
         setPredictionRows(merged);
@@ -1162,14 +1164,14 @@ export default function AnalyticsPage() {
                           <div>Loading category items...</div>
                         ) : predictionRows.length > 0 ? (
                           predictionRows.map((row) => (
-                            <div key={row.id} className="prediction-table-row">
+                            <div key={row.id} style={{borderBottom:"1px solid #dbe4df"}}><div className="prediction-table-row">
                               <div className="prediction-product">
                                 {row.product}
                               </div>
                               <div>{row.currentStock}</div>
                               <div>{row.demand}</div>
                               <div>{row.confidence == null ? "Not calibrated" : `${(row.confidence * 100).toFixed(1)}%`}</div>
-                            </div>
+                            </div><StockPlanningMatrix plan={row.stockPlan} product={row.product} /></div>
                           ))
                         ) : (
                           <div>No items in this category.</div>

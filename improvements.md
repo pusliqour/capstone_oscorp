@@ -88,3 +88,11 @@
 - Al Maya phone numbers are branch numbers; its email is corporate. Choithrams phone/email are central store-support contacts, not asserted branch lines. Complete street/postal addresses and coordinates are not invented.
 - Retained synthetic account/store names and stock provenance; source businesses are explicitly not participating retailers or suppliers of synthetic inventory. Original team accounts and owner-entered details are preserved.
 - Added a browsable public-reference directory under Archive data and source attribution in archive account banners/contact dialogs. No messages or calls were sent.
+
+
+## 12 November — multi-horizon stock planning
+
+- Added per-product 7/14/30/60-day demand and recommended on-hand stock ranges, horizon-specific stock position, add-to-range amounts and surplus above maximum.
+- Published matrix JSON atomically to Supabase and added expandable Analytics → Stock Metrics tables. Existing archive forecasts retain dated historical provenance.
+- Exposed lead-time, three-day safety and seven-day review assumptions; no statistical-confidence or proven-optimality claim. New products collect own-store history before receiving bounds; unconfirmed open-order arrivals are not credited.
+- Verified 41 backend tests, exact live API example, and all 6,135 stored matrices. Details: docs/STOCK_PLANNING.md.

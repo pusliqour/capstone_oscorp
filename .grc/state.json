@@ -1,7 +1,7 @@
 {
-  "now": "Replaced 50 fictional fillers with official public business references: 45 Al Maya branches, 5 Choithrams branches. Stored source URLs, dates, hashes and branch/corporate contact scope. Added source directory and attribution UI. Verified 50 contacts, original account isolation, browser flows and build. Pages release b855f93.",
-  "next": "Read DATA_SOURCES.json, data/public-businesses.json and docs/ARCHIVE_APP_CONNECTION.md. Treat public-contact reference data separately from generated stock. Do not restore fictional filler or invent branch-specific emails/phone numbers.",
-  "blocked": "No verified real retailer outcome dataset. Mac/tunnel hosting remains temporary.",
+  "now": "Implemented four-horizon stock planning matrix in API, atomic DB publication and Analytics Stock Metrics. All 6135 records populated; archive plans preserve historical snapshot. 41 backend tests, exact live API example, local browser and build passed. Pages frontend c7da704 pushed.",
+  "next": "Read docs/STOCK_PLANNING.md. Continue explaining report section 2 and address user concerns one at a time; preserve Claude simulation work and never claim 0.99 policy agreement as business accuracy.",
+  "blocked": "Existing public tunnel unavailable. Do not resume cancelled permanent hosting work without user instruction.",
   "last_agent": "codex",
-  "updated": "2026-11-11T03:43:41+04:00"
+  "updated": "2026-11-12T02:22:24+04:00"
 }

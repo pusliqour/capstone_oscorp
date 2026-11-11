@@ -33,6 +33,7 @@ from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional, Dict
 
 import time
+from stock_planning import stock_planning_matrix
 
 from inventory_policy import (days_until_next_delivery, donor_reserve, in_stock_rate, policy_metrics,
                               receiver_target_stock, stock_policy_label_v2)
@@ -262,6 +263,7 @@ class ProductPrediction(BaseModel):
     model_prediction: str
     demand_30d: float = 0.0
     demand_source: str = "observed_recent_sales"
+    stock_plan: dict = Field(default_factory=dict)
 
 
 class PredictResponse(BaseModel):
@@ -613,6 +615,10 @@ def _run_predictions(products: List[ProductInput]):
             model_prediction=model_label,
             demand_30d=float(rows[i]["forecast_30d"] if rows[i]["forecast_30d"] > 0 else max(p.recent_qty, 0.0)),
             demand_source=str(rows[i].get("forecast_method", "observed_recent_sales")),
+            stock_plan=stock_planning_matrix(rows[i], p.stock_qty, age_days=p.age_days,
+                lead_time_days=p.lead_time_days,
+                review_days=p.days_to_next_order if p.days_to_next_order is not None else 7,
+                on_order=p.on_order or 0, policy_label=policy_label),
         ))
     return results
 
