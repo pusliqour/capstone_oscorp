@@ -1,18 +1,17 @@
 # Handoff from codex
-_12 Nov 2026 02:40 · written by the agent itself_
+_12 Nov 2026 02:42 · written by the agent itself_
 
 ## Done
-Restored temporary public demo at user's request. New HTTPS gateway note-pick-regular-history.trycloudflare.com points only to authenticated gateway 8787. Pages b8bcb5f deployed. Three account/isolation/session HTTPS checks and public stock-matrix/archive/marketplace/archive-store browser tests passed. Credentials unchanged.
+Started one-concern-at-a-time review with mandatory MLP updates. A1 model/result attribution is PARTLY: report separation exists, paper abstract/pipeline/results remain stale. Recorded evidence and manuscript consistency closure criteria. Reconciled resolved B15 temporary access and C2 local migration.
 
 ## Remaining
-Continue user's MLP concern walkthrough. C1 review-cycle semantics remains unresolved; C2 stock_plan migration was applied previously. MLP-001/002 experiments remain on hold. Permanent hosting T8 still cancelled; Mac/tunnel must stay running.
+Discuss A1 with user before next concern; manuscript attribution still needs correction. C1 semantics remains open. MLP-001/002 experiments and agent execution remain on hold during walkthrough.
 
 ## Next step
-Resume one recorded MLP concern at a time with the user. Public operational access is restored, not evidence that model-quality concerns are resolved.
+Explain A1: attribute policy-agreement F1, forecast errors, benchmark outcome scores and transfer effects to their own components. Update /Users/zoro/MLP after every discussed concern; never equate discussion with resolution.
 
 ## Files that matter
-- `docs/TEAM_DEMO.md`
-- `HANDOFF.md`
 - `/Users/zoro/MLP`
-- `tests/stock_planning.cjs`
-- `tests/archive_app.cjs`
+- `docs/mlp/concern-review-log.md`
+- `breakdownreport.md`
+- `paper/jiran_isdia_2027.tex`
