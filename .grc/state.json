@@ -1,7 +1,7 @@
 {
-  "now": "Implemented four-horizon stock planning matrix in API, atomic DB publication and Analytics Stock Metrics. All 6135 records populated; archive plans preserve historical snapshot. 41 backend tests, exact live API example, local browser and build passed. Pages frontend c7da704 pushed.",
-  "next": "Read docs/STOCK_PLANNING.md. Continue explaining report section 2 and address user concerns one at a time; preserve Claude simulation work and never claim 0.99 policy agreement as business accuracy.",
-  "blocked": "Existing public tunnel unavailable. Do not resume cancelled permanent hosting work without user instruction.",
+  "now": "Recorded agreed MLP-001 task: validate 7/14/30/60-day stock target ranges against missed demand, excess and average inventory. Home MLP and project snapshot include scope, validation, acceptance and parallel work packages. Experiments/assignments remain pending.",
+  "next": "Continue one-topic-at-a-time voice discussion with user. Use /Users/zoro/MLP and docs/mlp/MLP-001-task.txt. First discuss timing semantics and the missed-sales/excess-stock tradeoff.",
+  "blocked": "",
   "last_agent": "codex",
-  "updated": "2026-11-12T02:22:24+04:00"
+  "updated": "2026-11-12T02:26:38+04:00"
 }

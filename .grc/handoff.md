@@ -1,24 +1,17 @@
 # Handoff from codex
-_12 Nov 2026 02:22 · written by the agent itself_
+_12 Nov 2026 02:26 · written by the agent itself_
 
 ## Done
-Implemented four-horizon stock planning matrix in API, atomic DB publication and Analytics Stock Metrics. All 6135 records populated; archive plans preserve historical snapshot. 41 backend tests, exact live API example, local browser and build passed. Pages frontend c7da704 pushed.
+Recorded agreed MLP-001 task: validate 7/14/30/60-day stock target ranges against missed demand, excess and average inventory. Home MLP and project snapshot include scope, validation, acceptance and parallel work packages. Experiments/assignments remain pending.
 
 ## Remaining
-Stock buffers are explicit policy assumptions, not calibrated intervals/proven optima. Delivery times/age may be unknown. Public tunnel currently does not resolve; hosting deliberately unchanged (T8 cancelled). Continue voice breakdownreport.md walkthrough from section 2; user wants one point at a time.
+Clarify horizon/lead/review semantics; agree service-level versus inventory tradeoff; assign packages; freeze protocol before experiments. Existing inspected test worlds cannot be called untouched final evidence.
 
 ## Next step
-Read docs/STOCK_PLANNING.md. Continue explaining report section 2 and address user concerns one at a time; preserve Claude simulation work and never claim 0.99 policy agreement as business accuracy.
-
-## Blocked on
-Existing public tunnel unavailable. Do not resume cancelled permanent hosting work without user instruction.
+Continue one-topic-at-a-time voice discussion with user. Use /Users/zoro/MLP and docs/mlp/MLP-001-task.txt. First discuss timing semantics and the missed-sales/excess-stock tradeoff.
 
 ## Files that matter
+- `/Users/zoro/MLP`
+- `docs/mlp/MLP-001-task.txt`
 - `docs/STOCK_PLANNING.md`
-- `ml_backend/stock_planning.py`
-- `ml_backend/tests/test_stock_planning.py`
-- `frontend/src/components/StockPlanningMatrix.jsx`
-- `tests/stock_planning.cjs`
 - `breakdownreport.md`
-
-Task: T14

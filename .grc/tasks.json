@@ -293,5 +293,13 @@
     "last_agent": "codex",
     "subtasks": [],
     "notes": "User requested explicit per-horizon stock ranges during voice report walkthrough. Policy target bands, not probability intervals or proven optimality. Preserve Claude's simulation/ML changes and cancelled permanent-hosting task. API predictions now include horizon-specific stock_plan for 7/14/30/60 days, persisted atomically in Supabase and rendered in Analytics → Stock Metrics. Uses own-horizon forecast plus explicit lead/safety/review policy buffers; cold start defers bounds, unknown delivery/age and open orders flagged, no statistical-confidence/optimality claim. All 6135 records populated (5960 archive plans preserve historical as_of). 41 backend tests passed, exact live API example and local browser matrix passed, frontend build passed. Existing public tunnel does not resolve; hosting left unchanged per user cancellation of T8."
+  },
+  {
+    "id": "T15",
+    "title": "MLP-001 Validate horizon-specific stock range defaults",
+    "status": "todo",
+    "last_agent": "codex",
+    "subtasks": [],
+    "notes": "Agreed with user 12 Nov. Task and acceptance criteria in /Users/zoro/MLP; project snapshot docs/mlp/MLP-001-task.txt. READY FOR ASSIGNMENT; no experiments run. First clarify horizon/lead/review semantics and double-counting, then freeze paired-replay protocol and candidate grid. Use development data for selection; existing benchmark tests/seeds already inspected, so reserve fresh final seeds. Report missed demand, excess and average inventory for 7/14/30/60 days, intervals/tradeoffs. Parallel protocol/harness/independent-review packages defined with ownership boundaries. No success or unique optimum assumed."
   }
 ]

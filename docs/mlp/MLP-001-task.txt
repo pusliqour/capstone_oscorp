@@ -1,0 +1,66 @@
+JIRAN MLP — AGREED TASKS AND VALIDATION
+Canonical planning file: /Users/zoro/MLP
+Project: /Users/zoro/Projects/Jiran
+Agreed: 12 November 2026
+Workflow: discuss one topic -> record task and validation -> assign independent work -> integrate -> record evidence and limitations. Do not mark a task complete from a passing build alone.
+
+TASK MLP-001: VALIDATE RECOMMENDED STOCK RANGES
+Status: READY FOR ASSIGNMENT. The task is agreed; experiments have not run.
+Question: For each store/product and 7, 14, 30, 60-day planning horizon, do the recommended lower/upper stock targets reduce missed demand without creating unnecessary inventory?
+
+Current implementation
+- ml_backend/stock_planning.py; docs/STOCK_PLANNING.md.
+- Lower = ceil(horizon forecast + daily rate * (supplier lead time + safety days)).
+- Upper additionally includes daily rate * review allowance.
+- Defaults: 3 safety days, 7 review-allowance days. Explicit assumptions, not proven optimal settings or statistical confidence bounds.
+- Current implementation tests verify calculation/publication/display, not the business quality of these thresholds.
+
+Scope
+1. First clarify horizon, supplier lead time, days until next order, actual ordering cadence and upper-band allowance. Audit possible double-counting. A range-width allowance must not be described as a change to actual ordering cadence unless that change is simulated.
+2. Specify how the target band becomes a decision: at an allowed review, order up to the upper target when inventory position is below the lower target. Credit only deliveries with known arrival times. Keep supplier capacity, case packs, ordering schedule and other assumptions explicit.
+3. Evaluate one chosen planning horizon at a time. The four rows are alternatives, not four simultaneous orders. Keep demand forecasts fixed when comparing buffer choices so forecast changes do not confound the policy comparison.
+4. Compare the current 3/7 default with a no-extra-buffer ablation, the existing simulation replenishment policy, and a small parameter grid. Proposed safety grid: 0, 1, 3, 5, 7 days. Proposed upper-band allowance grid: 0, 3, 7, 14 days, with actual review timing fixed and reported. Freeze the final grid before evaluation; record any revision.
+5. Include new products, intermittent/zero demand, stockouts, demand surges, slow/dead stock, delivery delays and missing delivery timing. Do not borrow another store's sales for a new product. Do not invent missing operational inputs.
+
+Validation and evidence
+- Use paired replay: identical customer demand, starting stock, supplier conditions and random delays for every policy. Hidden true demand is for grading only, never an input to a decision.
+- Report lost units/lost-demand fraction, fill rate, excess/ending unsold stock and average on-hand inventory. State denominators and units. Report inventory value only when valuation assumptions are declared; do not invent costs to claim profit.
+- Report all four horizons and results by region, demand class and delivery-time group. Include how often ranges were provisional or unavailable.
+- Choose candidates on development/validation worlds and earlier dates only. Test on unseen stores at later dates after freezing settings.
+- IMPORTANT: existing report's 200 test stores and seeds 1-4/20261111 have already been inspected. They are development evidence for this new task, not an untouched final test.
+- Reserve NEW final-world seeds 20261201, 20261202, 20261203 before generating their results. Do not use them for selection. A lead agent records the candidate/freeze manifest before final runs.
+- For 365-day worlds, choose evaluation origins with the entire next 60 days available (latest origin 304); no truncated 60-day labels. Training and validation outcome windows must finish before final evaluation begins.
+- Repeat across worlds; report mean/spread and 95% intervals clustered by store. Preserve paired comparisons when resampling.
+- Record baseline and candidate results even when the candidate loses. If missed sales and excess stock trade off, present the Pareto choices; do not declare a single best policy without the owner's service-level/cost preference.
+
+Acceptance
+A. Frozen protocol and split/seed manifest exist before final runs.
+B. Unit checks demonstrate inventory conservation, no negative stock, no future-data leakage, correct rounding and correct treatment of arrivals/new products.
+C. Reproducible results compare baseline vs candidates for every horizon, with uncertainty and subgroup results.
+D. Independent review checks replay fairness, implementation/protocol agreement and metric arithmetic.
+E. Recommendation cites the evidence and tradeoffs. If no improvement is supported, keep the default explicitly provisional; do not manufacture success.
+F. Integrate any selected change only after review, then rerun API/publication/dashboard regression checks. Do not silently alter existing benchmarks or paper claims.
+
+Parallel work packages (not assigned yet)
+MLP-001A — Protocol and semantics review. Write docs/mlp/001-protocol.md; read stock_planning.py and existing simulation/PROTOCOL.md. Own this document only. Flag double-counting and ambiguous timing before experiments.
+MLP-001B — Evaluation harness and tests. After A freezes the decision semantics, implement a new dedicated simulation evaluator and tests. Do not modify the original benchmark results or live defaults. Own new evaluator/test files only.
+MLP-001C — Independent validation audit. Read A/B and generated results; reproduce metric arithmetic and inspect splits, conservation, arrivals and uncertainty. Own docs/mlp/001-review.md only; do not select or tune candidates using final test results.
+Lead/integrator — Record assignments, review the protocol freeze, authorize final evaluation, consolidate evidence, update the task and perform the final merge. Use isolated branches/worktrees or disjoint file ownership. No shared output-directory overwrites.
+
+Required artifacts
+- Frozen protocol, config, source revision, seeds and data hashes.
+- Separate run directories and machine-readable metrics per candidate/horizon/seed.
+- Baseline comparison and a short plain-language decision report.
+- Review notes, remaining limitations, integration/test results if a change is adopted.
+- Large simulation data/models/results remain outside Git under ignored output paths; commit code, protocol and a compact non-sensitive summary.
+
+Task record (fill during execution)
+Owner A: unassigned
+Owner B: unassigned
+Owner C: unassigned
+Protocol frozen at/revision: pending
+Candidate selected on development data: pending
+Final seeds unsealed at: pending
+Validation result: pending
+Decision and tradeoffs: pending
+Next discussion: confirm what delivery/review timing means, then discuss the acceptable missed-sales versus excess-stock tradeoff. No numerical business threshold has been agreed yet.
