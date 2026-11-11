@@ -5,7 +5,7 @@ Agreed: 12 November 2026
 Workflow: discuss one topic -> record task and validation -> assign independent work -> integrate -> record evidence and limitations. Do not mark a task complete from a passing build alone.
 
 TASK MLP-001: VALIDATE RECOMMENDED STOCK RANGES
-Status: READY FOR ASSIGNMENT. The task is agreed; experiments have not run.
+Status: AGREED, PLANNING ONLY. Experiments and agent execution are on hold until the user finishes the report/concerns walkthrough. No experiments have run for this task.
 Question: For each store/product and 7, 14, 30, 60-day planning horizon, do the recommended lower/upper stock targets reduce missed demand without creating unnecessary inventory?
 
 Current implementation
@@ -64,3 +64,4 @@ Final seeds unsealed at: pending
 Validation result: pending
 Decision and tradeoffs: pending
 Next discussion: confirm what delivery/review timing means, then discuss the acceptable missed-sales versus excess-stock tradeoff. No numerical business threshold has been agreed yet.
+

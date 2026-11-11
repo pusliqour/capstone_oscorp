@@ -300,6 +300,14 @@
     "status": "todo",
     "last_agent": "codex",
     "subtasks": [],
-    "notes": "Agreed with user 12 Nov. Task and acceptance criteria in /Users/zoro/MLP; project snapshot docs/mlp/MLP-001-task.txt. READY FOR ASSIGNMENT; no experiments run. First clarify horizon/lead/review semantics and double-counting, then freeze paired-replay protocol and candidate grid. Use development data for selection; existing benchmark tests/seeds already inspected, so reserve fresh final seeds. Report missed demand, excess and average inventory for 7/14/30/60 days, intervals/tradeoffs. Parallel protocol/harness/independent-review packages defined with ownership boundaries. No success or unique optimum assumed."
+    "notes": "Agreed with user 12 Nov. Task and acceptance criteria in /Users/zoro/MLP; project snapshot docs/mlp/MLP-001-task.txt. READY FOR ASSIGNMENT; no experiments run. First clarify horizon/lead/review semantics and double-counting, then freeze paired-replay protocol and candidate grid. Use development data for selection; existing benchmark tests/seeds already inspected, so reserve fresh final seeds. Report missed demand, excess and average inventory for 7/14/30/60 days, intervals/tradeoffs. Parallel protocol/harness/independent-review packages defined with ownership boundaries. No success or unique optimum assumed. User steering: planning only; finish report/concerns walkthrough and deduplicate work BEFORE any experiments or parallel agent execution. /Users/zoro/MLP and project snapshot updated. Report 5.3 already benchmarks outcome-risk ML, 5.6/5.7 already test transfer rules, 5.9 already repeats worlds. MLP-001 specifically concerns the NEW four-horizon stock bands; preserve/reuse existing evaluation rather than recreating it."
+  },
+  {
+    "id": "T16",
+    "title": "MLP-002 Evaluate whether outcome-risk ML improves stock decisions",
+    "status": "todo",
+    "last_agent": "codex",
+    "subtasks": [],
+    "notes": "AGREED PLANNING ONLY; user explicitly requests finishing report walkthrough and checking duplication before running anything. Existing evaluate_alerts.py already benchmarks shortage_14d/excess_60d/dead_60d ML incl calibration/repeats. New gap: define risk-to-stock-range actions and compare baseline vs improved ranges vs risk-informed improved ranges in paired replay. Reuse existing models/code/results and MLP-001 harness; no model rebuild/reruns without a stated gap. See /Users/zoro/MLP and docs/mlp/MLP-002-task-and-overlap.txt. No experiments or agents launched."
   }
 ]

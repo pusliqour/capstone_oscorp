@@ -1,0 +1,51 @@
+TASK MLP-002: DOES OUTCOME-RISK ML IMPROVE STOCK DECISIONS?
+Status: AGREED, PLANNING ONLY. User requested checking existing work and finishing the report walkthrough before running anything new.
+Dependency: MLP-001 decision semantics, fixed protocol and development-selected stock-range policy.
+
+Reuse before building
+- breakdownreport.md sections 2, 4, 5.3, 5.9 and study session 8 already describe an outcome-predicting benchmark model.
+- ml_backend/simulation/evaluate_alerts.py already fits HistGradientBoosting against shortage_14d, excess_60d and dead_60d. It compares current/improved rules and a cover threshold, selects thresholds on validation, and reports precision/recall/F1, probability quality (Brier/reliability), ranking metrics and store-cluster intervals.
+- Existing alerts.json is present. Main-world F1: shortage rule 0.6007, improved rule 0.6681, benchmark ML 0.7384; excess ML 0.7302; dead-stock ML 0.4456. These are inspected simulated development evidence, not new results or real-world validation.
+- Seeds 1-4 and the main world already have repeat-run results. Reuse them for development/diagnosis rather than rerunning just to reproduce the same headline.
+- evaluate_transfers.py already has paired replay and rule-based transfer arms; none of its existing arms uses learned outcome-risk predictions to choose the requested stock bands.
+
+Genuine missing work
+1. Reuse/audit the existing outcome model instead of creating another rule-copying classifier. Inspect its target definitions, accessible inputs and calibration before deciding whether retraining or calibration is necessary.
+2. Define exactly how a predicted shortage/excess risk changes lower/upper targets or actions. A risk probability does not itself specify how many units to buy. Freeze this mapping and candidate-selection rule on development data.
+3. Compare three explicitly versioned policies under the same replay: A) existing baseline rules/default settings; B) development-selected improved ranges using the existing forecast; C) the same improved ranges informed by the outcome model. Name the baseline commit/config before running; do not let 'current' shift during experiments.
+4. Score the prediction model AND resulting decisions. Better F1 alone is not evidence of fewer lost sales or less excess. Report missed demand, fill rate, excess/ending stock and average inventory, alongside calibration and classification metrics.
+5. Reuse the simulator, split logic, paired randomness and common metric implementation from MLP-001/previous work. Use fresh final evaluation only after protocol/model/policy freeze. Do not inspect final worlds while tuning.
+6. Existing risk targets cover shortage at 14 days and excess/dead stock at 60 days; they do NOT validate every outcome at all four horizons. During the walkthrough decide which additional targets at 7/30/etc. are justified. Do not claim all-horizon risk validation from the existing three targets.
+7. Keep this offline until benefit and guardrails are reviewed. Do not replace the live ensemble or dashboard policy merely because benchmark ML has a higher F1.
+
+Acceptance
+- Inventory of reused code/results and exact new gap documented.
+- No rerun/retraining without a reason tied to a missing test, audit finding or new comparison.
+- Fixed target/action mapping, baseline/candidate versions, split/seed manifest and no-leakage checks.
+- Paired A/B/C outcome comparison with uncertainty, subgroup failures and declared inventory/service tradeoffs.
+- Independent review of whether model-informed policy adds value beyond better ranges alone.
+- Honest no-improvement outcome permitted; no 'true real-world performance' claim from simulation.
+
+Owners: unassigned. Experiments: NOT STARTED. Next action: finish the report walkthrough and reconcile all tasks before assignment.
+
+
+REPORT OVERLAP MAP — READ BEFORE ASSIGNING WORK
+Our discussion topics 'section one/two' are not identical to every numbered report heading. Use the explicit references below.
+- Report section 2: already separates policy rule, rule-copying ensemble, forecast selector, benchmark outcome model and transfer engine. Documentation/model-attribution issue remains in the paper.
+- Section 3 + study sessions 3/10: existing per-store stock rules and optional delivery inputs. Does not validate the newly implemented four-horizon lower/upper stock matrix. Lead/review/null input semantics must be checked first (MLP-001).
+- Section 4 + simulation/PROTOCOL.md: existing simulation/splits/uncertainty framework. Reuse; account for prior test inspection before a new confirmatory study.
+- Section 5.1: forecast comparison exists; simple 28-day mean beats the selector in these simulations. Discuss forecast choice as its own concern; do not assume risk modeling or range tuning fixes forecast error.
+- Section 5.2: lost-sales correction already implemented/evaluated. Live use still needs daily stock/stockout information. Reuse; do not fabricate missing inputs or duplicate the fix.
+- Section 5.3: future-outcome model already benchmarked. MLP-002 is the new risk-to-stock-decision comparison, not rebuilding this benchmark.
+- Section 5.4: delivery-aware Low rule implemented/evaluated; three-day safety setting was reasoned, not validated as optimal. This informs MLP-001 and is not a test of the new four-horizon bands.
+- Section 5.5: new-product own-history/28-day gate implemented/evaluated. Preserve it in both new tasks; no unnecessary reimplementation.
+- Sections 5.6/5.7: paired transfer replay, region/target/reserve improvements and ablations already done. Reuse harness where compatible, but adding learned-risk stock decisions is new.
+- Section 5.8: forecast staleness/fallback fix already implemented/tested. Live daily inputs remain an integration issue, separate from model quality.
+- Section 5.9: repeated simulated worlds already done. Their inspected outputs are development evidence for newly tuned policies, not an untouched final test.
+- Section 6: paper/model attribution, related work, threshold explanation, units and claims remain writing/review work. New simulation tasks will not automatically fix the manuscript.
+- Section 7: historical GRC snapshot predates newer tasks. Use current GRC rather than treating its count as current.
+- Sections 8/9: real operating inputs, recording stock, temporary-tunnel access and eventual usability study are separate issues. Permanent hosting T8 was cancelled; do not resume it automatically.
+- Section 10: study sessions explain existing code and commands; they do not establish new validation evidence merely by being present.
+
+WALKTHROUGH RULE
+Do not launch MLP-001/002 experiments or parallel execution yet. Continue topic by topic with the user, merge duplicate concerns, then agree the final task list/dependencies and assignment. Preserve existing results; label all reported metrics as simulated evidence.
