@@ -1,7 +1,7 @@
 # Jiran ML: full breakdown (12 Nov 2026)
 
 Written for reading aloud and for working through step by step (e.g. with Codex voice mode).
-New to this? Read sections 0–2, then do the **study sessions in section 10**: each has commands to run and functions to look at.
+New to this? Read section 0, then **My concerns** (every question you asked and its answer), then sections 1–2, then do the **study sessions in section 10**: each has commands to run and functions to look at.
 Every claim points to a file and function so you can open it and check.
 All numbers come from **simulated** stores, not real retailers.
 
@@ -20,6 +20,59 @@ All numbers come from **simulated** stores, not real retailers.
    - forecasts in the live app are **no longer frozen**;
    - **repeat runs** on other simulated worlds give the same picture.
 5. Not done yet: user studies, real data, and updating the paper text.
+
+---
+
+## My concerns: what I asked, what was done, where to look
+
+Every concern you raised, in your words where possible. Status: ✅ done · 🟡 partly done · ❌ not done (with the reason).
+
+### A. Concerns from my friend's paper (FATIS)
+
+The reviewer's comments on your friend's traffic paper are explained in **section 6.1**. "Make sure we don't fall into the same problems" was checked point by point:
+
+| # | My friend's problem | Could Jiran have it? | What was done | Where | Status |
+|---|---|---|---|---|---|
+| A1 | Same results credited to two different models | Yes. We have a rule, an ensemble that copies the rule, and a benchmark ML model. | Wrote down exactly which component makes which number | Section 2 | 🟡 code and report done; paper text still to change (Session 12) |
+| A2 | Balancing data before the train/test split (leak) | Checked | Live training splits first, then adds synthetic rows to training only; the simulation does no resampling | Section 6.2, row 2; `train.py`, `augmentation.py` | ✅ no leak |
+| A3 | Test set too small (120 samples, ±7 points) | Yes, the 3-store data has only 35 test rows | Moved the evidence to 71,598 test rows in 200 unseen stores, with 95% intervals | Sections 4, 5.3 | ✅ |
+| A4 | One simulation run, no seeds or variance, an odd "116 minutes" | Yes, the first benchmark used one world | Re-ran everything on 5 worlds; mean ± SD; every number states its units and time window | Section 5.9 | ✅ |
+| A5 | Abstract promises more than was built | Yes. Our draft promises user studies (RQ1, RQ4) and "general resource allocation" | Listed what is answered (RQ2, RQ3, in simulation) and what moves to future work | Section 6.2 | 🟡 paper text to change |
+| A6 | Unsupported "why the baseline lost" claims | Possible | Every explanation is backed by a number (e.g. the rule labels 55% of items Low); stated that the ML model was not tuned | Section 6.2 | 🟡 paper wording to check |
+| A7 | No related work on the real contributions | Yes | Listed 6 references to add: transshipment, lost sales, Croston, error metrics, M5, Prophet | Section 6.2 | ❌ paper. Check each DOI yourself. |
+| A8 | Thresholds not justified, maybe tuned on test data | Possible | Recorded where each threshold came from; the ×2 donor reserve was chosen on a separate development world (seed 1001) | Sections 3, 5.7 | 🟡 paper to state it |
+| A9 | Undefined symbols, divide by zero | Yes | Guards documented: +0.1 in days of cover, minimum 7 days in the in-stock rate | Section 3, Session 3 | 🟡 paper to define them |
+| A10 | Arithmetic slip (0.04% vs 0.02%) | Possible | All report numbers are computed by script; relative % and percentage points kept separate | Section 6.2 | ✅ report; recheck any hand-copied number in the paper |
+| A11 | Unreadable figures | Possible | Horizontal bars, 2× PNG exports | HTML report | 🟡 |
+| A12 | Placeholders, broken citations, typos, "humble" | Yes. The acknowledgements still say "must be confirmed by all contributors" | Listed the fixes | Section 6.2 | ❌ paper |
+
+### B. My other concerns
+
+| # | My concern | What was done | Where | Status |
+|---|---|---|---|---|
+| B1 | "The percentages look sus" | Found why: the 3-store data is pure random noise; daily MAPE can't drop below ~71% even with perfect knowledge; the 0.99 F1 measured the model copying the rule | Sections 2, 5.1; Session 9 | ✅ |
+| B2 | "Needs a good standard, I need to submit this as a paper" | Test plan fixed before results (`PROTOCOL.md`), unseen stores, later dates, real outcomes, intervals, 5 worlds | Section 4 | ✅ for evidence; paper text still open |
+| B3 | "Use more stores / fake stores, scale it up to a thousand" | 1,000-store simulation, 119,834 store-products, one year | Section 4, Session 7 | ✅ |
+| B4 | "Demand prediction and stock classification should be unique to each store. 100 units can be too much in one store and low in another" | Already true: every forecast and label uses that store's own sales rate. Example: same product, 90 units = Low in store 952, 96 units = Dead in store 185 | Section 3, Session 3 | ✅ |
+| B5 | "What else am I missing?" | Found 6 gaps: transfers untested, lost sales, new products, delivery time, frozen forecasts, real data. Each is B6–B11 below | Section 5 | ✅ |
+| B6 | Transfers not tested: "test these in a simulation, give me outcome and improvements, implement simple ones" | Paired replay of the year; 5 simple improvements plus 2 bug fixes in `transfer_policy.py`. Lost sales prevented 5.0% → 9.1%; giver harm 16.6% → 9.6% (5 worlds) | Sections 5.6, 5.7; Session 6 | ✅ code; live once region and lead time are entered |
+| B7 | "Lost sales are hidden. Clearly fix this" | `forecasting.uncensor`, `inventory_policy.in_stock_rate`; under-forecast of true demand 21% → 13% | Section 5.2 | 🟡 code done; needs daily stock or stock-out days recorded live |
+| B8 | "New products: a unique case, wait to collect data, can't use other stores' data" | "New" label for under 28 days, own data only, excluded from transfers; dashboard tile and tab. The old rule's labels were almost all wrong for new products | Section 5.5 | ✅ (no product in today's data is under 28 days, so none shows yet) |
+| B9 | "Apply your logic" (delivery time) | Low = runs out before the next delivery + 3 days; warnings right 45% → 71% | Section 5.4 | ✅ code; live once lead time is entered |
+| B10 | "Unfreeze" forecasts | API refuses saved forecasts older than 7 days; refreshes from live data | Section 5.8 | ✅ live |
+| B11 | "I can't get real data at all" | Present it as a simulation study; publish generator, seed and checksums; 5 worlds; list what the simulation leaves out | Section 5.9 | ✅ (stated as a limitation) |
+| B12 | "I'm bad at testing ML models, the numbers are confusing, hard to explain to teammates" | Plain-language counts ("73 of 100 stock-outs caught"), glossary, voice-friendly report, 12 study sessions | Sections 0, 11; section 10 | ✅ |
+| B13 | "Be in sync with GRC, how many tasks, what's pending" | 13 tasks: 9 done, 1 cancelled, 3 open | Section 7 | ✅ |
+| B14 | "Cancel T8, I won't be able to do hosting" | Marked blocked/cancelled with a note; the paper must not claim stable hosting | Section 7 | ✅ |
+| B15 | "Push to git and make it go live" | Pushed (`b69d945`, `63a8fab`, `6655ae9`); migration applied; data reloaded; API restarted; pipeline verified | Section 9 | 🟡 public site offline: the tunnel stopped and Claude was not allowed to restart it. You run the 3 steps in section 9 |
+| B16 | "Explain everything, with commands and functions" | Study sessions 1–12 | Section 10 | ✅ |
+
+### What is still on me (short list)
+1. Restart the tunnel and redeploy the website (section 9).
+2. Enter real region and delivery-time values for the stores (Session 10).
+3. Start recording daily stock (for the lost-sales fix).
+4. Update the paper (rows A1, A5–A9, A11, A12 → Session 12).
+5. Confirm where the 3-store data came from (GRC T9).
 
 ---
 
