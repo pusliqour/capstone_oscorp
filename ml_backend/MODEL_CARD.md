@@ -101,3 +101,27 @@ Copies in `docs/mlp/figures/`: `fig_a6_fair_tuning`, `fig_a8_dead_60d_stability`
 | transfer coverage after | stock / (demand_30d + 0.1) | +0.1 |
 
 All of these are exercised at zero stock, zero sales, zero days and empty history in `tests/test_edge_guards.py`.
+
+## A7 — Method references (where each ML method in the code comes from)
+
+Each method used in the code, the file that uses it, and the published work it follows. Volume/page details are from
+memory and must be checked against the publisher page before they go into the paper (no DOIs are given here on purpose).
+
+| Method in the code | Where | Reference |
+|---|---|---|
+| Croston / SBA forecast for intermittent demand | `simulation/evaluate_forecasts.py` (`sba`) | Croston, J.D. (1972). Forecasting and stock control for intermittent demands. *Operational Research Quarterly* 23(3), 289–303. Syntetos, A.A. & Boylan, J.E. (2005). The accuracy of intermittent demand estimates. *International Journal of Forecasting* 21(2), 303–314. |
+| MASE (scaled error) | forecast metrics | Hyndman, R.J. & Koehler, A.B. (2006). Another look at measures of forecast accuracy. *International Journal of Forecasting* 22(4), 679–688. |
+| RMSSE, retail forecasting benchmark design | forecast metrics, simulation design | Makridakis, S., Spiliotis, E. & Assimakopoulos, V. (2022). M5 accuracy competition: Results, findings, and conclusions. *International Journal of Forecasting* 38(4), 1346–1364. |
+| Prophet | `forecasting.py` | Taylor, S.J. & Letham, B. (2018). Forecasting at scale. *The American Statistician* 72(1), 37–45. |
+| Lost-sales (censored demand) correction | `forecasting.uncensor`, `inventory_policy.in_stock_rate` | Nahmias, S. (1994). Demand estimation in lost sales inventory systems. *Naval Research Logistics* 41(6), 739–757. |
+| Lateral transshipment between stores | `transfer_policy.py`, `simulation/evaluate_transfers.py` | Paterson, C., Kiesmüller, G., Teunter, R. & Glazebrook, K. (2011). Inventory models with lateral transshipments: A review. *European Journal of Operational Research* 210(2), 125–136. |
+| Gradient-boosted trees (benchmark outcome model) | `simulation/evaluate_alerts.py`, `evaluate_tuning.py` | Ke, G. et al. (2017). LightGBM: A highly efficient gradient boosting decision tree. *NeurIPS 30*. Pedregosa, F. et al. (2011). Scikit-learn: Machine learning in Python. *JMLR* 12, 2825–2830. |
+| Precision–recall / PR-AUC for rare alerts | alert metrics | Saito, T. & Rehmsmeier, M. (2015). The precision-recall plot is more informative than the ROC plot when evaluating binary classifiers on imbalanced datasets. *PLoS ONE* 10(3), e0118432. |
+| Store-clustered bootstrap intervals | `evaluate_alerts.cluster_ci` | Cameron, A.C., Gelbach, J.B. & Miller, D.L. (2008). Bootstrap-based improvements for inference with clustered errors. *Review of Economics and Statistics* 90(3), 414–427. |
+| Brier score / reliability (calibration) | alert metrics | Brier, G.W. (1950). Verification of forecasts expressed in terms of probability. *Monthly Weather Review* 78(1), 1–3. |
+
+## A12 — Placeholders and typos (ML side)
+
+Checked 12 Nov: no TODO/FIXME/TBD/placeholder text and no common misspellings in `ml_backend/`, `docs/mlp/` or
+`docs/STOCK_PLANNING.md`. The placeholders the reviewer-style check found ("must be confirmed by all contributors") are in
+the manuscript, which Codex owns.
