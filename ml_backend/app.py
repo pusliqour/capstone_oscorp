@@ -195,6 +195,7 @@ class ProductInput(BaseModel):
     on_order: Optional[float] = Field(None, ge=0, le=1e12, description="Units ordered from the supplier but not yet received.")
     lead_time_days: Optional[float] = Field(None, ge=0, le=365, description="Supplier delivery time in days.")
     days_to_next_order: Optional[float] = Field(None, ge=0, le=365, description="Days until this store next places a supplier order (default 7).")
+    order_cycle_days: Optional[float] = Field(None, gt=0, le=365, description="How often this store orders from its supplier, in days (default 7 = weekly). Sets the width of the stock range and the donor reserve; not the same as days_to_next_order.")
     daily_sales: Optional[List[float]] = Field(None, max_length=730, description="Daily units sold, oldest first, ending today. Enables a fresh forecast.")
     daily_stock: Optional[List[float]] = Field(None, max_length=730, description="End-of-day stock aligned with daily_sales; marks stock-out days.")
 
@@ -257,9 +258,13 @@ class ProductPrediction(BaseModel):
     product_id:  str
     product_name: str
     prediction:  str      # Low | Optimum | Excess | Slow | Dead
-    confidence:  float    # ensemble support for the policy decision
+    confidence:  float    # ensemble probability for the policy label (agreement with the rule, not outcome accuracy)
     probabilities: dict   # all 5 class probabilities
-    decision_source: str = "stock_policy"
+    # Which component set `prediction` (concern A1): "new_product_gate" (under 28 days),
+    # "stock_policy_v2_delivery" (delivery-time Low test) or "stock_policy_v1" (fixed thresholds).
+    # The ML ensemble never sets the label; model_agrees only reports whether it reproduces it.
+    decision_source: str = "stock_policy_v1"
+    model_agrees: bool = True
     model_prediction: str
     demand_30d: float = 0.0
     demand_source: str = "observed_recent_sales"
@@ -602,6 +607,8 @@ def _run_predictions(products: List[ProductInput]):
             raw_probabilities, key=lambda label: raw_probabilities[label]
         )
         policy_label = stock_policy_label_v2(rows[i])
+        source = ("new_product_gate" if policy_label == "New" else
+                  "stock_policy_v2_delivery" if p.lead_time_days is not None else "stock_policy_v1")
         prob_dict = {
             label: round(value, 4) for label, value in raw_probabilities.items()
         }
@@ -613,11 +620,13 @@ def _run_predictions(products: List[ProductInput]):
             confidence=round(float(raw_probabilities.get(policy_label, 0.0)), 4),
             probabilities=prob_dict,
             model_prediction=model_label,
+            decision_source=source,
+            model_agrees=model_label == policy_label,
             demand_30d=float(rows[i]["forecast_30d"] if rows[i]["forecast_30d"] > 0 else max(p.recent_qty, 0.0)),
             demand_source=str(rows[i].get("forecast_method", "observed_recent_sales")),
             stock_plan=stock_planning_matrix(rows[i], p.stock_qty, age_days=p.age_days,
                 lead_time_days=p.lead_time_days,
-                review_days=p.days_to_next_order if p.days_to_next_order is not None else 7,
+                review_days=p.order_cycle_days if p.order_cycle_days is not None else 7,  # ordering cadence, not days until the next order
                 on_order=p.on_order or 0, policy_label=policy_label),
         ))
     return results
@@ -655,7 +664,7 @@ def _compute_recommendations(
                 wait = days_until_next_delivery(p.lead_time_days, 7.0 if p.days_to_next_order is None else p.days_to_next_order)
                 rec["target_stock"] = receiver_target_stock(rate, wait, p.on_order or 0.0)
             else:
-                rec["keep_stock"] = donor_reserve(rate, p.lead_time_days)
+                rec["keep_stock"] = donor_reserve(rate, p.lead_time_days, order_cycle_days=p.order_cycle_days or 7.0)
         records.append(rec)
     transfers, restocks = plan_transfers(records)
     return ([TransferRecommendation(**t) for t in transfers],

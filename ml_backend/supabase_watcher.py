@@ -158,7 +158,7 @@ def build_api_payload(rows: list[dict]) -> dict:
         })
         # Optional fields: passed through only when the Supabase view provides them.
         for key in ("region", "age_days", "stockout_days_30d", "on_order", "lead_time_days",
-                    "days_to_next_order", "daily_sales", "daily_stock"):
+                    "days_to_next_order", "order_cycle_days", "daily_sales", "daily_stock"):
             if r.get(key) is not None:
                 products[-1][key] = r[key]
     return {"products": products}
