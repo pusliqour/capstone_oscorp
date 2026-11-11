@@ -74,3 +74,6 @@ Use GRC at this canonical folder and read `AGENTS.md` and `DATA_SOURCES.json` to
 
 
 Latest requested implementation: stock planning matrices for 7/14/30/60 days are in API predictions, Supabase stock_plan JSON and Analytics → Stock Metrics. See docs/STOCK_PLANNING.md for formulas, assumptions and tests. Matrix bands are policy targets, not calibrated prediction intervals or proven optimality. Preserve Claude’s subsequent simulation/report work; stable hosting T8 was cancelled by user, so do not resume permanent-hosting work.
+
+
+12 November tunnel restoration: user explicitly requested restarting the temporary tunnel. New gateway https://note-pick-regular-history.trycloudflare.com points only to authenticated gateway 8787. All three accounts passed HTTPS gateway checks; Pages build b8bcb5f points to the new address. This restores temporary access, not permanent hosting T8. MLP experiments remain on hold pending the concerns walkthrough.

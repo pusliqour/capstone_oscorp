@@ -1,19 +1,18 @@
 # Handoff from codex
-_12 Nov 2026 02:30 · written by the agent itself_
+_12 Nov 2026 02:40 · written by the agent itself_
 
 ## Done
-Checked remaining report sections against actual evaluation code and stored results. Outcome ML/threshold selection/calibration already exist in 5.3; rule-based paired transfers in 5.6/5.7 and repeats in 5.9. Recorded narrowly scoped MLP-002 and report-overlap map; MLP-001/002 explicitly planning-only.
+Restored temporary public demo at user's request. New HTTPS gateway note-pick-regular-history.trycloudflare.com points only to authenticated gateway 8787. Pages b8bcb5f deployed. Three account/isolation/session HTTPS checks and public stock-matrix/archive/marketplace/archive-store browser tests passed. Credentials unchanged.
 
 ## Remaining
-Finish report walkthrough with user and reconcile all concerns BEFORE experiments/parallel execution. New gap is risk-informed stock-decision benefit beyond improved ranges, not rebuilding existing outcome prediction. Existing inspected worlds cannot serve as untouched final evidence.
+Continue user's MLP concern walkthrough. C1 review-cycle semantics remains unresolved; C2 stock_plan migration was applied previously. MLP-001/002 experiments remain on hold. Permanent hosting T8 still cancelled; Mac/tunnel must stay running.
 
 ## Next step
-Continue section-by-section voice explanation. Next report section 3 concerns per-store stock labels and shared thresholds. Refer to /Users/zoro/MLP and docs/mlp/MLP-002-task-and-overlap.txt. Do not launch queued experiments yet.
+Resume one recorded MLP concern at a time with the user. Public operational access is restored, not evidence that model-quality concerns are resolved.
 
 ## Files that matter
+- `docs/TEAM_DEMO.md`
+- `HANDOFF.md`
 - `/Users/zoro/MLP`
-- `docs/mlp/MLP-001-task.txt`
-- `docs/mlp/MLP-002-task-and-overlap.txt`
-- `breakdownreport.md`
-- `ml_backend/simulation/evaluate_alerts.py`
-- `ml_backend/simulation/evaluate_transfers.py`
+- `tests/stock_planning.cjs`
+- `tests/archive_app.cjs`

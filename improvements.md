@@ -96,3 +96,10 @@
 - Published matrix JSON atomically to Supabase and added expandable Analytics → Stock Metrics tables. Existing archive forecasts retain dated historical provenance.
 - Exposed lead-time, three-day safety and seven-day review assumptions; no statistical-confidence or proven-optimality claim. New products collect own-store history before receiving bounds; unconfirmed open-order arrivals are not credited.
 - Verified 41 backend tests, exact live API example, and all 6,135 stored matrices. Details: docs/STOCK_PLANNING.md.
+
+
+## 12 November — restore temporary public demo
+
+- Started replacement tunnel https://note-pick-regular-history.trycloudflare.com to the authenticated gateway only; rebuilt and published Pages b8bcb5f.
+- Verified all three team accounts over HTTPS, isolation and session rotation; public browser checks passed login, four-horizon stock matrix, archive/source browsing, marketplace and archive-store dashboards. Existing credentials unchanged.
+- Updated docs/TEAM_DEMO.md and handoff. Permanent hosting remains cancelled; MLP experiments remain queued pending concerns walkthrough.

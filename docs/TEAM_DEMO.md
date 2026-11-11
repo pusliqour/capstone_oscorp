@@ -3,8 +3,8 @@
 ## Current access
 
 - Team site: https://pusliqour.github.io/jiran/
-- HTTPS gateway: https://navy-genre-bind-fleece.trycloudflare.com
-- Pages commit: `666faccef60d9424cd070283bd601ddf92fb2a7b`
+- HTTPS gateway: https://note-pick-regular-history.trycloudflare.com
+- Pages commit: `b8bcb5f`
 - Credentials: `Private/operator/team-demo-credentials.json` (owner-only; not in Git)
 - Accounts: `research01@jiran.test`, `research02@jiran.test`, `research03@jiran.test`
 
@@ -51,7 +51,7 @@ The file hashes and workbook metadata are recorded in `Private/operator/DATA-PRO
 - Reproduce evaluation: `(cd ml_backend && ../.venv/bin/python evaluate.py)`
 - Run a new ML batch: `.venv/bin/python scripts/run_ml_batch.py`
 - Verify data isolation: `.venv/bin/python scripts/verify_demo.py`
-- Verify public gateway: `JIRAN_GATEWAY_URL=https://navy-genre-bind-fleece.trycloudflare.com .venv/bin/python scripts/verify_gateway.py`
+- Verify public gateway: `JIRAN_GATEWAY_URL=https://note-pick-regular-history.trycloudflare.com .venv/bin/python scripts/verify_gateway.py`
 
 Do not run `bootstrap_demo.py` just to refresh predictions. It rebuilds the dedicated demo accounts' storefront rows and removes their previous prediction mappings. Use the batch runner for predictions.
 

@@ -1,7 +1,7 @@
 {
-  "now": "Checked remaining report sections against actual evaluation code and stored results. Outcome ML/threshold selection/calibration already exist in 5.3; rule-based paired transfers in 5.6/5.7 and repeats in 5.9. Recorded narrowly scoped MLP-002 and report-overlap map; MLP-001/002 explicitly planning-only.",
-  "next": "Continue section-by-section voice explanation. Next report section 3 concerns per-store stock labels and shared thresholds. Refer to /Users/zoro/MLP and docs/mlp/MLP-002-task-and-overlap.txt. Do not launch queued experiments yet.",
+  "now": "Restored temporary public demo at user's request. New HTTPS gateway note-pick-regular-history.trycloudflare.com points only to authenticated gateway 8787. Pages b8bcb5f deployed. Three account/isolation/session HTTPS checks and public stock-matrix/archive/marketplace/archive-store browser tests passed. Credentials unchanged.",
+  "next": "Resume one recorded MLP concern at a time with the user. Public operational access is restored, not evidence that model-quality concerns are resolved.",
   "blocked": "",
   "last_agent": "codex",
-  "updated": "2026-11-12T02:30:41+04:00"
+  "updated": "2026-11-12T02:40:41+04:00"
 }
