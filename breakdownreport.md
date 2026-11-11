@@ -340,7 +340,7 @@ Done: T1–T7, T10, T13.
    - With region, delivery time and stock-out days empty, the API uses the old behaviour for those parts.
    - Live now regardless: forecast refresh (no saved forecast older than 7 days), the two transfer bug fixes, and the "New" logic.
 4. **ML API** (port 8001) restarted with the new code. End-to-end check: Supabase → `supabase_watcher.fetch_inventory()` → `build_api_payload()` → `/recommend` returned 175 predictions (Dead 70, Slow 35, Excess 33, Optimum 26, Low 11), 2 transfers and 10 restocks.
-5. **Git:** source committed and pushed to `fork` (pusliqour/capstone_oscorp), branch `recovery/jiran-archive-20261110`. Simulation data (`ml_backend/simulation/output/`) is git-ignored and can be rebuilt with `generate.py`.
+5. **Git:** source committed (`b69d945`) and pushed to `fork` (pusliqour/capstone_oscorp), branch `recovery/jiran-archive-20261110`. Simulation data (`ml_backend/simulation/output/`) is git-ignored and can be rebuilt with `generate.py`.
 
 ### Not done: needs you
 1. **The public website's backend is offline.** The Cloudflare quick tunnel (`navy-genre-bind-fleece.trycloudflare.com`) has stopped, so https://pusliqour.github.io/jiran/ cannot reach the Mac. Claude was not allowed to open a public tunnel itself (safety rule). To restore it, follow `docs/TEAM_DEMO.md` "Restart instructions":
