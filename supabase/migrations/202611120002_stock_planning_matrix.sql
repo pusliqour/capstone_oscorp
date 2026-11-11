@@ -24,4 +24,3 @@ begin
 end; $$;
 revoke all on function public.publish_ml_results(jsonb,jsonb,boolean) from public,anon,authenticated;
 grant execute on function public.publish_ml_results(jsonb,jsonb,boolean) to service_role;
-
