@@ -46,6 +46,10 @@ ARMS = {
     "improved_reserve_x1": dict(transfers=True, region=True, rate="instock", low="delivery", target="delivery", keep="delivery", new=True, keep_mult=1.0),
     # donor-protection variant rejected on development seed 1001 (halved the benefit)
     "improved+no_excess_donors": dict(transfers=True, region=True, rate="instock", low="delivery", target="delivery", keep="delivery", new=True, donors=("Slow", "Dead")),
+    # Task P1 (concern A8): thresholds chosen on validation in evaluate_tuning.py, 6/6 worlds
+    "improved+slow2.5": dict(transfers=True, region=True, rate="instock", low="delivery", target="delivery", keep="delivery", new=True, slow_cov=2.5),
+    "improved+dead30": dict(transfers=True, region=True, rate="instock", low="delivery", target="delivery", keep="delivery", new=True, dead_days=30.0),
+    "improved+slow2.5+dead30": dict(transfers=True, region=True, rate="instock", low="delivery", target="delivery", keep="delivery", new=True, slow_cov=2.5, dead_days=30.0),
     # ablations: region + one fix
     "region+instock_rate": dict(transfers=True, region=True, rate="instock", low="rule", target="rule", keep="rule", new=False),
     "region+delivery_low": dict(transfers=True, region=True, rate="all", low="delivery", target="rule", keep="rule", new=False),
@@ -53,15 +57,17 @@ ARMS = {
 }
 
 
-def rule_labels_vec(stock, f30, f7, recent, velocity, accel, days_since):
-    """Vectorised inventory_policy.stock_policy_label (checked against it in check_rule)."""
+def rule_labels_vec(stock, f30, f7, recent, velocity, accel, days_since, slow_cov=4.0, dead_cov=8.0, dead_days=90.0):
+    """Vectorised inventory_policy.stock_policy_label (checked against it in check_rule at the defaults).
+    slow_cov / dead_cov / dead_days are the thresholds swept in evaluate_tuning.py (concern A8, task P1);
+    the "or coverage > 0.75 x cut-off with low velocity" clauses scale with them (3 = 0.75 x 4, 6 = 0.75 x 8)."""
     d30 = np.where(f30 > 0, f30, np.maximum(recent, 1.0)); d7 = np.where(f7 > 0, f7, np.maximum(recent / 4.0, 1.0))
     cov = stock / (d30 + 1); ds = stock / (d30 / 30 + 0.1); risk = stock < d7
     lab = np.full(stock.shape, "Optimum", dtype=object)
-    excess = (cov > 2.0) & (cov <= 4.0) & (velocity > 0.5); lab[excess] = "Excess"
+    excess = (cov > 2.0) & (cov <= slow_cov) & (velocity > 0.5); lab[excess] = "Excess"
     low = (cov < 0.6) | (ds < 14) | ((cov < 0.8) & (accel > 1.2)) | risk; lab[low] = "Low"
-    slow = (cov > 4) | (ds > 120) | ((cov > 3) & (velocity < 0.5)); lab[slow] = "Slow"
-    dead = (cov > 8) | (ds > 180) | (days_since > 90) | ((cov > 6) & (velocity < 0.2)); lab[dead] = "Dead"
+    slow = (cov > slow_cov) | (ds > 120) | ((cov > 0.75 * slow_cov) & (velocity < 0.5)); lab[slow] = "Slow"
+    dead = (cov > dead_cov) | (ds > 180) | (days_since > dead_days) | ((cov > 0.75 * dead_cov) & (velocity < 0.2)); lab[dead] = "Dead"
     return lab
 
 
@@ -109,7 +115,8 @@ def transfer_round(T, W, cfg, S, ST, TX, on_hand, on_order, last_sale):
     velocity = (recent / np.maximum(rtx, 1)) / (hist / np.maximum(htx, 1) + 0.1)
     f30, f7 = rate * 30, rate * 7
     days_since = np.where(last_sale >= 0, T - last_sale, np.maximum(T - W["launch"], 0))
-    lab = rule_labels_vec(on_hand.astype(float), f30, f7, recent.astype(float), velocity, (f7 / 7) / (f30 / 30 + 0.1), days_since)
+    lab = rule_labels_vec(on_hand.astype(float), f30, f7, recent.astype(float), velocity, (f7 / 7) / (f30 / 30 + 0.1), days_since,
+                          **{k: cfg[k] for k in ("slow_cov", "dead_cov", "dead_days") if k in cfg})
     dow = (START + pd.Timedelta(days=T + 1)).day_of_week
     to_next_order = (W["review"] - dow) % 7 + 1          # tomorrow counts as 1
     until_delivery = to_next_order + W["lead"] + 0.5     # + mean delivery jitter

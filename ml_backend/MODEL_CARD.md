@@ -62,7 +62,29 @@ The vectorised rule used for the sweep reproduces the shipped rule exactly (agre
 but (1) both values sit at the edge of the grid, so the best value may lie further out; (2) they move the rule toward the
 target definitions themselves (excess = stock > next 60 days' sales ≈ coverage > 2; dead = no sale in 60 days), so part of
 the gain is definitional; (3) more Dead/Slow labels mean more donor stock in transfers, which must be re-checked in the
-paired transfer replay before going live. Status: justified with evidence; adoption pending a transfer-replay check.
+paired transfer replay before going live.
+
+**Task P1 — transfer replay with the tuned thresholds (done 12 Nov).** `evaluate_transfers.py` arms `improved+slow2.5`,
+`improved+dead30`, `improved+slow2.5+dead30`; development world 1001 first, then the main world (same direction in both):
+
+| Arm (main world) | Lost sales prevented | Giver stock-outs caused | Stores worse off | Dead stock cleared |
+|---|---|---|---|---|
+| Improved engine (live) | 8.3% | 9.8% | 227 | 71% |
+| + Slow 2.5 | 8.2% | 10.9% | 252 | 78% |
+| + Dead after 30 days | 7.8% | 12.7% | 291 | 80% |
+| + both | 7.8% | 13.0% | 297 | 83% |
+
+The thresholds that give better *alerts* make more stock count as spare, so transfers clear more dead stock but prevent
+slightly fewer lost sales and cause more stock-outs at the giving store. This is a trade-off, not an improvement.
+**Decision: keep the live thresholds** (they protect sales and givers). Switching is an owner choice (service level vs
+dead-stock clearing); the evidence and arms are in place to switch. Results: `output/results/transfers_p1.json`,
+`dev1001_transfers_p1.json`; chart `docs/mlp/figures/fig_p1_transfers.png`.
+
+## A11 — Readable figures
+
+`simulation/make_figures.py` draws the ML evidence from the results JSON (no re-runs): horizontal bars, value printed on
+every bar, 95% store-clustered whiskers, one axis per chart, colour-blind-safe order, legend always shown, 300 dpi PNG + SVG.
+Copies in `docs/mlp/figures/`: `fig_a6_fair_tuning`, `fig_a8_dead_60d_stability`, `fig_a8_excess_60d_stability`, `fig_p1_transfers`.
 
 ## A9 — Definitions and divide-by-zero guards
 
