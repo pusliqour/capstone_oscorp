@@ -30,7 +30,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from xgboost import XGBClassifier
 
-from inventory_policy import policy_metrics, stock_policy_label
+from inventory_policy import no_sale_days, policy_metrics, stock_policy_label
 from augmentation import PolicyAugmentedClassifier
 
 warnings.filterwarnings("ignore")
@@ -299,6 +299,14 @@ sf = sf.merge(
 sf = sf.merge(temporal, on=["store_id", "product_id"], how="left")
 sf = sf.merge(store_stats, on="store_id", how="left")
 sf = sf.merge(product_store, on=["store_id", "product_id"], how="left")
+# Never-sold stock rows: censor recency at the observed history length instead
+# of letting fillna(0) claim they sold today.
+history_days = (transactions["timestamp"].max() - transactions["timestamp"].min()).days
+never_sold = sf["days_since_last_sale"].isna()
+sf.loc[never_sold, "days_since_last_sale"] = no_sale_days(history_days)
+sf["is_active"] = (sf["days_since_last_sale"] <= 7).astype(int)
+sf["is_dormant"] = (sf["days_since_last_sale"] > 90).astype(int)
+print(f"  Never-sold stock rows: {int(never_sold.sum())} (recency set to {history_days} days)")
 sf = sf.fillna(0)
 
 # -- Derived features (used for both labeling and training) --
@@ -434,7 +442,8 @@ validation = cross_validate(
     PolicyAugmentedClassifier(clone(ensemble)),
     X_train, y_train, groups=groups.iloc[train_idx], cv=cv,
     scoring={"macro_f1": "f1_macro", "accuracy": "accuracy"},
-    return_train_score=True, error_score="raise", n_jobs=1,
+    return_train_score=True, return_estimator=True, return_indices=True,
+    error_score="raise", n_jobs=1,
 )
 cv_scores = validation["test_accuracy"]
 print("  Validation macro F1:", validation["test_macro_f1"].tolist())
@@ -442,7 +451,6 @@ print("  Validation macro F1:", validation["test_macro_f1"].tolist())
 # --- Final fit on full training set with balanced sample weights ---
 print("\n  Fitting final model on train split (balanced sample weights)...")
 t1 = time.time()
-sample_weights = compute_sample_weight("balanced", y_train)
 augmented_model = PolicyAugmentedClassifier(ensemble).fit(X_train, y_train)
 ensemble = augmented_model.model_
 scaler = augmented_model.scaler_
@@ -461,6 +469,49 @@ print(f"\n{classification_report(y_test, y_pred)}")
 
 # This measures agreement with rule-generated labels, not business ground truth.
 labels = sorted(y.unique())
+
+# Permutation importance on each grouped validation fold (held-out rows only).
+# Impurity importance from one tree model is biased toward continuous,
+# correlated features, so it is no longer the reported ranking.
+from sklearn.inspection import permutation_importance
+print("\n  Permutation importance on grouped validation folds...")
+perm = []
+for est, val_idx in zip(validation["estimator"], validation["indices"]["test"]):
+    r = permutation_importance(est, X_train.iloc[val_idx], y_train.iloc[val_idx],
+                               scoring="f1_macro", n_repeats=10, random_state=42, n_jobs=1)
+    perm.append(r.importances_mean)
+perm = np.mean(perm, axis=0)
+
+# Repeated product-grouped CV over all rows gives a less fragile estimate than
+# one 35-row holdout that has already been inspected.
+def grouped_oof(columns, seeds=(0, 1, 2, 3, 4)):
+    scores, pooled_true, pooled_pred = [], [], []
+    for seed in seeds:
+        folds = StratifiedGroupKFold(n_splits=3, shuffle=True, random_state=seed)
+        pred = pd.Series(index=y.index, dtype=object)
+        for tr, te in folds.split(X, y, groups):
+            m = PolicyAugmentedClassifier(clone(ensemble_template), columns=columns).fit(X.iloc[tr], y.iloc[tr])
+            pred.iloc[te] = m.predict(X.iloc[te])
+        scores.append(f1_score(y, pred, average="macro", labels=labels, zero_division=0))
+        pooled_true.append(y.to_numpy()); pooled_pred.append(pred.to_numpy())
+    t, p = np.concatenate(pooled_true), np.concatenate(pooled_pred)
+    rng = np.random.default_rng(42); n = len(y)
+    boot = [f1_score(t[i], p[i], average="macro", labels=labels, zero_division=0)
+            for i in (rng.integers(0, len(t), len(t)) for _ in range(1000))]
+    return {"per_repeat_macro_f1": scores, "mean": float(np.mean(scores)),
+            "ci95": [float(np.quantile(boot, .025)), float(np.quantile(boot, .975))],
+            "confusion_matrix": confusion_matrix(t, p, labels=labels).tolist(),
+            "classification_report": classification_report(t, p, labels=labels, output_dict=True, zero_division=0)}
+
+ensemble_template = VotingClassifier(estimators=[("rf", rf), ("gb", gb), ("xgb", xgb)], voting="soft", n_jobs=-1)
+# Target-leakage check: the label is a fixed function of these inputs.
+RULE_INPUTS = ["coverage_30d_feat", "days_of_stock_30d_feat", "stockout_risk_7d", "days_since_over_90", "is_dormant"]
+print("  Repeated grouped CV (5x3), all features...")
+repeated_full = grouped_oof(None)
+print("  Repeated grouped CV (5x3), without the rule's own inputs...")
+repeated_ablation = grouped_oof([c for c in FEATURE_COLS if c not in RULE_INPUTS])
+print("   full:", round(repeated_full["mean"], 3), repeated_full["ci95"],
+      " no-rule-inputs:", round(repeated_ablation["mean"], 3), repeated_ablation["ci95"])
 baseline = DummyClassifier(strategy="most_frequent").fit(X_train, y_train)
 metrics = {
     "training_only_synthetic_rows": augmented_model.synthetic_rows_,
@@ -479,16 +530,22 @@ metrics = {
     "validation_train_macro_f1": validation["train_macro_f1"].tolist(),
     "labels": labels, "confusion_matrix": confusion_matrix(y_test, y_pred, labels=labels).tolist(),
     "classification_report": classification_report(y_test, y_pred, labels=labels, output_dict=True, zero_division=0),
+    "repeated_grouped_cv_5x3": repeated_full,
+    "leakage_ablation_without_rule_inputs": {"removed": RULE_INPUTS, **repeated_ablation},
+    "never_sold_rows": int(never_sold.sum()),
     "limitations": ["Only three stores", "One stock snapshot", "Forecast accuracy needs temporal backtesting", "Rule agreement is not business effectiveness"],
 }
 with open(os.path.join(MODELS_DIR, "evaluation.json"), "w") as f:
     json.dump(metrics, f, indent=2)
 sf.to_csv(os.path.join(MODELS_DIR, "training_features.csv"), index=False)
 
-# Feature importance from RF base learner
+# Reported ranking: mean drop in held-out macro F1 when a feature is shuffled.
+# RF impurity importance is kept as a second column for comparison only.
 rf_model = ensemble.named_estimators_["rf"]
 feature_importance = (
-    pd.DataFrame({"feature": FEATURE_COLS, "importance": rf_model.feature_importances_})
+    pd.DataFrame({"feature": FEATURE_COLS, "importance": perm,
+                  "method": "permutation_f1_drop_grouped_cv",
+                  "rf_impurity_importance": rf_model.feature_importances_})
     .sort_values("importance", ascending=False)
 )
 print("Top 10 features:")
@@ -510,6 +567,8 @@ joblib.dump(le_category, os.path.join(MODELS_DIR, "label_encoder.pkl"))
 print("  Saved: label_encoder.pkl")
 
 # Save updated forecasts with derived forecast features
+# When these forecasts were made; the API stops trusting them after FORECAST_MAX_AGE_DAYS.
+forecasts["generated_at"] = pd.Timestamp.now(tz="UTC").isoformat()
 forecasts.to_csv(os.path.join(MODELS_DIR, "forecasts_aggregated.csv"), index=False)
 print("  Saved: forecasts_aggregated.csv (with acceleration + trend flags)")
 

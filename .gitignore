@@ -68,3 +68,6 @@ archive_recovery/
 /Private
 /.deploy/
 /Deployment
+
+# Simulated benchmark data (regenerate with ml_backend/simulation/generate.py)
+ml_backend/simulation/output/

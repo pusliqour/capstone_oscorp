@@ -456,6 +456,7 @@ export default function AnalyticsPage() {
     Dead: 0,
     Excess: 0,
     Low: 0,
+    New: 0,
     Optimum: 0,
     Slow: 0,
   });
@@ -640,6 +641,7 @@ export default function AnalyticsPage() {
           Dead: 0,
           Excess: 0,
           Low: 0,
+          New: 0,
           Optimum: 0,
           Slow: 0,
         };
@@ -1057,6 +1059,12 @@ export default function AnalyticsPage() {
                   sub="Stock policy"
                   tone="purple"
                 />
+                <KPI
+                  label="New"
+                  value={predictionCounts.New}
+                  sub="Collecting data (<28 days)"
+                  tone="slate"
+                />
               </div>
             )}
           </div>
@@ -1117,6 +1125,7 @@ export default function AnalyticsPage() {
                             color: "#10b981",
                           },
                           { id: "Slow", label: "Slow", color: "#6366f1" },
+                          { id: "New", label: "New", color: "#64748b" },
                         ].map((tab) => (
                           <button
                             key={tab.id}

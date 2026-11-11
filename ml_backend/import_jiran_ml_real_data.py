@@ -60,6 +60,15 @@ INVENTORY_COLUMNS = [
     "days_since_last_sale",
     "store_total_txns",
     "updated_at",
+    # Optional policy inputs. Only age_days can be derived from these exports;
+    # region, stock-out days, open orders and lead time are not in the source
+    # and stay null (the API then keeps its previous behaviour for them).
+    "age_days",
+    "region",
+    "stockout_days_30d",
+    "on_order",
+    "lead_time_days",
+    "days_to_next_order",
 ]
 
 
@@ -291,6 +300,7 @@ def build_ml_inventory(
             total_sold=("quantity", "sum"),
             num_sales=("quantity", "count"),
             last_sale_ts=("timestamp", "max"),
+            first_sale_ts=("timestamp", "min"),
         )
         .reset_index()
     )
@@ -317,6 +327,12 @@ def build_ml_inventory(
     inventory["days_since_last_sale"] = (
         (as_of - inventory["last_sale_ts"]).dt.total_seconds() / 86400
     ).clip(lower=0).fillna(999).round(2)
+    # Days on sale here, measured from the first recorded sale (a lower bound:
+    # the product may have been stocked before it first sold). Never sold -> null.
+    inventory["first_sale_ts"] = pd.to_datetime(inventory["first_sale_ts"], utc=True, errors="coerce")
+    inventory["age_days"] = ((as_of - inventory["first_sale_ts"]).dt.total_seconds() / 86400).clip(lower=0).round(2)
+    for col in ("region", "stockout_days_30d", "on_order", "lead_time_days", "days_to_next_order"):
+        inventory[col] = None
     numeric = [
         "recent_qty",
         "recent_txns",

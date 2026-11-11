@@ -1,0 +1,77 @@
+@startuml Jiran_Component_Diagram
+' UML component diagram for Jiran, production (ship-ready) view
+skinparam componentStyle uml2
+left to right direction
+
+package "Client (browser)" {
+  component "Jiran Web App\nReact + Vite\nstatic hosting / CDN" as WebApp {
+    component "UI Pages" as Pages
+    component "Auth & Routing\nAuthContext, route guards" as AuthUI
+    component "Supabase Client\nsupabase-js" as SbClient
+  }
+}
+
+package "Admin / developer access" {
+  component "Admin Console\nSupabase Studio" as Studio
+  component "ML Job Runner\nrun_ml_batch.py" as JobRunner
+  component "Research Lab API\narchive_lab_api.py" as LabAPI
+}
+
+package "Supabase platform" {
+  interface "Supabase API\n(Auth, REST, RPC, Realtime, Functions)" as SbAPI
+  interface "Admin & service-role API" as SvcAPI
+  component "Edge Functions\npos-sync, connect-square,\npos-switch-provider" as EdgeFn
+  component "Auth (GoTrue)" as SbAuth
+  component "Realtime" as Realtime
+  component "PostgREST" as PostgREST
+  database "PostgreSQL" as PG {
+    folder "public schema" as PublicSchema
+    folder "jiran_archive_lab schema" as LabSchema
+  }
+}
+
+package "ML services (Python / FastAPI)" {
+  component "ML Service" as MLService {
+    component "Supabase Watcher" as Watcher
+    component "Result Publisher" as Publisher
+    component "Prediction API\n/predict-stock /recommend" as PredAPI
+    component "Inventory Policy" as Policy
+    component "Classifier Models\nXGBoost, RF, GBM" as Models
+    component "Forecasting\nProphet" as Forecast
+  }
+  artifact "Model Store\nsaved_models/" as ModelStore
+}
+
+package "External systems & data" {
+  component "Square POS API" <<external>> as Square
+  component "ERP & CSV files\nERPNext, Odoo" <<external>> as ErpFiles
+  component "ERP Import Tool\ntools/resource_import.py" as ErpTool
+}
+
+Pages ..> AuthUI
+Pages ..> SbClient
+AuthUI ..> SbClient
+SbClient --( SbAPI : public API, row-level security
+SbAPI - EdgeFn
+SbAPI - SbAuth
+SbAPI - Realtime
+SbAPI - PostgREST
+SvcAPI - PostgREST
+EdgeFn --> PG
+SbAuth --> PG
+Realtime --> PG
+PostgREST --> PG
+EdgeFn --> Square
+Studio --( SvcAPI
+JobRunner --( SvcAPI
+LabAPI --( SvcAPI
+Watcher --( SvcAPI : polls ml_triggers
+Publisher --( SvcAPI : publish_ml_results()
+Watcher ..> PredAPI : /recommend
+Watcher ..> Publisher
+PredAPI ..> Policy
+PredAPI ..> Models
+Models ..> Forecast
+Models ..> ModelStore : loads
+ErpFiles ..> ErpTool
+@enduml

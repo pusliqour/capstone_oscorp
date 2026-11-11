@@ -20,7 +20,7 @@ from sklearn.metrics import classification_report, f1_score
 logging.getLogger('cmdstanpy').setLevel(logging.WARNING)
 
 
-def forecast_backtest(transactions, top_pairs=10, horizon=14):
+def forecast_backtest(transactions, top_pairs=None, horizon=14):
     transactions=transactions.copy()
     transactions['day']=pd.to_datetime(transactions['timestamp'],utc=True).dt.tz_localize(None).dt.normalize()
     latest=transactions.day.max()
@@ -28,8 +28,11 @@ def forecast_backtest(transactions, top_pairs=10, horizon=14):
     for lag in (horizon*2,horizon):
         cutoff=latest-pd.Timedelta(days=lag)
         history=transactions[transactions.day<=cutoff]
-        # Select series using training history only.
-        pairs=history.groupby(['store_id','product_id']).quantity.sum().nlargest(top_pairs).index
+        # Select series using training history only. Default: every series with
+        # past sales. "Top N by past volume" over-weights recent spikes and
+        # makes forecasts look biased upward (regression to the mean).
+        volume=history.groupby(['store_id','product_id']).quantity.sum()
+        pairs=volume.index if top_pairs is None else volume.nlargest(top_pairs).index
         for store,product in pairs:
             series=transactions[(transactions.store_id==store)&(transactions.product_id==product)].groupby('day').quantity.sum()
             train=series.reindex(pd.date_range(series.index.min(),cutoff),fill_value=0)

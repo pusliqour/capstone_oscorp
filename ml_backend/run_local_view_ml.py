@@ -8,6 +8,8 @@ import pandas as pd
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE_DIR)
+from inventory_policy import no_sale_days  # noqa: E402
 DEFAULT_INVENTORY = "/Users/muhammadabdulmohsin/Downloads/v_inventory_snapshot.json"
 DEFAULT_PRODUCTS = "/Users/muhammadabdulmohsin/Downloads/v_store_products.json"
 DEFAULT_TRANSACTIONS = "/Users/muhammadabdulmohsin/Downloads/v_store_transactions.json"
@@ -105,7 +107,7 @@ def aggregate_transactions(transactions: pd.DataFrame) -> Dict[str, pd.DataFrame
     )
     totals["days_since_last_sale"] = (
         (max_ts - totals["last_sale_ts"]).dt.total_seconds() / 86400.0
-    ).fillna(0.0)
+    )
     totals = totals.drop(columns=["last_sale_ts"])
 
     store_txns = (
@@ -163,6 +165,12 @@ def build_model_input(
         "stock_qty",
         "retail_price",
     ]
+    # Never-sold rows: censor recency at the history length (0 would mean "sold today").
+    tx = txn_aggs["transactions"]["timestamp"].dropna()
+    history_days = float((tx.max() - tx.min()).days) if len(tx) else 0.0
+    model_input["days_since_last_sale"] = pd.to_numeric(
+        model_input["days_since_last_sale"], errors="coerce"
+    ).fillna(no_sale_days(history_days))
     for col in numeric_cols:
         model_input[col] = pd.to_numeric(model_input[col], errors="coerce").fillna(0.0)
 

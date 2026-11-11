@@ -32,7 +32,14 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, model_validator
 from typing import List, Optional, Dict
 
-from inventory_policy import policy_metrics, stock_policy_label
+import time
+
+from inventory_policy import (days_until_next_delivery, donor_reserve, in_stock_rate, policy_metrics,
+                              receiver_target_stock, stock_policy_label_v2)
+
+# Saved forecasts older than this are not used; the live 30-day rate from the
+# request replaces them until the model is retrained ("unfrozen" forecasts).
+FORECAST_MAX_AGE_DAYS = float(os.getenv("JIRAN_FORECAST_MAX_AGE_DAYS", "7"))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -180,6 +187,16 @@ class ProductInput(BaseModel):
     # Days since last transaction
     days_since_last_sale: float = Field(0.0, ge=0, le=1e12)
 
+    # --- Optional inputs (12 Nov 2026). Leave them out and behaviour is unchanged. ---
+    region: Optional[str] = Field(None, description="Neighbourhood/region. Transfers stay within one region.")
+    age_days: Optional[float] = Field(None, ge=0, le=1e6, description="Days since this product was first stocked in this store. Under 28 = 'New'.")
+    stockout_days_30d: Optional[float] = Field(None, ge=0, le=30, description="Days in the last 30 with zero stock (lost-sales correction).")
+    on_order: Optional[float] = Field(None, ge=0, le=1e12, description="Units ordered from the supplier but not yet received.")
+    lead_time_days: Optional[float] = Field(None, ge=0, le=365, description="Supplier delivery time in days.")
+    days_to_next_order: Optional[float] = Field(None, ge=0, le=365, description="Days until this store next places a supplier order (default 7).")
+    daily_sales: Optional[List[float]] = Field(None, max_length=730, description="Daily units sold, oldest first, ending today. Enables a fresh forecast.")
+    daily_stock: Optional[List[float]] = Field(None, max_length=730, description="End-of-day stock aligned with daily_sales; marks stock-out days.")
+
     # Total transactions for this store (used to size the store)
     store_total_txns: float = Field(
         0.0, ge=0, le=1e12,
@@ -302,20 +319,9 @@ class RecommendResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Recommendation constants
+# Recommendation constants live in transfer_policy.py (shared with the simulation)
 # ---------------------------------------------------------------------------
-
-# After a transfer, target coverage for the receiving store
-OPTIMUM_TARGET_COVERAGE = 1.5   # 1.5x 30-day demand = healthy optimum
-
-# Minimum coverage a sending store must retain after donating stock
-OPTIMUM_MIN_COVERAGE_AFTER = 0.9  # keep at least ~27 days of demand
-
-# Labels that can donate stock
-DONOR_LABELS   = {"Excess", "Slow", "Dead"}
-
-# Labels that need to receive stock
-RECEIVE_LABELS = {"Low"}
+from transfer_policy import DONOR_LABELS, RECEIVE_LABELS, plan_transfers  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -330,39 +336,73 @@ def encode_category(category: str) -> float:
     return -1.0
 
 
-def get_forecast_features(store_id: str, product_id: str) -> dict:
+def _forecast_age_days(row) -> float:
+    stamp = row.get("generated_at") if hasattr(row, "get") else None
+    if isinstance(stamp, str) and stamp:
+        return (pd.Timestamp.now(tz="UTC") - pd.Timestamp(stamp)).total_seconds() / 86400
+    path = os.path.join(MODELS_DIR, "forecasts_aggregated.csv")
+    return (time.time() - os.path.getmtime(path)) / 86400 if os.path.exists(path) else float("inf")
+
+
+def _rate_features(daily_rate: float, method: str, seven_day_rate: float | None = None) -> dict:
+    r7 = daily_rate if seven_day_rate is None else seven_day_rate
+    return {
+        "forecast_method": method,
+        "forecast_7d": 7 * r7, "forecast_14d": 14 * daily_rate,
+        "forecast_30d": 30 * daily_rate, "forecast_60d": 60 * daily_rate,
+        "forecast_acceleration": r7 / (daily_rate + 0.1),
+        "forecast_confidence_30d": 0.0, "is_trending_up": 0, "is_trending_down": 0, "is_stable": 1,
+    }
+
+
+def live_daily_rate(p: "ProductInput") -> float:
+    """Recent units/day from the request, counting only days the item was in stock."""
+    if p.daily_sales:
+        sales = np.asarray(p.daily_sales[-28:], dtype=float)
+        if p.daily_stock and len(p.daily_stock) == len(p.daily_sales):
+            stock = np.asarray(p.daily_stock[-28:], dtype=float)
+            return in_stock_rate(sales.sum(), len(sales), float((stock <= 0).sum()))
+        return float(sales.mean())
+    return in_stock_rate(p.recent_qty, 30, p.stockout_days_30d or 0.0)
+
+
+def get_forecast_features(p: "ProductInput") -> dict:
+    """Forecast features for one store-product, never older than FORECAST_MAX_AGE_DAYS.
+
+    1. daily_sales in the request -> fresh forecast now (weekly-naive vs 28-day
+       mean, chosen on the last 28 days; stock-out days excluded from the mean).
+    2. saved training forecast, if it is recent enough.
+    3. otherwise the live 30-day in-stock rate from the request.
     """
-    Look up Prophet forecast features from saved forecasts.
-    Returns zeros if this store-product pair wasn't in the top-100 trained set.
-    """
-    key = (store_id, product_id)
+    if p.daily_sales and len(p.daily_sales) >= 56:
+        from forecasting import selected_forecast, uncensor  # imports Prophet; only load when needed
+        values = np.asarray(p.daily_sales, dtype=float)
+        if p.daily_stock and len(p.daily_stock) == len(p.daily_sales):
+            values = uncensor(values, p.daily_stock)  # stock-out days: hidden demand -> in-stock mean
+        sales = pd.Series(values, index=pd.date_range(end=pd.Timestamp.today().normalize(), periods=len(values)))
+        fc = selected_forecast(sales, 60, methods=("weekly_naive", "recent_mean"))
+        v = fc["values"]
+        feats = _rate_features(v[:30].mean(), f"live_{fc['method']}", v[:7].mean())
+        feats.update({"forecast_7d": float(v[:7].sum()), "forecast_14d": float(v[:14].sum()),
+                      "forecast_30d": float(v[:30].sum()), "forecast_60d": float(v.sum())})
+        return feats
+    key = (p.store_id, p.product_id)
     if key in forecasts_df.index:
         row = forecasts_df.loc[key]
-        return {
-            "forecast_method": str(row.get("forecast_method", "prophet")),
-            "forecast_7d":  float(row.get("forecast_7d",  0)),
-            "forecast_14d": float(row.get("forecast_14d", 0)),
-            "forecast_30d": float(row.get("forecast_30d", 0)),
-            "forecast_60d": float(row.get("forecast_60d", 0)),
-            "forecast_acceleration":    float(row.get("forecast_acceleration",    1.0)),
-            "forecast_confidence_30d":  float(row.get("forecast_confidence_30d",  0.0)),
-            "is_trending_up":   int(row.get("is_trending_up",   0)),
-            "is_trending_down": int(row.get("is_trending_down", 0)),
-            "is_stable":        int(row.get("is_stable",        1)),
-        }
-    # Fallback: estimate forecast from recent sales velocity
-    return {
-        "forecast_method": "observed_recent_sales",
-        "forecast_7d":  0.0,
-        "forecast_14d": 0.0,
-        "forecast_30d": 0.0,
-        "forecast_60d": 0.0,
-        "forecast_acceleration":   1.0,
-        "forecast_confidence_30d": 0.0,
-        "is_trending_up":   0,
-        "is_trending_down": 0,
-        "is_stable":        1,
-    }
+        if _forecast_age_days(row) <= FORECAST_MAX_AGE_DAYS:
+            return {
+                "forecast_method": str(row.get("forecast_method", "prophet")),
+                "forecast_7d":  float(row.get("forecast_7d",  0)),
+                "forecast_14d": float(row.get("forecast_14d", 0)),
+                "forecast_30d": float(row.get("forecast_30d", 0)),
+                "forecast_60d": float(row.get("forecast_60d", 0)),
+                "forecast_acceleration":    float(row.get("forecast_acceleration",    1.0)),
+                "forecast_confidence_30d":  float(row.get("forecast_confidence_30d",  0.0)),
+                "is_trending_up":   int(row.get("is_trending_up",   0)),
+                "is_trending_down": int(row.get("is_trending_down", 0)),
+                "is_stable":        int(row.get("is_stable",        1)),
+            }
+    return _rate_features(live_daily_rate(p), "observed_recent_sales")
 
 
 def get_store_features(store_id: str, store_total_txns_input: float) -> dict:
@@ -446,7 +486,7 @@ def build_feature_row(p: ProductInput) -> dict:
     # coverage_30d_feat and days_since_over_90 are added after fc is known
 
     # -- Forecast features (from saved Prophet outputs) --
-    fc = get_forecast_features(p.store_id, p.product_id)
+    fc = get_forecast_features(p)
 
     # -- Explicit boundary features (mirrors label-rule metrics exactly) --
     forecast_30d = fc.get("forecast_30d", 0)
@@ -502,6 +542,12 @@ def build_feature_row(p: ProductInput) -> dict:
         "days_since_over_90":     days_since_over_90,
         "days_of_stock_30d_feat": metrics["days_of_stock_30d_feat"],
         "stockout_risk_7d":       metrics["stockout_risk_7d"],
+        # Inputs for stock_policy_label_v2 only (not model features)
+        "age_days":           p.age_days,
+        "lead_time_days":     p.lead_time_days,
+        "days_to_next_order": p.days_to_next_order,
+        "on_order":           p.on_order or 0.0,
+        "daily_rate":         fc.get("forecast_30d", 0) / 30 if fc.get("forecast_30d", 0) > 0 else live_daily_rate(p),
     }
     return row
 
@@ -553,7 +599,7 @@ def _run_predictions(products: List[ProductInput]):
         model_label = max(
             raw_probabilities, key=lambda label: raw_probabilities[label]
         )
-        policy_label = stock_policy_label(rows[i])
+        policy_label = stock_policy_label_v2(rows[i])
         prob_dict = {
             label: round(value, 4) for label, value in raw_probabilities.items()
         }
@@ -576,201 +622,38 @@ def _demand_30d(p: ProductInput) -> float:
     Best estimate of 30-day demand for a product-store pair.
     Uses Prophet forecast if available, falls back to recent_qty (actual sales).
     """
-    fc = get_forecast_features(p.store_id, p.product_id)
+    fc = get_forecast_features(p)
     if fc["forecast_30d"] > 0:
         return fc["forecast_30d"]
     # Fallback: use last 30 days of actual sales
     return max(p.recent_qty, 1.0)
 
 
-def _calc_available(donor: dict) -> float:
-    """How many units a donor store can safely give without falling below health threshold."""
-    if donor["label"] == "Dead" or donor["demand_30d"] <= 0:
-        return donor["sim_stock"]
-    elif donor["label"] == "Excess":
-        return max(0.0, donor["sim_stock"] - OPTIMUM_MIN_COVERAGE_AFTER * donor["demand_30d"])
-    else:  # Slow
-        return max(0.0, donor["sim_stock"] - OPTIMUM_TARGET_COVERAGE * donor["demand_30d"])
-
-
-def _make_transfer(donor: dict, recv: dict, qty: int,
-                   mode: str, group_id: str, product_id: str) -> TransferRecommendation:
-    """Build a TransferRecommendation and update simulated stock in-place."""
-    from_after = donor["sim_stock"] - qty
-    to_after   = recv["sim_stock"]  + qty
-    from_cov   = round(from_after / (donor["demand_30d"] + 0.1), 2)
-    to_cov     = round(to_after   / (recv["demand_30d"]  + 0.1), 2)
-    ttype      = "macro" if qty >= recv["needed"] * 0.5 else "micro"
-
-    t = TransferRecommendation(
-        from_store=donor["store_id"],
-        to_store=recv["store_id"],
-        product_id=product_id,
-        product_name=recv["product_name"],
-        transfer_qty=qty,
-        from_label=donor["label"],
-        to_label=recv["label"],
-        from_stock_before=round(donor["sim_stock"], 1),
-        from_stock_after=round(from_after, 1),
-        to_stock_before=round(recv["sim_stock"], 1),
-        to_stock_after=round(to_after, 1),
-        from_coverage_after=from_cov,
-        to_coverage_after=to_cov,
-        demand_30d=round(recv["demand_30d"], 1),
-        transfer_type=ttype,
-        transfer_mode=mode,
-        group_id=group_id,
-    )
-
-    # Update simulation state
-    donor["sim_stock"] -= qty
-    donor["available"] -= qty
-    recv["sim_stock"]  += qty
-
-    return t
-
-
 def _compute_recommendations(
     products: List[ProductInput],
     predictions: List[ProductPrediction],
 ):
-    """
-    Core recommendation engine.
-
-    Decision logic per receiver store:
-
-      1. SINGLE-STORE CHECK
-         Can any one donor fully cover the receiver's need on its own?
-         If yes → use the best single donor (prefer Excess > Dead > Slow,
-         then most available within tier). Clean, minimal logistics.
-
-      2. COMBINED-STORE FALLBACK
-         No single donor can cover the full need → draw from multiple donors
-         in order of availability (largest surplus first) until the need is met.
-         All transfers in this group share a group_id so the caller can display
-         them as one coordinated action.
-
-      3. RESTOCK
-         If even all donors combined can't fill the gap → issue a restock
-         recommendation for the remaining shortfall.
-    """
-
+    """Build transfer and restock recommendations (logic in transfer_policy.plan_transfers)."""
     pred_lookup = {(r.store_id, r.product_id): r for r in predictions}
-
-    by_product: dict = defaultdict(list)
+    records = []
     for p in products:
-        by_product[p.product_id].append(p)
-
-    transfers: List[TransferRecommendation] = []
-    restocks:  List[RestockRecommendation]  = []
-    group_counter = [0]
-
-    def next_group(product_id, to_store):
-        group_counter[0] += 1
-        return f"{product_id}→{to_store}#{group_counter[0]}"
-
-    # Donor tier priority: Excess first (most obligated to give), then Dead, then Slow
-    DONOR_TIER = {"Excess": 0, "Dead": 1, "Slow": 2}
-
-    for product_id, prod_list in by_product.items():
-
-        stores = []
-        for p in prod_list:
-            key  = (p.store_id, p.product_id)
-            pred = pred_lookup[key]
-            d30  = _demand_30d(p)
-            stores.append({
-                "store_id":    p.store_id,
-                "product_id":  product_id,
-                "product_name": p.product_name or "",
-                "stock_qty":   p.stock_qty,
-                "demand_30d":  d30,
-                "label":       pred.prediction,
-                "p":           p,
-                "sim_stock":   p.stock_qty,
-                "available":   0.0,
-            })
-
-        donors    = [s for s in stores if s["label"] in DONOR_LABELS]
-        receivers = [s for s in stores if s["label"] in RECEIVE_LABELS]
-
-        if not receivers:
-            continue
-
-        # Calculate how much each receiver needs
-        for r in receivers:
-            r["target_stock"] = OPTIMUM_TARGET_COVERAGE * r["demand_30d"]
-            r["needed"]       = max(0.0, r["target_stock"] - r["sim_stock"])
-
-        # Calculate available from each donor (recalculated fresh per receiver
-        # to reflect prior simulation state correctly)
-        for d in donors:
-            d["available"] = _calc_available(d)
-
-        # Sort receivers: most urgent first (lowest current coverage)
-        receivers.sort(key=lambda x: x["sim_stock"] / (x["demand_30d"] + 0.1))
-
-        for recv in receivers:
-            needed = recv["needed"]
-            if needed <= 0:
-                continue
-
-            # Refresh available for all donors (sim_stock may have changed)
-            for d in donors:
-                d["available"] = _calc_available(d)
-
-            # Sort donors: tier first (Excess→Dead→Slow), then most available
-            donors.sort(key=lambda x: (DONOR_TIER.get(x["label"], 9), -x["available"]))
-
-            # ── Decision: can a single donor cover the full need? ──────────
-            single_donor = next(
-                (d for d in donors if d["available"] >= needed), None
-            )
-
-            if single_donor:
-                # SINGLE-STORE transfer
-                qty = max(1, round(needed))
-                gid = next_group(product_id, recv["store_id"])
-                transfers.append(
-                    _make_transfer(single_donor, recv, qty, "single", gid, product_id)
-                )
-                recv["sim_stock"] += qty   # already updated inside _make_transfer
-                continue
-
-            # ── Fallback: COMBINED transfer from multiple donors ──────────
-            gid          = next_group(product_id, recv["store_id"])
-            still_needed = needed
-
-            for donor in donors:
-                if still_needed <= 0:
-                    break
-                if donor["available"] <= 0:
-                    continue
-
-                qty = max(1, round(min(still_needed, donor["available"])))
-                transfers.append(
-                    _make_transfer(donor, recv, qty, "combined", gid, product_id)
-                )
-                still_needed -= qty
-
-            # Anything still unmet → restock
-            if still_needed > 1:
-                restocks.append(RestockRecommendation(
-                    store_id=recv["store_id"],
-                    product_id=product_id,
-                    product_name=recv["product_name"],
-                    restock_qty=round(still_needed),
-                    current_stock=round(recv["p"].stock_qty, 1),
-                    target_stock=round(recv["target_stock"], 1),
-                    demand_30d=round(recv["demand_30d"], 1),
-                    reason=(
-                        "No donor stores available — order from supplier"
-                        if not donors
-                        else "Donor network insufficient — partial restock needed"
-                    ),
-                ))
-
-    return transfers, restocks
+        pred = pred_lookup[(p.store_id, p.product_id)]
+        rec = {
+            "store_id": p.store_id, "product_id": p.product_id, "product_name": p.product_name or "",
+            "stock_qty": p.stock_qty, "demand_30d": pred.demand_30d if pred.demand_30d > 0 else _demand_30d(p),
+            "label": pred.prediction, "group": p.region or None,
+        }
+        if p.lead_time_days is not None:  # delivery timing known: size transfers by it
+            rate = rec["demand_30d"] / 30
+            if pred.prediction == "Low":
+                wait = days_until_next_delivery(p.lead_time_days, 7.0 if p.days_to_next_order is None else p.days_to_next_order)
+                rec["target_stock"] = receiver_target_stock(rate, wait, p.on_order or 0.0)
+            else:
+                rec["keep_stock"] = donor_reserve(rate, p.lead_time_days)
+        records.append(rec)
+    transfers, restocks = plan_transfers(records)
+    return ([TransferRecommendation(**t) for t in transfers],
+            [RestockRecommendation(**r) for r in restocks])
 
 
 @app.post("/recommend", response_model=RecommendResponse)

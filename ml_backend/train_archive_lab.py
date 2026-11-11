@@ -19,6 +19,7 @@ from sklearn.metrics import classification_report, f1_score, confusion_matrix
 from sklearn.model_selection import GroupShuffleSplit, GroupKFold, cross_val_score
 from forecasting import selected_forecast, forecast_daily
 from inventory_policy import policy_metrics, stock_policy_label
+from augmentation import PolicyAugmentedClassifier, simulate
 
 FEATURES=['stock_qty','stock_value','forecast_7d','forecast_14d','forecast_30d','forecast_60d','forecast_acceleration','forecast_confidence_30d','is_trending_up','is_trending_down','is_stable','days_since_last_sale','velocity_trend','sales_volatility','is_active','is_dormant','recent_qty','recent_txns','recent_avg','recent_std','historical_qty','historical_txns','historical_avg','price_tier','is_perishable','is_budget','is_premium','category_encoded','retail_price','store_size_encoded','store_total_txns','sales_rank_in_store','is_top_10_in_store','is_top_50_in_store','total_sold','num_sales','price_velocity_interaction','coverage_30d_feat','days_since_over_90','days_of_stock_30d_feat','stockout_risk_7d']
 
@@ -116,6 +117,16 @@ def forecast_experiments(db,frame,cutoff,output):
     return derived_features(frame),metrics
 
 
+def recency_check(model,X_test,days=(60,95,120,180,365)):
+    """Held-out-store rows with sales stopped for N days; model vs the rule."""
+    out={}
+    for d in days:
+        rows=[simulate(r,{'recent_qty':0,'recent_avg':0,'recent_std':0,'days_since_last_sale':float(d)}) for r in X_test.to_dict('records')]
+        frame=pd.DataFrame(rows,columns=X_test.columns);rule=frame.apply(stock_policy_label,axis=1)
+        out[f'{d}_days']={'cases':len(frame),'agreement':float((model.predict(frame)==rule.to_numpy()).mean()),'rule_dead_share':float((rule=='Dead').mean())}
+    return out
+
+
 def train(lab):
     lab=Path(lab);output=lab/'models';output.mkdir(exist_ok=True)
     manifest=json.loads((lab/'recovery.json').read_text())
@@ -128,9 +139,12 @@ def train(lab):
     categories=sorted(frame.iloc[train_idx].category.unique());encoding={v:i for i,v in enumerate(categories)}
     frame['category_encoded']=frame.category.map(encoding).fillna(-1)
     X=frame[FEATURES].fillna(0);y=target
+    # Fold-local policy simulations (same as the live model). Without them the
+    # generated data has 3 rows inactive >90 days, so the recency rule is unlearnable.
+    # Class balancing is done by the wrapper's sample weights.
     models={
-      'random_forest':RandomForestClassifier(n_estimators=160,max_depth=10,min_samples_leaf=5,class_weight='balanced',random_state=42,n_jobs=2),
-      'hist_gradient_boosting':HistGradientBoostingClassifier(max_iter=120,max_leaf_nodes=15,l2_regularization=2,class_weight='balanced',random_state=42),
+      'random_forest':PolicyAugmentedClassifier(RandomForestClassifier(n_estimators=160,max_depth=10,min_samples_leaf=5,random_state=42,n_jobs=2)),
+      'hist_gradient_boosting':PolicyAugmentedClassifier(HistGradientBoostingClassifier(max_iter=120,max_leaf_nodes=15,l2_regularization=2,random_state=42)),
     }
     cv=GroupKFold(n_splits=3);scores={}
     for name,model in models.items():
@@ -141,6 +155,7 @@ def train(lab):
     baseline=DummyClassifier(strategy='most_frequent').fit(X.iloc[train_idx],y.iloc[train_idx])
     report={'data_origin':'synthetic_generated','target':'agreement with explicit inventory policy; not independent business ground truth','evaluation_status':'development research; re-evaluated after correcting temporal series selection','rule_baseline_macro_f1':1.0,'chosen_model':chosen,'validation_macro_f1':scores,'macro_f1':f1_score(y.iloc[test_idx],pred,average='macro',labels=labels,zero_division=0),'weighted_f1':f1_score(y.iloc[test_idx],pred,average='weighted',zero_division=0),'train_macro_f1':f1_score(y.iloc[train_idx],model.predict(X.iloc[train_idx]),average='macro',labels=labels,zero_division=0),'baseline_macro_f1':f1_score(y.iloc[test_idx],baseline.predict(X.iloc[test_idx]),average='macro',labels=labels,zero_division=0),'train_stores':sorted(groups.iloc[train_idx].unique()),'test_stores':sorted(groups.iloc[test_idx].unique()),'train_rows':len(train_idx),'test_rows':len(test_idx),'labels':labels,'confusion_matrix':confusion_matrix(y.iloc[test_idx],pred,labels=labels).tolist(),'classification_report':classification_report(y.iloc[test_idx],pred,labels=labels,output_dict=True,zero_division=0),'snapshot_cutoff':str(cutoff),'production_promoted':False}
     assert not set(report['train_stores'])&set(report['test_stores'])
+    report['recency_check_test_stores']=recency_check(model,X.iloc[test_idx])
     joblib.dump({'model':model,'features':FEATURES,'categories':categories,'data_origin':'synthetic_generated','source_hashes':manifest['source_hashes']},output/'archive_model.joblib')
     (output/'classifier_metrics.json').write_text(json.dumps(report,indent=2))
     frame['policy_prediction']=target;frame['model_prediction']=model.predict(X)

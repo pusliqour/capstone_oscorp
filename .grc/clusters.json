@@ -1,0 +1,172 @@
+{
+  "ml_backend/tests/test_archive_recovery.py": {
+    "name": "Model training data",
+    "files": [
+      "ml_backend/tests/test_archive_recovery.py",
+      "ml_backend/candidate_models/product_store_ranks.csv",
+      "ml_backend/previous_models/product_store_ranks.csv",
+      "ml_backend/saved_models/product_store_ranks.csv",
+      "ml_backend/tests/test_jiran_ml_real_data_import.py",
+      "ml_backend/candidate_models/feature_cols.json",
+      "ml_backend/candidate_models/feature_importance.csv",
+      "ml_backend/previous_models/feature_cols.json",
+      "ml_backend/previous_models/feature_importance.csv",
+      "ml_backend/saved_models/feature_cols.json",
+      "ml_backend/saved_models/feature_importance.csv",
+      "ml_backend/candidate_models/store_stats.csv"
+    ],
+    "by": "qwen3:8b"
+  },
+  "frontend/src/App.jsx": {
+    "name": "Frontend app pages",
+    "files": [
+      "frontend/src/App.jsx",
+      "frontend/src/supaBase/Client.js",
+      "frontend/src/context/AuthContext.jsx",
+      "frontend/src/components/Icon.jsx",
+      "frontend/src/pages/Inventory.jsx",
+      "frontend/src/pages/Analytics.jsx",
+      "frontend/src/pages/Exchange.jsx",
+      "frontend/src/pages/RetailDashboard.jsx",
+      "frontend/src/pages/Settings.jsx",
+      "frontend/src/pages/Landing.jsx",
+      "frontend/src/pages/Loading.jsx",
+      "frontend/src/pages/Auth/Signup.jsx"
+    ],
+    "by": "qwen3:8b"
+  },
+  "ml_backend/inventory_policy.py": {
+    "name": "Forecasting logic",
+    "files": [
+      "ml_backend/inventory_policy.py",
+      "ml_backend/supabase_watcher.py",
+      "ml_backend/app.py",
+      "ml_backend/run_local_view_ml.py",
+      "ml_backend/train_archive_lab.py",
+      "ml_backend/forecasting.py",
+      "ml_backend/train.py",
+      "ml_backend/archive_lab_api.py",
+      "ml_backend/augmentation.py",
+      "ml_backend/publish_results.py",
+      "ml_backend/evaluate.py",
+      "ml_backend/map_supabase_inventory.py"
+    ],
+    "by": "qwen3:8b"
+  },
+  "ml_backend/requirements-tested.txt": {
+    "name": "Demo setup files",
+    "files": [
+      "ml_backend/requirements-tested.txt",
+      "supabase/migrations/202610240001_local_recovery.sql",
+      "ml_backend/import_jiran_ml_real_data.py",
+      "docs/TEAM_DEMO.md",
+      "scripts/configure_local_supabase.py",
+      "research/ISDIA-source-register.md",
+      "ml_backend/tests/test_storefront_demo_import.py",
+      "ml_backend/candidate_models/training_features.csv",
+      "ml_backend/previous_models/training_features.csv",
+      "ml_backend/saved_models/training_features.csv",
+      "ml_backend/storefront_demo.py",
+      "scripts/bootstrap_demo.py"
+    ],
+    "by": "qwen3:8b"
+  },
+  "ml_backend/candidate_evaluation/REPORT.md": {
+    "name": "Archive recovery tools",
+    "files": [
+      "ml_backend/candidate_evaluation/REPORT.md",
+      "ml_backend/evaluation/REPORT.md",
+      "ml_backend/DOCUMENTATION.md",
+      "ml_backend/tests/test_forecasting.py",
+      "docs/ARCHIVE_RECOVERY.md",
+      "supabase/migrations/202611100002_archive_product_metadata.sql",
+      "ml_backend/recover_archive_data.py",
+      "scripts/load_archive_lab.py",
+      "scripts/verify_archive_lab.py"
+    ],
+    "by": "qwen3:8b"
+  },
+  "ISDIA-WORKSPACE.md": {
+    "name": "ISDIA research",
+    "files": [
+      "ISDIA-WORKSPACE.md",
+      "paper/jiran_isdia_2027.pdf",
+      "paper/jiran_isdia_2027.tex",
+      "research/sources/isdia-call-for-papers.txt",
+      "research/sources/isdia-home.txt",
+      "research/sources/isdia-important-dates.txt",
+      "research/sources/isdia-submission-guideline.txt"
+    ],
+    "by": "qwen3:8b"
+  },
+  "CSIT321_Oscorps_Jiran_FinalReport.docx": {
+    "name": "Jiran project docs",
+    "files": [
+      "CSIT321_Oscorps_Jiran_FinalReport.docx",
+      "CSIT321_Oscorps_Jiran_MarketingPoster.pdf",
+      "CSIT321_Oscorps_Jiran_TechnicalPoster.pdf",
+      "HANDOFF.md",
+      "JIRAN PRESENTATION.pdf",
+      "Jiran.code-workspace",
+      "architecture/jiran-high-level-architecture.html"
+    ],
+    "by": "qwen3:8b"
+  },
+  "supabase/migrations/202610300001_jiran_ml_inventory_bridge.sql": {
+    "name": "Public schema changes",
+    "files": [
+      "supabase/migrations/202610300001_jiran_ml_inventory_bridge.sql",
+      "supabase/migrations/202611090001_tenant_access.sql",
+      "supabase/migrations/202611090002_publish_ml_results.sql",
+      "supabase/migrations/202611090003_prediction_details.sql",
+      "supabase/migrations/202611090004_account_management.sql",
+      "supabase/migrations/202611090006_profile_name_validation.sql"
+    ],
+    "by": "qwen3:8b"
+  },
+  "README.md": {
+    "name": "Project documentation",
+    "files": [
+      "README.md",
+      "paper/ISDIA-paper-working-draft.md",
+      "research/open-source-recovery-options.md",
+      "REMAINING.md",
+      "START_HERE.md",
+      "data/data-status.json"
+    ],
+    "by": "qwen3:8b"
+  },
+  "frontend/jiran-ml-service/saved_models/label_encoder.pkl": {
+    "name": "Label encoding files",
+    "files": [
+      "frontend/jiran-ml-service/saved_models/label_encoder.pkl",
+      "frontend/jiran-ml-service/training/v2222.py",
+      "ml_backend/candidate_models/label_encoder.pkl",
+      "ml_backend/previous_models/label_encoder.pkl",
+      "ml_backend/saved_models/label_encoder.pkl"
+    ],
+    "by": "qwen3:8b"
+  },
+  "research/JIRAN_OPEN_SOURCE_RECOVERY_RESEARCH.md": {
+    "name": "Research notes",
+    "files": [
+      "research/JIRAN_OPEN_SOURCE_RECOVERY_RESEARCH.md",
+      "updates.md",
+      "ml_backend/requirements.txt",
+      "research/ISDIA-venue-paper-brief.md",
+      "supabase/migrations/202611100001_archive_research_lab.sql"
+    ],
+    "by": "qwen3:8b"
+  },
+  "ml_backend/stress_test.py": {
+    "name": "Stress test data",
+    "files": [
+      "ml_backend/stress_test.py",
+      "ml_backend/candidate_evaluation/random_stress.json",
+      "ml_backend/candidate_evaluation/stress.json",
+      "ml_backend/evaluation/random_stress.json",
+      "ml_backend/evaluation/stress.json"
+    ],
+    "by": "qwen3:8b"
+  }
+}

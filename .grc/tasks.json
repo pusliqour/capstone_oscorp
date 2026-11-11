@@ -220,10 +220,10 @@
   {
     "id": "T8",
     "title": "Provide stable team hosting, startup and backups",
-    "status": "todo",
-    "last_agent": "codex",
+    "status": "blocked",
+    "last_agent": "claude-code/opus",
     "subtasks": [],
-    "notes": "Priority 1. Replace temporary tunnel/laptop dependency with a stable backend or named tunnel/domain. Add health checks, backups and tested recovery. Current app is functional while this Mac and services remain online."
+    "notes": "Priority 1. Replace temporary tunnel/laptop dependency with a stable backend or named tunnel/domain. Add health checks, backups and tested recovery. Current app is functional while this Mac and services remain online. CANCELLED by user on 12 Nov 2026: stable team hosting/backups will not be done. Do not pick this up. The app stays on the Mac with the temporary tunnel; the paper should not claim stable hosting."
   },
   {
     "id": "T9",
@@ -236,10 +236,10 @@
   {
     "id": "T10",
     "title": "Fix research-model inactivity and out-of-distribution behavior",
-    "status": "todo",
-    "last_agent": "codex",
+    "status": "done",
+    "last_agent": "claude-code/opus",
     "subtasks": [],
-    "notes": "Priority 3. Generated-data classifier has high policy-label F1 but 0/10 agreement on inactive-365-day scenarios. Add conservative abstention/OOD handling or fold-local augmentation, evaluate new groups/time windows, and retain policy/model separation. Do not promote based on synthetic F1 alone."
+    "notes": "Priority 3. Generated-data classifier has high policy-label F1 but 0/10 agreement on inactive-365-day scenarios. Add conservative abstention/OOD handling or fold-local augmentation, evaluate new groups/time windows, and retain policy/model separation. Do not promote based on synthetic F1 alone. 11 Nov audit: research model now trained with fold-local policy simulations (random inactivity 8-90 / 91-400 days, recent sales zeroed when >=30 days). Held-out-store inactivity check: 95-365 days 3% -> 100%, 60 days 85% -> 99.6%; inactive_365 scenario 0/10 -> 10/10. RF now chosen by CV. Old models in lab/models.bak-20261111. Code changes uncommitted."
   },
   {
     "id": "T11",
@@ -252,10 +252,10 @@
   {
     "id": "T12",
     "title": "Complete independent evaluation and design-research paper evidence",
-    "status": "todo",
-    "last_agent": "codex",
+    "status": "doing",
+    "last_agent": "claude-code/opus",
     "subtasks": [],
-    "notes": "Priority 5. Collect independent real stores and dated snapshots, reserve untouched evaluation groups/periods, evaluate large errors and uncertainty, run participant usability tasks, and finalize paper authorship/contact/template/venue decisions. Existing paper is a draft, not acceptance evidence."
+    "notes": "Priority 5. Collect independent real stores and dated snapshots, reserve untouched evaluation groups/periods, evaluate large errors and uncertainty, run participant usability tasks, and finalize paper authorship/contact/template/venue decisions. Existing paper is a draft, not acceptance evidence. 11 Nov: added ml_backend/simulation/ (PROTOCOL.md fixed before results, generate.py seed 20261111, evaluate_forecasts.py, evaluate_alerts.py, oracle_reference.py). 1,000 simulated stores, 800 train / 200 held-out, later dates. Alert F1 ML vs rule: shortage 0.738/0.601, excess 0.730/0.656, dead 0.446/0.328. Forecast 30-day total WAPE: selector 27.8%, recent mean 24.0%. Simulation evidence only; live 3-store sales are statistically pure Poisson noise. Output dir gitignored; code uncommitted. 12 Nov: Implemented and tested six fixes (opt-in API inputs, old behaviour kept by default): stock-out (lost-sales) correction forecasting.uncensor + inventory_policy.in_stock_rate; delivery-based Low stock_policy_label_v2; 'New' label <28 days; transfer engine moved to transfer_policy.plan_transfers with region groups, delivery-sized targets, donor reserve x2 (chosen on dev seed 1001), 2 bug fixes; unfrozen forecasts in app.get_forecast_features. New sims: evaluate_transfers/lost_sales/cold_start.py, run_seeds.sh. Main world: transfers prevent 8.3% of lost sales vs 4.6% shipped, 67 vs 17 per 100 units moved; shortage F1 0.60->0.67 (rule v2), ML 0.74; under-forecast of true demand 21%->13%. 36 tests pass. Seeds 2-4 running. Remaining: finish seeds, update paper text (see breakdownreport.md section 6), user study RQ1/RQ4. Full write-up: breakdownreport.md. Nothing committed."
   },
   {
     "id": "T13",
