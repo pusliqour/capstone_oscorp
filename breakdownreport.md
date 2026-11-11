@@ -1,6 +1,7 @@
 # Jiran ML: full breakdown (12 Nov 2026)
 
 Written for reading aloud and for working through step by step (e.g. with Codex voice mode).
+New to this? Read sections 0–2, then do the **study sessions in section 10**: each has commands to run and functions to look at.
 Every claim points to a file and function so you can open it and check.
 All numbers come from **simulated** stores, not real retailers.
 
@@ -353,7 +354,305 @@ Done: T1–T7, T10, T13.
 
 ---
 
-## 10. Glossary
+## 10. Study sessions (one topic at a time)
+
+Work through these in order, one per sitting. Each session has: the goal, the files, the functions (what each takes and returns), commands to run (copy exactly), what you should see, and questions to ask Codex.
+All commands assume you start in `/Users/zoro/Projects/Jiran` unless a `cd` is shown. Python is always `.venv/bin/python` (or `../.venv/bin/python` from inside `ml_backend`).
+
+---
+
+### Session 1: What is running and how to start it
+
+**Goal:** know every moving part and its port.
+
+| Part | Port | Start command |
+|---|---|---|
+| Supabase (database, login, API) in Docker | 54321 (API), 54322 (Postgres) | `bash scripts/run-local.sh` (also applies migrations) |
+| ML API | 8001 | `cd ml_backend && ../.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8001 --env-file .env` |
+| Research (archive lab) API | 8003 | `ARCHIVE_LAB_DIR="$PWD/Private/recovery/20261110/lab" .venv/bin/uvicorn archive_lab_api:app --app-dir ml_backend --host 127.0.0.1 --port 8003 --no-access-log` |
+| Team gateway (what the public site talks to) | 8787 | `.venv/bin/uvicorn scripts.team_gateway:app --host 127.0.0.1 --port 8787` |
+| Frontend (local dev) | 5173 | `npm --prefix frontend run dev` |
+| Public tunnel | – | `cloudflared tunnel --url http://127.0.0.1:8787 --no-autoupdate --protocol http2` |
+
+**Check commands:**
+- `curl -s localhost:8001/` → `"ai_available":true`, model name, 41 features, labels list.
+- `docker ps --format '{{.Names}}'` → containers named `supabase_*_ISDIA`.
+- `lsof -iTCP -sTCP:LISTEN -P | grep -E "8001|8003|8787|5173"` → which ports are listening.
+- Restart the ML API after any code change: `kill $(lsof -ti tcp:8001 -sTCP:LISTEN)`, then the start command above.
+
+**Ask Codex:** "Explain what each of these services does and what breaks if one stops."
+
+---
+
+### Session 2: The data flow, from database to dashboard
+
+**Goal:** follow one product from the database to the label on screen.
+
+1. Table `public.ml_inventory` holds one row per store and product: stock, recent sales and so on.
+   - Created in `supabase/migrations/202610300001_jiran_ml_inventory_bridge.sql`.
+   - New columns added in `202611120001_ml_inventory_policy_inputs.sql`.
+2. It is filled by `ml_backend/import_jiran_ml_real_data.py`:
+   - `build_ml_inventory(transactions, stock, products)` turns raw orders into 30-day and older totals, `days_since_last_sale` and the new `age_days`.
+   - `push_inventory(inventory)` sends the rows to Supabase through the `replace_ml_inventory` database function.
+3. The watcher `ml_backend/supabase_watcher.py`:
+   - `poll()` waits for a row in table `ml_triggers`;
+   - `process_trigger(trigger)` runs the job: `fetch_inventory()` reads `ml_inventory`, `build_api_payload(rows)` makes the JSON (optional fields only when present), then it POSTs to `/recommend` or `/predict-stock`;
+   - the results are published back to Supabase for the dashboard.
+4. The API `ml_backend/app.py`:
+   - `recommend(req)` → `_run_predictions(products)` → `build_feature_row(p)` per product → `stock_policy_label_v2(row)` gives the label;
+   - the ensemble model gives `confidence`;
+   - `_compute_recommendations()` → `transfer_policy.plan_transfers()`.
+5. The dashboard `frontend/src/pages/Analytics.jsx` counts labels (Dead, Excess, Low, New, Optimum, Slow) and shows tiles and tabs.
+
+**Commands:**
+- See the table: `docker exec supabase_db_ISDIA psql -U postgres -c "select store_id, product_id, stock_qty, recent_qty, age_days, region from public.ml_inventory limit 5;"`
+- Reload it: `cd ml_backend && set -a && source .env && set +a && ../.venv/bin/python import_jiran_ml_real_data.py --push`
+- Whole pipeline by hand:
+```bash
+cd ml_backend && set -a && source .env && set +a && ../.venv/bin/python - <<'PY'
+import json, urllib.request
+from supabase_watcher import fetch_inventory, build_api_payload
+payload = build_api_payload(fetch_inventory(None, None))
+req = urllib.request.Request("http://127.0.0.1:8001/recommend", json.dumps(payload).encode(), {"content-type": "application/json"})
+print(json.load(urllib.request.urlopen(req))["summary"])
+PY
+```
+**You should see:** 175 rows; label counts (about Dead 70, Slow 35, Excess 33, Optimum 26, Low 11); 2 transfers; 10 restocks.
+
+**Ask Codex:** "Walk me through process_trigger line by line."
+
+---
+
+### Session 3: Stock labels (`ml_backend/inventory_policy.py`)
+
+**Goal:** understand why a product is called Low, Dead, New and so on.
+
+| Function | Takes | Returns / does |
+|---|---|---|
+| `policy_metrics(stock_qty=, forecast_30d=, forecast_7d=, recent_qty=)` | stock and demand | `coverage_30d_feat` (stock ÷ month demand), `days_of_stock_30d_feat`, `stockout_risk_7d` |
+| `stock_policy_label(row)` | one feature row | old rule: Dead / Slow / Low / Excess / Optimum |
+| `stock_policy_label_v2(row)` | same row + optional `age_days`, `lead_time_days`, `days_to_next_order`, `on_order`, `daily_rate` | "New" if under 28 days; delivery-based "Low" if lead time is known; otherwise exactly the old rule |
+| `is_new_product(age_days)` | days on sale | True if under `MIN_HISTORY_DAYS` (28) |
+| `in_stock_rate(units_sold, days, stockout_days)` | sales and empty days | units ÷ in-stock days (at least 7) |
+| `days_until_next_delivery(lead_time_days, days_to_next_order)` | | the sum of the two |
+| `runs_out_before_delivery(stock, on_order, rate, lead, next_order, safety_days=3)` | | True if the stock won't last |
+| `receiver_target_stock(rate, days_until_delivery, on_order)` | | how much a Low store should be topped up to |
+| `donor_reserve(rate, lead_time_days, order_cycle_days=7, mult=2.0)` | | how much a giving store must keep |
+| `no_sale_days(history_days)` | | days without a sale for never-sold items (= history length) |
+
+Constants: `MIN_HISTORY_DAYS = 28`, `SAFETY_DAYS = 3.0`, `DONOR_RESERVE_MULT = 2.0`.
+
+**Try it** (`cd ml_backend && ../.venv/bin/python`):
+```python
+from inventory_policy import *
+r = {'velocity_trend': 1.0, 'forecast_acceleration': 1.0, 'days_since_last_sale': 1}
+r.update(policy_metrics(stock_qty=100, forecast_30d=30*36, forecast_7d=7*36, recent_qty=1080))
+stock_policy_label(r)                      # 'Low'   (busy store, 100 units = ~3 days)
+r2 = {'velocity_trend': 1.0, 'forecast_acceleration': 1.0, 'days_since_last_sale': 1}
+r2.update(policy_metrics(stock_qty=100, forecast_30d=4, forecast_7d=1, recent_qty=4))
+stock_policy_label(r2)                     # 'Dead'  (quiet store, same 100 units)
+stock_policy_label_v2(dict(r, age_days=10))  # 'New'
+in_stock_rate(30, 30, 15)                  # 2.0   (30 sold in 15 in-stock days)
+runs_out_before_delivery(10, 0, 1.0, 5, 7) # True  (10 days of stock, delivery in 12)
+```
+**Ask Codex:** "Why is the order of checks Dead → Slow → Low → Excess important?"
+
+---
+
+### Session 4: Forecasting (`ml_backend/forecasting.py`)
+
+| Function | Does |
+|---|---|
+| `daily_series(frame, as_of)` | turns orders into one number per day (missing days = 0) |
+| `forecast_daily(series, horizon, method)` | one method: `weekly_naive` (repeat last week), `recent_mean` (28-day average) or `prophet` |
+| `selected_forecast(series, horizon, methods=METHODS)` | tries each method on the last `VALIDATION_DAYS` (28), picks the lowest error, refits on all history; needs at least 56 days, otherwise uses `recent_mean` |
+| `uncensor(values, stock, window=28)` | lost-sales fix: empty-shelf days → average of in-stock days |
+
+**Try it:**
+```python
+import pandas as pd, numpy as np
+from forecasting import selected_forecast, uncensor
+s = pd.Series([2.0]*60, index=pd.date_range('2026-01-01', periods=60))
+selected_forecast(s, 7, methods=('weekly_naive', 'recent_mean'))['method']
+uncensor(np.array([2,2,2,2,2,2,2,2,0.]), np.array([5,5,5,5,5,5,5,5,0]))  # last day 0 -> 2
+```
+**In the API** (`app.py`):
+- `get_forecast_features(p)`: fresh forecast from `daily_sales`; otherwise a saved forecast if `_forecast_age_days()` ≤ `FORECAST_MAX_AGE_DAYS` (7); otherwise `live_daily_rate(p)`.
+- `_rate_features(rate, method)` turns a daily rate into the 7/14/30/60-day fields.
+
+**Ask Codex:** "Why does the simple 28-day mean beat the selector on our data?"
+
+---
+
+### Session 5: The API by hand (`ml_backend/app.py`)
+
+| Endpoint | Function | Does |
+|---|---|---|
+| `GET /` | `health()` | is AI loaded |
+| `POST /predict-stock` | `predict_stock(req)` | labels only |
+| `POST /recommend` | `recommend(req)` | labels + transfers + restocks + summary |
+| `GET /feature-importance` | `get_feature_importance(top_n)` | which inputs matter (permutation importance) |
+
+Input fields per product (`class ProductInput`):
+- required: `store_id`, `product_id`, `category`, `stock_qty`, `retail_price`;
+- sales: `recent_qty`, `recent_txns`, `days_since_last_sale`;
+- **new optional:** `region`, `age_days`, `stockout_days_30d`, `on_order`, `lead_time_days`, `days_to_next_order`, `daily_sales`, `daily_stock`.
+
+**Try it:**
+```bash
+curl -s -X POST localhost:8001/recommend -H 'content-type: application/json' -d '{"products":[
+ {"store_id":"A","product_id":"P1","category":"snacks","stock_qty":2,"retail_price":5,"recent_qty":60,"recent_txns":20,"days_since_last_sale":1,"region":"r1","lead_time_days":4,"days_to_next_order":3},
+ {"store_id":"B","product_id":"P1","category":"snacks","stock_qty":400,"retail_price":5,"recent_qty":60,"recent_txns":20,"days_since_last_sale":1,"region":"r1","lead_time_days":4},
+ {"store_id":"C","product_id":"P1","category":"snacks","stock_qty":400,"retail_price":5,"recent_qty":60,"recent_txns":20,"days_since_last_sale":1,"region":"r2","lead_time_days":4}]}' | python3 -m json.tool | head -60
+```
+**You should see:** A = Low; B and C = Dead; one transfer of 18 units from B to A (same region r1); nothing from C (region r2).
+Why 18: A sells 2 a day; the next delivery is 3 + 4 = 7 days away; plus 3 safety days = 10 days × 2 = 20, minus the 2 in stock = 18.
+
+**Ask Codex:** "Change lead_time_days for store A to 1 and predict what happens."
+
+---
+
+### Session 6: The transfer engine (`ml_backend/transfer_policy.py`)
+
+| Item | Meaning |
+|---|---|
+| `plan_transfers(records)` | main function; returns `(transfers, restocks)` |
+| `calc_available(donor)` | units a donor can give: `keep_stock` if set; otherwise Dead gives everything, Excess keeps 0.9 × month, Slow keeps 1.5 × month |
+| `_transfer(...)` | builds one transfer record and updates both stores' stock |
+| `DONOR_LABELS` / `RECEIVE_LABELS` | givers = Excess, Slow, Dead; receivers = Low ("New" never takes part) |
+| `DONOR_TIER` | order of givers: Excess, then Dead, then Slow |
+| `OPTIMUM_TARGET_COVERAGE = 1.5` | old receiver target: 1.5 × monthly demand |
+
+Steps inside `plan_transfers`:
+1. Group by product (and by `group`, i.e. region, if given).
+2. Sort receivers: most urgent first.
+3. For each receiver, use a single donor if one can cover the whole need.
+4. Otherwise combine several donors, biggest surplus first.
+5. Any remaining need becomes a restock from the supplier.
+
+**Try it:**
+```python
+from transfer_policy import plan_transfers
+plan_transfers([dict(store_id='A', product_id='P', product_name='p', stock_qty=0, demand_30d=30, label='Low', group='dubai'),
+                dict(store_id='B', product_id='P', product_name='p', stock_qty=200, demand_30d=30, label='Excess', group='dubai')])
+# one transfer B -> A of 45 units (1.5 x 30)
+```
+**Ask Codex:** "What does keep_stock change, and why did we pick x2?"
+
+---
+
+### Session 7: The simulated world (`ml_backend/simulation/generate.py`)
+
+| Function | Does |
+|---|---|
+| `build_world(rng)` | 600 products (category, price, pack size, popularity), 1,000 stores (region, size, ordering day, lead time, safety days, ordering habit), seasons, regional shocks |
+| `build_series(rng, products, stores)` | which products each store sells; product decline and late launches |
+| `demand_rate(...)` | expected units per day: store × product × weekday × season × trend × promotions × decline × launch × shock |
+| `draw_demand(rng, lam)` | random customer counts and basket sizes |
+| `simulate_inventory(...)` | day by day: deliveries arrive → sell min(demand, stock) → weekly order-up-to restock |
+| `main()` | writes `sales.npy`, `stock.npy`, `on_order.npy`, `demand.npy`, `txns.npy`, `expected_demand.npy`, `series.csv`, `stores.csv`, `manifest.json` |
+
+**Commands:**
+- Rebuild the main world (about 10 s, 850 MB): `cd ml_backend/simulation && ../../.venv/bin/python generate.py`
+- A different world: `../../.venv/bin/python generate.py --seed 7 --out output/seed_runs/seed7`
+- Check the totals: `cat output/sim1000_v1/manifest.json | head -20`
+
+**Ask Codex:** "Which parts of real retail does this simulation leave out?" (Answer: section 9 of the HTML report.)
+
+---
+
+### Session 8: Running the tests and reading results
+
+All scripts are in `ml_backend/simulation/` and run with `../../.venv/bin/python <script>`. Results go to `output/results/`.
+
+| Script | Main functions | Output | Time |
+|---|---|---|---|
+| `evaluate_forecasts.py` | `run_one()` per series, `score()` → WAPE, MAPE, MASE, RMSSE, bias | `forecasts.json` | ~3 min |
+| `oracle_reference.py` | adds the perfect-knowledge forecast | updates `forecasts.json` | seconds |
+| `evaluate_lost_sales.py` | `run_one()` raw vs `uncensor` forecasts; `score()` against sales and against true demand | `lost_sales.json` | ~3 min |
+| `evaluate_alerts.py` | `snapshot()` features + outcomes; `rule_labels()`, `rule_v2_labels()`, `best_threshold()`, `cluster_ci()`, `metrics()` | `alerts.json` | ~1 min |
+| `evaluate_cold_start.py` | weekly snapshots of products 1–41 days old | `cold_start.json` | ~1 min |
+| `evaluate_transfers.py --stores all` | `simulate()`, `transfer_round()`, `summarise()`, `rule_labels_vec()` + `check_rule()` | `transfers.json` | ~2 min |
+| `run_seeds.sh 1 2 3 4` | everything on 4 more worlds | `results/seeds/` | ~40 min |
+
+**Read a result:**
+```bash
+cd ml_backend/simulation
+python3 -c "import json; d=json.load(open('output/results/alerts.json')); print({m: round(d['targets']['shortage_14d'][m]['f1'],3) for m in ('jiran_rule','jiran_rule_v2','cover_threshold','ml_hgb')})"
+python3 -c "import json; d=json.load(open('output/results/transfers.json')); b=d['arms']['none']['lost_units']; print({k: round(1-v['lost_units']/b,4) for k,v in d['arms'].items()})"
+```
+**Unit tests:** `cd ml_backend && ../.venv/bin/python -m unittest discover -s tests` → `Ran 36 tests … OK`.
+
+**Ask Codex:** "Explain cluster_ci and why we resample stores, not rows."
+
+---
+
+### Session 9: Training the live models (`ml_backend/train.py`, `augmentation.py`)
+
+- Learns from the 3-store data in `ml_backend/training/data/`.
+- Labels come from the rule (`stock_policy_label`), so the model learns to **copy the rule**. That is why its score is about 0.99; it is not real accuracy.
+- `GroupShuffleSplit` splits by product first; `PolicyAugmentedClassifier.fit()` adds synthetic "what if" rows to the training part only.
+- Also reports: repeated grouped CV (5×3) with a confidence interval, and a leakage test without the rule's inputs (F1 drops to 0.73).
+- Writes everything to `ml_backend/saved_models/`: `ensemble.pkl`, `scaler.pkl`, `forecasts_aggregated.csv` (now stamped with `generated_at`), `evaluation.json`, `feature_importance.csv`.
+- **Retrain:** `cd ml_backend && ../.venv/bin/python train.py`. Back up `saved_models/` first; old backups are in `ml_backend/previous_models/`. Then restart the API (Session 1).
+
+**Ask Codex:** "Why is a model that copies a rule not evidence that it works?"
+
+---
+
+### Session 10: Database changes and migrations
+
+- Migrations live in `supabase/migrations/` and run in name order.
+- Apply new ones: `npx supabase migration up --local`
+- Today's migration `202611120001_ml_inventory_policy_inputs.sql`:
+  - adds 6 nullable columns;
+  - rewrites `replace_ml_inventory(inventory_rows jsonb)` to accept them;
+  - only the service role may run it.
+- **Turn on the delivery-based "Low" and neighbour-only transfers for the 3 stores.** Example only; use real values you know:
+```bash
+docker exec supabase_db_ISDIA psql -U postgres -c "update public.ml_inventory set region='dubai', lead_time_days=3, days_to_next_order=7;"
+```
+  Note: re-running the importer with `--push` replaces the table and clears these values. To make them permanent, add them in `build_ml_inventory()` (`import_jiran_ml_real_data.py`), where they are currently set to `None`.
+
+**Ask Codex:** "Help me store region and lead time per store permanently."
+
+---
+
+### Session 11: Git, GRC and publishing
+
+- **Source:** branch `recovery/jiran-archive-20261110`, remote `fork` (pusliqour/capstone_oscorp).
+  - `git status`, then `git add …`, then `git commit -m "…"`, then `git push fork recovery/jiran-archive-20261110`.
+  - Never commit `.env`, `Private/`, datasets, models or `ml_backend/simulation/output/`.
+- **Website:** compiled files go in `Deployment/pages/` (a separate repo, pusliqour/jiran, branch `main`). Steps are in section 9 "Not done" and `docs/TEAM_DEMO.md`.
+- **GRC** keeps the shared task board in `.grc/`. Codex can use the same GRC tools:
+  - `grc_list_tasks`: all tasks;
+  - `grc_context`: briefing;
+  - `grc_update_task`: set a status or add a note;
+  - `grc_handoff`: before stopping.
+  - Open tasks: T9, T11, T12. T8 is cancelled (shown as blocked).
+
+**Ask Codex:** "Show me git log -5 and explain each commit."
+
+---
+
+### Session 12: Fixing the paper (`paper/jiran_isdia_2027.tex`)
+
+Go through section 6.2 one row at a time. Suggested order:
+1. **Abstract:** replace "no accuracy claim / AI unavailable" with the simulation results, clearly labelled as simulation.
+2. **Table 1:** change "FastAPI service: starts in explicit null-AI mode" and "ML artifacts: legacy artifacts rejected" to the current state.
+3. **New section "Simulation evaluation":** design (section 4 here), then results (sections 5.1–5.9). Use the draft paragraph in the HTML report, section 11.
+4. **Add the "which model does what" table** (section 2 here).
+5. **Research questions:** RQ2 and RQ3 are answered in simulation; RQ1 and RQ4 move to future work.
+6. **Related work:** add the six references and check each DOI.
+7. **Method details:** define the symbols, units and the +0.1 / minimum-7-days guards; justify each threshold.
+8. **Cleanup:** fix the acknowledgements placeholder, add keywords and a corresponding author, and spell-check.
+- Build the PDF: `cd paper && pdflatex jiran_isdia_2027.tex` (run it twice for references).
+
+**Ask Codex:** "Rewrite my abstract using only the results in breakdownreport.md sections 5 and 9, labelled as simulation evidence."
+
+---
+
+## 11. Glossary
 
 - **WAPE:** total forecast error ÷ total actual sales. 28% means off by 28 units per 100 sold.
 - **MAPE:** average daily percentage error. Misleading for slow sellers.
